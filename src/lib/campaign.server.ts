@@ -20,36 +20,6 @@ export function getPost(postId: string): BlogPost | undefined {
   return db().posts.find((p) => p.id === postId);
 }
 
-export interface CreatePostInput {
-  title: string;
-  body: string;
-  url?: string | undefined;
-}
-
-/** User-authored blog post. The seeded three are only demo content. */
-export function createPost(input: CreatePostInput): BlogPost {
-  const post: BlogPost = {
-    id: newId("post"),
-    title: input.title.trim(),
-    body: input.body.trim(),
-    url: input.url?.trim() || `https://flyrank.example/blog/${newId("p").slice(5)}`,
-    createdAt: new Date().toISOString(),
-  };
-  mutate((s) => {
-    s.posts = [post, ...s.posts];
-  });
-  return post;
-}
-
-/** Removes a post and any campaign entries generated from it. */
-export function deletePost(postId: string): boolean {
-  return mutate((s) => {
-    const before = s.posts.length;
-    s.posts = s.posts.filter((p) => p.id !== postId);
-    s.entries = s.entries.filter((e) => e.postId !== postId);
-    return s.posts.length < before;
-  });
-}
 
 /** Deterministic per (post, platform) — the guarantee behind idempotent publish. */
 export function idempotencyKeyFor(postId: string, platform: Platform): string {
