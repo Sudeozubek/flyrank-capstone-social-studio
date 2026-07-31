@@ -16,6 +16,7 @@ import { Route as ApiLogsRouteImport } from './routes/api/logs'
 import { Route as ApiPostsRouteImport } from './routes/api/posts'
 import { Route as ApiCampaignsPostIdRouteImport } from './routes/api/campaigns.$postId'
 import { Route as ApiImageVariantRouteImport } from './routes/api/image/variant'
+import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiCampaignsPostIdPublishRouteImport } from './routes/api/campaigns.$postId.publish'
 import { Route as ApiCampaignsPostIdScheduleRouteImport } from './routes/api/campaigns.$postId.schedule'
 import { Route as ApiPublicFakePlatformPublishRouteImport } from './routes/api/public/fake-platform/publish'
@@ -57,6 +58,11 @@ const ApiImageVariantRoute = ApiImageVariantRouteImport.update({
   path: '/api/image/variant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
+  id: '/api/public/mcp',
+  path: '/api/public/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCampaignsPostIdPublishRoute =
   ApiCampaignsPostIdPublishRouteImport.update({
     id: '/publish',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/api/posts': typeof ApiPostsRoute
   '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
   '/api/image/variant': typeof ApiImageVariantRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/campaigns/$postId/publish': typeof ApiCampaignsPostIdPublishRoute
   '/api/campaigns/$postId/schedule': typeof ApiCampaignsPostIdScheduleRoute
   '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/api/posts': typeof ApiPostsRoute
   '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
   '/api/image/variant': typeof ApiImageVariantRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/campaigns/$postId/publish': typeof ApiCampaignsPostIdPublishRoute
   '/api/campaigns/$postId/schedule': typeof ApiCampaignsPostIdScheduleRoute
   '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/api/posts': typeof ApiPostsRoute
   '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
   '/api/image/variant': typeof ApiImageVariantRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/campaigns/$postId/publish': typeof ApiCampaignsPostIdPublishRoute
   '/api/campaigns/$postId/schedule': typeof ApiCampaignsPostIdScheduleRoute
   '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/api/posts'
     | '/api/campaigns/$postId'
     | '/api/image/variant'
+    | '/api/public/mcp'
     | '/api/campaigns/$postId/publish'
     | '/api/campaigns/$postId/schedule'
     | '/api/public/fake-platform/publish'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/api/posts'
     | '/api/campaigns/$postId'
     | '/api/image/variant'
+    | '/api/public/mcp'
     | '/api/campaigns/$postId/publish'
     | '/api/campaigns/$postId/schedule'
     | '/api/public/fake-platform/publish'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/api/posts'
     | '/api/campaigns/$postId'
     | '/api/image/variant'
+    | '/api/public/mcp'
     | '/api/campaigns/$postId/publish'
     | '/api/campaigns/$postId/schedule'
     | '/api/public/fake-platform/publish'
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   ApiLogsRoute: typeof ApiLogsRoute
   ApiPostsRoute: typeof ApiPostsRoute
   ApiImageVariantRoute: typeof ApiImageVariantRoute
+  ApiPublicMcpRoute: typeof ApiPublicMcpRoute
   ApiPublicFakePlatformPublishRoute: typeof ApiPublicFakePlatformPublishRoute
   ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
   ApiPublicFakePlatformOauthTokenRoute: typeof ApiPublicFakePlatformOauthTokenRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: '/api/image/variant'
       fullPath: '/api/image/variant'
       preLoaderRoute: typeof ApiImageVariantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mcp': {
+      id: '/api/public/mcp'
+      path: '/api/public/mcp'
+      fullPath: '/api/public/mcp'
+      preLoaderRoute: typeof ApiPublicMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/campaigns/$postId/publish': {
@@ -309,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLogsRoute: ApiLogsRoute,
   ApiPostsRoute: ApiPostsRoute,
   ApiImageVariantRoute: ApiImageVariantRoute,
+  ApiPublicMcpRoute: ApiPublicMcpRoute,
   ApiPublicFakePlatformPublishRoute: ApiPublicFakePlatformPublishRoute,
   ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,
   ApiPublicFakePlatformOauthTokenRoute: ApiPublicFakePlatformOauthTokenRoute,
