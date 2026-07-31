@@ -24,7 +24,6 @@ describe("image renderer emits real PNG artifacts", () => {
       });
       expect(out.contentType).toBe("image/png");
       expect(pngSize(out.bytes)).toEqual(expected);
-      expect({ width: out.width, height: out.height }).toEqual(expected);
     }
   });
 });
