@@ -9,6 +9,10 @@ import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: search['mode'] === "signup" ? ("signup" as const) : ("signin" as const),
+  }),
+
   head: () => ({
     meta: [
       { title: "Sign in · FlyRank Campaign Studio" },
