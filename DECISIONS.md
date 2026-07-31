@@ -1,70 +1,88 @@
 # DECISIONS.md
 
-Assumptions and senior-engineer calls made while building the FlyRank campaign layer.
-Each entry states the decision, why, and what it would cost to change.
+Assumptions and senior-engineer calls made while building **CampaignHub Studio**
+(the FlyRank capstone). Each entry states the decision, why, and what it would cost to change.
 
-## D1 — Backend framework: TanStack Start server routes, not Express/Fastify
-The project template is a TanStack Start (React 19 + Vite 7) app on a Node/edge runtime,
-and the brief requires "a Node/TypeScript API". Adding a second HTTP process (Express)
-would mean two servers, two deploy targets and CORS between them for no functional gain.
-All endpoints are file-based server routes (`src/routes/api/**`) with the same
-request/response semantics as Fastify handlers. Every handler is a plain
-`(Request) => Response` function, so lifting them into Express/Fastify later is mechanical.
+## D1 — Backend: TanStack Start server functions, not Express/Fastify
+The project is a TanStack Start (React 19 + Vite 7) app and the brief requires a
+Node/TypeScript API. A second HTTP process would mean two deploy targets and CORS for no
+functional gain. App-internal calls use typed server functions
+(`src/lib/flyrank.functions.ts`); external callers (fake platform, delivery webhook, MCP)
+use file-based server routes under `src/routes/api/public/**`, which are plain
+`Request → Response` handlers. Lifting them into Fastify later is mechanical.
 
-## D2 — Persistence: JSON-file-backed durable store, not SQLite
-The requirement is "queue table + status column is enough". `src/lib/store.server.ts`
-writes every mutation to `.data/flyrank.json` via a temp-file + rename, so state survives a
-process crash — which is what the crash-resume requirement actually tests. The module
-exposes a tiny surface (`db()`, `mutate()`), so swapping in SQLite/Postgres is a one-file
-change with no callers touched. Native DB drivers are also unavailable on the Worker runtime
-this template deploys to.
+## D2 — Persistence: Postgres with RLS, not a local file store
+The prototype used a JSON-file store. Tenant isolation is a graded requirement and the
+lease/claim scheduler wants real transactional `UPDATE`s, so persistence moved to Postgres
+behind repository ports (`src/domain/ports.ts`,
+`src/infrastructure/persistence/supabase-repositories.server.ts`). Schema, grants, RLS
+policies and indexes ship as migrations in `supabase/migrations/`. Swapping the database
+touches one folder; no use case imports a driver.
 
-## D3 — Image pipeline: pure geometry + SVG renderer, not `sharp`
-`sharp`/`canvas` need native binaries that do not exist in the serverless runtime. The graded
-behaviour — cover-crop math, exact per-platform dimensions, subject-in-safe-zone — is
-implemented as pure, unit-tested functions (`computeVariantGeometry`, `fitSubjectToSafeZone`)
-and rendered to a real, inspectable image (`renderVariantSvg`) served at the exact declared
-pixel size by `/api/image/variant`. To move to raster output, keep the geometry module and
-replace only the renderer.
+## D3 — Images: sharp primary, Jimp fallback, no custom encoder
+No hand-rolled PNG encoder. `sharp` rasterises the shared SVG composition wherever a native
+Node runtime exists (local dev, Docker, tests); `Jimp` (pure JS) covers the serverless Worker
+target, where sharp's native binary cannot load. Both consume the same pure geometry
+(`computeVariantGeometry`, `fitSubjectToSafeZone`), so dimensions are identical by
+construction. Tests decode the PNG IHDR chunk rather than trusting library metadata.
 
 ## D4 — Status transitions are webhook-owned, with one documented exception
 `published` / `failed` are written exclusively by `/api/public/webhooks/delivery` after HMAC
-verification. The one exception: if the adapter exhausts its retries and the platform never
-accepted the post, no webhook will ever arrive, so the worker marks the row `failed` locally
-after `MAX_ATTEMPTS`. Leaving it `queued` forever would be a silent stuck row.
+verification. The exception: if the adapter exhausts `MAX_PUBLISH_ATTEMPTS` and the platform
+never accepted the post, no webhook will ever arrive, so the worker marks the row `failed`
+locally. Leaving it `queued` forever would be a silent stuck row.
 
 ## D5 — Extra `publishing` status
-The spec's model is `queued → published | failed`. A worker needs a distinct in-flight state
-to hold a lease, so `publishing` was added as an intermediate. It is never terminal: the
-webhook moves it on, and an expired lease returns it to the claimable pool.
+The brief's model is `queued → published | failed`. A worker needs a distinct in-flight state
+to hold a lease, so `publishing` was added. It is never terminal: the webhook moves it on, and
+an expired lease returns the row to the claimable pool.
 
 ## D6 — Idempotency key is deterministic, not random
-`flyrank:<postId>:<platform>`. A random key would make a post-crash replay look like a new
-publish to the platform. Deterministic keys mean replay, retry and UI spam all collapse to
-one remote post — which is exactly what the idempotency test asserts.
+`flyrank:{campaignId}:{platform}`, enforced by `UNIQUE (campaign_id, platform)` in the database
+and by the fake platform. A random key would make a post-crash replay look like a new publish.
+Deterministic keys collapse replay, retry and UI spam into one remote post.
 
-## D7 — Dev clock instead of real waiting
-Scheduling decisions read `now()` from the store, which applies `clockOffsetMs`. The demo
-("advance time") and the scheduling test therefore run in milliseconds instead of minutes.
-Production simply never sets an offset.
+## D7 — Captions: LLM with a deterministic fallback
+Captions are written by OpenAI `gpt-4o-mini` using the existing prompt-fragment architecture
+(shared brand voice + per-platform overrides in `src/config/social-prompts.config.ts`), not a
+duplicated prompt string. A 15-second timeout and a catch-all delegate to the deterministic
+composer on missing key, timeout, rate limit or any API error — campaign creation never fails
+because the model is unavailable. The deterministic path is what the test suite pins, so the
+graded behaviour stays reproducible.
 
-## D8 — OAuth credentials
+## D8 — Blog sources: real published articles, plus paste/upload
+The brief says "given a published post". Rather than invent seed data, the Blog library pulls
+real published articles (Anthropic, Google DeepMind, Cloudflare) and enriches previews with
+Open Graph metadata behind an in-memory cache. Users can still paste text or upload
+`.md` / `.pdf` / `.docx`. Replacing or extending sources is one file:
+`src/infrastructure/feeds/blog-library.server.ts`.
+
+## D9 — Secrets and OAuth credentials
 The fake platform issues tokens for any non-empty client id/secret. Tokens are stored
-AES-256-GCM encrypted with a fresh random IV per write (`src/lib/crypto.server.ts`). If
-`TOKEN_ENCRYPTION_KEY` / `WEBHOOK_SIGNING_SECRET` are absent, a clearly-labelled dev fallback
-key is derived so the sandbox boots without secrets; both belong in `.env` in any real deployment.
+AES-256-GCM encrypted with a fresh random IV per write
+(`src/infrastructure/crypto/token-cipher.server.ts`); no plaintext token column exists. When
+`TOKEN_ENCRYPTION_KEY` / `WEBHOOK_SIGNING_SECRET` are absent, a clearly-labelled dev fallback is
+derived so the sandbox boots without secrets; both belong in `.env` for any real deployment.
 
-## D9 — Adapter boundary enforced by folder + review, not a lint rule
-Only `src/lib/publisher/adapters/**` performs platform I/O; everything else imports
-`getPublisher()` and the `SocialPublisher` interface. This is documented at the top of
-`src/lib/publisher/types.ts`. A dependency-cruiser rule was considered and skipped as extra
-tooling for a two-adapter codebase.
+## D10 — Adapter boundary enforced by folder + review, not a lint rule
+Only `src/infrastructure/publishing/**` performs platform I/O; everything else depends on the
+`SocialPublisher` port. This is documented in `src/domain/ports.ts` and pinned by a test that
+scans `src/` for real platform endpoints. A dependency-cruiser rule was considered and skipped
+as extra tooling for a two-adapter codebase.
 
-## D10 — Dev control panel is API-gated, not stripped
-`/api/dev` returns 403 when `NODE_ENV=production` unless `ENABLE_DEV_PANEL=true`, so the demo
-controls exist in one place and cannot be triggered on a real deployment by accident.
+## D11 — Demo controls are gated, not stripped
+Force-429 and worker-tick controls exist in one place and are disabled outside development
+unless `ENABLE_DEV_PANEL=true`, so a real deployment cannot trigger them by accident.
 
-## D11 — Stretch goals not started
-Real-platform integration, brand templating, A/B captions, analytics loopback and the
-approval workflow are untouched by design. The optional read-only MCP endpoint
-(`/api/public/mcp`) was included because it is a thin wrapper over existing reads.
+## D12 — MCP is vendor-neutral and interface-only
+The first MCP implementation used a platform SDK and generated routes, which coupled a
+"standalone" server to the build platform. It was replaced with a hand-rolled JSON-RPC 2.0
+server (`src/mcp/`) depending only on `zod` + `zod-to-json-schema`, transported over
+`POST /api/public/mcp` with bearer verification and RLS-scoped queries. Every tool delegates to
+an existing use case: the MCP layer holds no business logic, generates no captions and calls no
+model.
+
+## D13 — Stretch goals not started
+Real-platform integration, brand templating, A/B captions, analytics loopback and the approval
+workflow are untouched by design. The MCP interface and document import were included because
+both are thin layers over existing use cases and are sanctioned by the brief.
