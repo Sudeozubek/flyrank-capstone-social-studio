@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PLATFORMS } from "@/config/platform-specs";
 import type { BlogPost, ContentSocials, SocialPostEntry, WebhookLogEntry, WorkerLogEntry } from "@/lib/types";
 import { ActionButton } from "@/components/campaign/ActionButton";
+import { NewPostForm } from "@/components/campaign/NewPostForm";
 import { DevPanel } from "@/components/campaign/DevPanel";
 import { StatusChip } from "@/components/campaign/StatusChip";
 import { VariantCard } from "@/components/campaign/VariantCard";
