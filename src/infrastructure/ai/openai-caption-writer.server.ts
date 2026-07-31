@@ -75,15 +75,37 @@ function sanitize(raw: string, platform: Platform): string {
   return clamp(text, Math.min(spec.maxCaptionLength, voice.targetLength));
 }
 
+/** Deterministic composer — the guaranteed floor. Never throws, never empty. */
+function fallbackCaption(post: CaptionSource, platform: Platform, reason: string): string {
+  console.warn(`[captions] falling back to deterministic composer (${platform}): ${reason}`);
+  try {
+    const text = composeCaption(post, platform).trim();
+    if (text) return text;
+  } catch (error) {
+    console.error("[captions] deterministic composer failed", error);
+  }
+  // Last resort: still platform-shaped, still valid.
+  const spec = PLATFORM_SPECS[platform]!;
+  const voice = PLATFORM_VOICE[platform]!;
+  const base = [post.title, summarize(post.body, voice.summarySentences), post.url ?? ""]
+    .filter(Boolean)
+    .join(voice.lineBreaks ? "\n\n" : " ");
+  return clamp(base || post.title || SHARED_VOICE.brandName, Math.min(spec.maxCaptionLength, voice.targetLength));
+}
+
 export const openAiCaptionWriter: CaptionWriter = {
   name: "openai",
   async write(post, platform) {
     const apiKey = process.env["OPENAI_API_KEY"];
-    if (!apiKey) return composeCaption(post, platform);
+    if (!apiKey) return fallbackCaption(post, platform, "missing OPENAI_API_KEY");
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
       const response = await fetch(ENDPOINT, {
         method: "POST",
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
@@ -101,19 +123,35 @@ export const openAiCaptionWriter: CaptionWriter = {
 
       if (!response.ok) {
         const detail = await response.text().catch(() => "");
-        console.error(`[captions] OpenAI ${response.status}: ${detail.slice(0, 300)}`);
-        return composeCaption(post, platform);
+        const label =
+          response.status === 429
+            ? "rate limited"
+            : response.status === 401 || response.status === 403
+              ? "auth rejected"
+              : `HTTP ${response.status}`;
+        return fallbackCaption(post, platform, `${label}: ${detail.slice(0, 200)}`);
       }
 
       const json = (await response.json()) as {
         choices?: Array<{ message?: { content?: string } }>;
       };
       const content = json.choices?.[0]?.message?.content?.trim();
-      if (!content) return composeCaption(post, platform);
-      return sanitize(content, platform);
+      if (!content) return fallbackCaption(post, platform, "empty completion");
+
+      const caption = sanitize(content, platform).trim();
+      if (!caption) return fallbackCaption(post, platform, "caption empty after sanitize");
+      return caption;
     } catch (error) {
-      console.error("[captions] OpenAI call failed", error);
-      return composeCaption(post, platform);
+      const reason =
+        error instanceof Error && error.name === "AbortError"
+          ? `timeout after ${TIMEOUT_MS}ms`
+          : error instanceof Error
+            ? error.message
+            : "unknown error";
+      return fallbackCaption(post, platform, reason);
+    } finally {
+      clearTimeout(timer);
     }
   },
 };
+
