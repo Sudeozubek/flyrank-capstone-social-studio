@@ -148,10 +148,90 @@ function parseAnthropicListing(html: string, source: BlogSource): LibraryItem[] 
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" "),
     url: `https://www.anthropic.com/news/${slug}`,
-    summary: "Published on Anthropic News.",
+    summary: "",
     image: null,
     publishedAt: null,
   }));
+}
+
+/** og:/twitter:/name meta lookup on a rendered article page. */
+function meta(html: string, key: string): string | null {
+  const pattern = new RegExp(
+    `<meta[^>]+(?:property|name)=["']${key}["'][^>]+content=["']([^"']+)["']|<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${key}["']`,
+    "i",
+  );
+  const match = pattern.exec(html);
+  const value = match?.[1] ?? match?.[2];
+  return value ? decode(value) : null;
+}
+
+const metaCache = new Map<string, CacheEntry<Partial<LibraryItem>>>();
+
+/** Reads real cover art + a real excerpt from the published article page. */
+async function fetchMeta(url: string): Promise<Partial<LibraryItem>> {
+  const cached = metaCache.get(url);
+  if (cached && cached.expires > Date.now()) return cached.value;
+
+  let result: Partial<LibraryItem> = {};
+  try {
+    const html = await get(url);
+    const image = meta(html, "og:image") ?? meta(html, "twitter:image");
+    const description =
+      meta(html, "og:description") ?? meta(html, "description") ?? meta(html, "twitter:description");
+    const title = meta(html, "og:title");
+    const published =
+      meta(html, "article:published_time") ?? meta(html, "publishdate") ?? meta(html, "date");
+
+    // No usable description meta: fall back to the first sentences of the body.
+    let summary = description ?? "";
+    if (summary.length < 60) {
+      const main =
+        /<article[\s\S]*?<\/article>/i.exec(html)?.[0] ??
+        /<main[\s\S]*?<\/main>/i.exec(html)?.[0] ??
+        "";
+      const text = stripHtml(main).replace(/\s+/g, " ");
+      if (text.length > summary.length) summary = text;
+    }
+
+    result = {
+      ...(image && /^https?:\/\//.test(image) ? { image } : {}),
+      ...(summary ? { summary: summary.slice(0, 320) } : {}),
+      ...(title ? { title: title.split("\\")[0]!.trim().slice(0, 200) } : {}),
+      ...(published && !Number.isNaN(new Date(published).getTime())
+        ? { publishedAt: new Date(published).toISOString() }
+        : {}),
+    };
+  } catch {
+    result = {};
+  }
+
+  metaCache.set(url, { value: result, expires: Date.now() + ARTICLE_TTL_MS });
+  return result;
+}
+
+/** Fills in missing artwork/excerpts from the article pages, 6 at a time. */
+async function enrich(items: LibraryItem[]): Promise<LibraryItem[]> {
+  const output = [...items];
+  const queue = output
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => !item.image || item.summary.length < 60);
+
+  for (let i = 0; i < queue.length; i += 6) {
+    const batch = queue.slice(i, i + 6);
+    await Promise.all(
+      batch.map(async ({ item, index }) => {
+        const extra = await fetchMeta(item.url);
+        output[index] = {
+          ...item,
+          image: item.image ?? extra.image ?? null,
+          summary: item.summary.length >= 60 ? item.summary : (extra.summary ?? item.summary),
+          title: extra.title ?? item.title,
+          publishedAt: item.publishedAt ?? extra.publishedAt ?? null,
+        };
+      }),
+    );
+  }
+  return output;
 }
 
 /** Latest published posts for one source (memoised for 15 minutes). */
@@ -163,13 +243,15 @@ export async function listSourcePosts(sourceId: string, limit = 12): Promise<Lib
   if (cached && cached.expires > Date.now()) return cached.value.slice(0, limit);
 
   const raw = await get(source.feed);
-  const items = (source.kind === "rss" ? parseRss(raw, source) : parseAnthropicListing(raw, source)).slice(
+  const parsed = (source.kind === "rss" ? parseRss(raw, source) : parseAnthropicListing(raw, source)).slice(
     0,
     24,
   );
+  const items = await enrich(parsed.slice(0, 12));
   listCache.set(sourceId, { value: items, expires: Date.now() + LIST_TTL_MS });
   return items.slice(0, limit);
 }
+
 
 /** Every catalogued source, fetched in parallel; a failing source is skipped. */
 export async function listLibrary(perSource = 8): Promise<
