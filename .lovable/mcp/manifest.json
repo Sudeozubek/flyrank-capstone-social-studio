@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://rpkxetgjjzdydjsvzldw.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "campaign-canvas",
+      "version": "0.1.0",
+      "title": "Campaign Canvas"
+    },
+    "tools": [
+      {
+        "name": "create_campaign",
+        "title": "Create campaign",
+        "description": "Create a campaign from one of the signed-in user's blog posts. Generates platform captions and image variants through the same use cases the web app calls.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "postId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "ID of an existing blog post owned by the caller."
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Optional campaign name."
+            },
+            "brandName": {
+              "type": "string",
+              "maxLength": 120,
+              "description": "Optional brand / company name."
+            },
+            "brandTone": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Optional brand tone of voice."
+            }
+          },
+          "required": [
+            "postId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_campaigns",
+        "title": "List campaigns",
+        "description": "List every campaign belonging to the signed-in user, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_campaign",
+        "title": "Get campaign",
+        "description": "Fetch one campaign owned by the caller with its source blog post and every per-platform entry (caption, image size, status).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Campaign ID."
+            }
+          },
+          "required": [
+            "campaignId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "campaign_status",
+        "title": "Campaign status",
+        "description": "Compact delivery status for one campaign: overall status plus per-platform entry status, attempts, remote id and last error.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Campaign ID."
+            }
+          },
+          "required": [
+            "campaignId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "schedule_campaign",
+        "title": "Schedule campaign",
+        "description": "Queue every entry of a campaign for delivery at an ISO timestamp. The durable worker publishes it; nothing is sent immediately.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Campaign ID."
+            },
+            "scheduledFor": {
+              "type": "string",
+              "description": "ISO 8601 timestamp for delivery, e.g. 2026-08-01T09:00:00Z."
+            }
+          },
+          "required": [
+            "campaignId",
+            "scheduledFor"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "publish_campaign",
+        "title": "Publish campaign",
+        "description": "Publish a campaign now through the idempotent publishing pipeline (Retry-After aware). Terminal status arrives via the signed delivery webhook.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Campaign ID."
+            }
+          },
+          "required": [
+            "campaignId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "retry_campaign",
+        "title": "Retry campaign",
+        "description": "Retry the failed or rate-limited entries of a campaign. The deterministic idempotency key prevents duplicate remote posts.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Campaign ID."
+            }
+          },
+          "required": [
+            "campaignId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
