@@ -219,7 +219,9 @@ export function CampaignComposer({
                     key={item.url}
                     item={item}
                     active={selectedUrl === item.url}
-                    onSelect={() => setSelectedUrl(item.url)}
+                    onSelect={() =>
+                      setSelectedUrl((current) => (current === item.url ? null : item.url))
+                    }
                   />
                 ))}
               </div>
