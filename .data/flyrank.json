@@ -29,12 +29,14 @@
       "platform": "instagram",
       "caption": "We shipped something worth reading. ✨\n\nONE SOURCE IMAGE, EVERY ASPECT RATIO\n\nA 1:1 square and a 16:9 banner are not the same picture cropped twice. We compute a cover crop per platform, then translate it so the subject box lands inside a configured safe zone. Overlays sit in the corner the platform does not cover with its own chrome.\n\nWritten by the team that maintains the thing.\n\nSwipe the carousel then read the full post (link in bio)\nhttps://flyrank.example/blog/image-variants\n\n— the FlyRank team\n\n#FlyRank #ContentOps #MarketingAutomation #SocialTooling #DevLife #BehindTheBuild #Startup #Engineering",
       "imageUrl": "/api/image/variant?platform=instagram&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
-      "status": "queued",
+      "status": "published",
       "idempotencyKey": "flyrank:post_variants:instagram",
-      "attempts": 0,
+      "attempts": 1,
       "createdAt": "2026-07-31T13:07:34.919Z",
-      "updatedAt": "2026-07-31T13:07:34.919Z",
-      "scheduledFor": "2026-07-31T13:37:34.919Z"
+      "updatedAt": "2026-07-31T13:44:53.228Z",
+      "scheduledFor": "2026-07-31T13:37:34.919Z",
+      "remoteId": "fp_dd6be5fc5a3d4015",
+      "publishedAt": "2026-07-31T13:44:53.228Z"
     },
     {
       "id": "spe_9c2a0a0c6b274c1b",
@@ -42,18 +44,88 @@
       "platform": "x",
       "caption": "One source image, every aspect ratio A 1:1 square and a 16:9 banner are not the same picture cropped twice. Full write-up: https://flyrank.example/blog/image-variants #FlyRank #ContentOps",
       "imageUrl": "/api/image/variant?platform=x&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
-      "status": "queued",
+      "status": "published",
       "idempotencyKey": "flyrank:post_variants:x",
-      "attempts": 0,
+      "attempts": 1,
       "createdAt": "2026-07-31T13:07:34.919Z",
-      "updatedAt": "2026-07-31T13:07:34.919Z",
-      "scheduledFor": "2026-07-31T13:37:34.919Z"
+      "updatedAt": "2026-07-31T13:44:53.251Z",
+      "scheduledFor": "2026-07-31T13:37:34.919Z",
+      "remoteId": "fp_4264976a763b4eb5",
+      "publishedAt": "2026-07-31T13:44:53.251Z"
     }
   ],
-  "credentials": [],
-  "webhookLog": [],
-  "workerLog": [],
-  "platformPosts": [],
+  "credentials": [
+    {
+      "platform": "instagram",
+      "accessTokenEncrypted": "kOfXVFQhTDZui6tb.eQBH57rRR+7QHl6+WKlJNA==.YmaYqJaK9XzyjHAyKDkshdCFGTWhcIwqujcs0mhyY0uvPK62cZuWVEzcyYI+GQ==",
+      "issuedAt": "2026-07-31T13:13:52.010Z",
+      "expiresAt": "2026-07-31T14:13:52.010Z"
+    },
+    {
+      "platform": "x",
+      "accessTokenEncrypted": "+GcL8A39ysJLChBC.ifuTMHC3bk2XPI4gvKVvkQ==.w1NNRKVJ1uOFKZsxeRV7ynNJ2nUSOhDmIgTBNBy+lc+qkfTn8VA=",
+      "issuedAt": "2026-07-31T13:13:52.034Z",
+      "expiresAt": "2026-07-31T14:13:52.035Z"
+    }
+  ],
+  "webhookLog": [
+    {
+      "postId": "post_variants",
+      "entryId": "spe_9c2a0a0c6b274c1b",
+      "verified": true,
+      "status": 200,
+      "message": "signature ok → status published (x)",
+      "id": "wh_65df00377f7d4911",
+      "receivedAt": "2026-07-31T13:44:53.251Z"
+    },
+    {
+      "postId": "post_variants",
+      "entryId": "spe_0af045c9f0c8419d",
+      "verified": true,
+      "status": 200,
+      "message": "signature ok → status published (instagram)",
+      "id": "wh_e69181c0349d4b61",
+      "receivedAt": "2026-07-31T13:44:53.228Z"
+    }
+  ],
+  "workerLog": [
+    {
+      "id": "wl_a296ed2a80fa4593",
+      "at": "2026-07-31T13:44:52.058Z",
+      "level": "info",
+      "message": "x post_variants: accepted [attempt 1]"
+    },
+    {
+      "id": "wl_052660b6e1c841cf",
+      "at": "2026-07-31T13:44:52.024Z",
+      "level": "info",
+      "message": "instagram post_variants: accepted [attempt 1]"
+    },
+    {
+      "id": "wl_b5197933c1e243fb",
+      "at": "2026-07-31T13:44:49.898Z",
+      "level": "info",
+      "message": "scheduler worker started"
+    }
+  ],
+  "platformPosts": [
+    {
+      "id": "fp_dd6be5fc5a3d4015",
+      "platform": "instagram",
+      "idempotencyKey": "flyrank:post_variants:instagram",
+      "caption": "We shipped something worth reading. ✨\n\nONE SOURCE IMAGE, EVERY ASPECT RATIO\n\nA 1:1 square and a 16:9 banner are not the same picture cropped twice. We compute a cover crop per platform, then translate it so the subject box lands inside a configured safe zone. Overlays sit in the corner the platform does not cover with its own chrome.\n\nWritten by the team that maintains the thing.\n\nSwipe the carousel then read the full post (link in bio)\nhttps://flyrank.example/blog/image-variants\n\n— the FlyRank team\n\n#FlyRank #ContentOps #MarketingAutomation #SocialTooling #DevLife #BehindTheBuild #Startup #Engineering",
+      "imageUrl": "/api/image/variant?platform=instagram&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
+      "createdAt": "2026-07-31T13:13:52.021Z"
+    },
+    {
+      "id": "fp_4264976a763b4eb5",
+      "platform": "x",
+      "idempotencyKey": "flyrank:post_variants:x",
+      "caption": "One source image, every aspect ratio A 1:1 square and a 16:9 banner are not the same picture cropped twice. Full write-up: https://flyrank.example/blog/image-variants #FlyRank #ContentOps",
+      "imageUrl": "/api/image/variant?platform=x&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
+      "createdAt": "2026-07-31T13:13:52.044Z"
+    }
+  ],
   "force429": 0,
   "clockOffsetMs": 1860000
 }

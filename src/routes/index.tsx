@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PLATFORMS } from "@/config/platform-specs";
 import type { BlogPost, ContentSocials, SocialPostEntry, WebhookLogEntry, WorkerLogEntry } from "@/lib/types";
 import { ActionButton } from "@/components/campaign/ActionButton";
+import { NewPostForm } from "@/components/campaign/NewPostForm";
 import { DevPanel } from "@/components/campaign/DevPanel";
 import { StatusChip } from "@/components/campaign/StatusChip";
 import { VariantCard } from "@/components/campaign/VariantCard";
@@ -127,16 +128,22 @@ function CampaignDashboard() {
 
       <main className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[300px_1fr]">
         <aside className="flex flex-col gap-4">
+          <NewPostForm
+            busy={addPost.isPending}
+            error={addPost.isError ? (addPost.error as Error).message : null}
+            onCreate={(input) => addPost.mutate(input)}
+          />
+
           <section className="panel p-4">
             <h2 className="eyebrow">Blog posts</h2>
             <ul className="mt-3 flex flex-col gap-2">
               {posts.map((p) => {
                 const active = p.id === activeId;
                 return (
-                  <li key={p.id}>
+                  <li key={p.id} className="group relative">
                     <button
                       onClick={() => setSelectedId(p.id)}
-                      className={`w-full rounded-lg border px-3 py-3 text-left transition-colors ${
+                      className={`w-full rounded-lg border px-3 py-3 pr-9 text-left transition-colors ${
                         active
                           ? "border-accent-strong/70 bg-surface-raised"
                           : "border-border hover:border-accent-strong/40"
@@ -145,11 +152,27 @@ function CampaignDashboard() {
                       <span className="block text-sm font-semibold leading-snug">{p.title}</span>
                       <span className="mt-1 block font-mono text-[11px] text-muted-foreground">{p.id}</span>
                     </button>
+                    <button
+                      onClick={() => {
+                        if (p.id === selectedId) setSelectedId(null);
+                        removePost.mutate(p.id);
+                      }}
+                      disabled={removePost.isPending}
+                      aria-label={`Remove ${p.title}`}
+                      title="Remove post"
+                      className="absolute right-2 top-2 rounded-md border border-transparent px-1.5 py-0.5 font-mono text-xs text-muted-foreground opacity-0 transition-opacity hover:border-destructive/50 hover:text-destructive focus:opacity-100 group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
                   </li>
                 );
               })}
+              {!posts.length ? (
+                <li className="text-xs text-muted-foreground">No posts yet — add one above.</li>
+              ) : null}
             </ul>
           </section>
+
 
           <section className="panel flex flex-col gap-3 p-4">
             <h2 className="eyebrow">Actions</h2>
