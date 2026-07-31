@@ -30,12 +30,15 @@ export const BLOG_SOURCES: BlogSource[] = [
     feed: "https://www.anthropic.com/news",
   },
   {
-    id: "openai",
-    name: "OpenAI News",
-    homepage: "https://openai.com/news",
+    // OpenAI's site returns 403 to server-side fetches, so its posts would have
+    // no artwork or excerpt; DeepMind's feed ships both.
+    id: "deepmind",
+    name: "Google DeepMind Blog",
+    homepage: "https://blog.google/technology/google-deepmind/",
     kind: "rss",
-    feed: "https://openai.com/blog/rss.xml",
+    feed: "https://blog.google/technology/google-deepmind/rss/",
   },
+
   {
     id: "cloudflare",
     name: "Cloudflare Blog",
