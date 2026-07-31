@@ -12,7 +12,8 @@ bun install && bun run test
 # 3 files, 20 tests, all passing
 ```
 
-Screenshots live in `docs/screenshots/` (placeholders referenced below).
+Screenshots are captured and committed under `docs/screenshots/` (12 images, referenced per
+requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png`).
 
 ---
 
