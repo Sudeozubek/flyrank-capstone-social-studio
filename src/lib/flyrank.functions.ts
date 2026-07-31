@@ -9,6 +9,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   createCampaign,
+  deleteCampaign,
+  editCampaign,
   generateCaptions,
   generateImages,
   getCampaignSnapshot,
@@ -84,17 +86,57 @@ export const deletePost = createServerFn({ method: "POST" })
 export const createCampaignWithAssets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ postId: uuid, name: z.string().max(200).optional() }).parse(input),
+    z.object({ postId: uuid, name: z.string().max(200).optional(), brandName: z.string().max(120).nullish(), brandTone: z.string().max(200).nullish() }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
     const snapshot = await createCampaign(app, {
       postId: data.postId,
       ...(data.name ? { name: data.name } : {}),
+      brandName: data.brandName ?? null,
+      brandTone: data.brandTone ?? null,
     });
     await generateImages(app, snapshot.campaign.id);
     return getCampaignSnapshot(app, snapshot.campaign.id);
   });
+
+/** Manual edit: campaign name, brand context and hand-written captions. */
+export const updateCampaignFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        campaignId: uuid,
+        name: z.string().max(200).optional(),
+        brandName: z.string().max(120).nullish(),
+        brandTone: z.string().max(200).nullish(),
+        captions: z
+          .array(z.object({ entryId: uuid, caption: z.string().max(5000) }))
+          .max(10)
+          .optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const app = createAppContext(context.supabase as never, context.userId);
+    return editCampaign(app, {
+      campaignId: data.campaignId,
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.brandName !== undefined ? { brandName: data.brandName } : {}),
+      ...(data.brandTone !== undefined ? { brandTone: data.brandTone } : {}),
+      ...(data.captions ? { captions: data.captions } : {}),
+    });
+  });
+
+export const deleteCampaignFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ campaignId: uuid }).parse(input))
+  .handler(async ({ data, context }) => {
+    const app = createAppContext(context.supabase as never, context.userId);
+    await deleteCampaign(app, data.campaignId);
+    return { ok: true };
+  });
+
 
 export const regenerateCaptions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -208,7 +250,12 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
-      .object({ url: z.string().url().max(500), name: z.string().max(200).optional() })
+      .object({
+        url: z.string().url().max(500),
+        name: z.string().max(200).optional(),
+        brandName: z.string().max(120).nullish(),
+        brandTone: z.string().max(200).nullish(),
+      })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -222,6 +269,8 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
     const snapshot = await createCampaign(app, {
       postId: post.id,
       ...(data.name ? { name: data.name } : {}),
+      brandName: data.brandName ?? null,
+      brandTone: data.brandTone ?? null,
     });
     await generateImages(app, snapshot.campaign.id);
     return getCampaignSnapshot(app, snapshot.campaign.id);

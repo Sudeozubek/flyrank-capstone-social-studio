@@ -55,6 +55,8 @@ export const toCampaign = (row: CampaignRow): Campaign => ({
   name: row.name,
   status: row.status,
   scheduledFor: row.scheduled_for,
+  brandName: row.brand_name ?? null,
+  brandTone: row.brand_tone ?? null,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -138,7 +140,13 @@ export function createCampaignRepository(db: Db, userId: string): CampaignReposi
     async create(input) {
       const { data, error } = await db
         .from("campaigns")
-        .insert({ user_id: userId, post_id: input.postId, name: input.name })
+        .insert({
+          user_id: userId,
+          post_id: input.postId,
+          name: input.name,
+          brand_name: input.brandName ?? null,
+          brand_tone: input.brandTone ?? null,
+        })
         .select()
         .single();
       if (error || !data) fail("createCampaign", error);
@@ -163,6 +171,9 @@ export function createCampaignRepository(db: Db, userId: string): CampaignReposi
         .update({
           ...(patch.status !== undefined ? { status: patch.status } : {}),
           ...(patch.scheduledFor !== undefined ? { scheduled_for: patch.scheduledFor } : {}),
+          ...(patch.name !== undefined ? { name: patch.name } : {}),
+          ...(patch.brandName !== undefined ? { brand_name: patch.brandName } : {}),
+          ...(patch.brandTone !== undefined ? { brand_tone: patch.brandTone } : {}),
         })
         .eq("id", id)
         .select()

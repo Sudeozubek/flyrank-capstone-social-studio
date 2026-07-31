@@ -26,10 +26,10 @@ export interface PlatformVoice {
 }
 
 export const SHARED_VOICE: SharedVoice = {
-  brandName: "FlyRank",
+  brandName: "CampaignHub",
   hooks: [
     "We shipped something worth reading.",
-    "Fresh off the FlyRank blog.",
+    "Fresh off the {brand} blog.",
     "New write-up, straight from the build log.",
     "Here's what we learned this week.",
   ],
@@ -38,8 +38,8 @@ export const SHARED_VOICE: SharedVoice = {
     "Everything here is running in an internal tool today.",
     "Written by the team that maintains the thing.",
   ],
-  baseHashtags: ["FlyRank", "ContentOps"],
-  signOff: "— the FlyRank team",
+  baseHashtags: ["ContentOps"],
+  signOff: "— the {brand} team",
 };
 
 export const PLATFORM_VOICE: Record<Platform, PlatformVoice> = {

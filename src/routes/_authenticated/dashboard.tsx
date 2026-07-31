@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CampaignComposer, type ComposerSubmit } from "@/components/campaign/CampaignComposer";
+import { CampaignEditDialog, type CampaignEdit } from "@/components/campaign/CampaignEditDialog";
 import { StatusChip } from "@/components/campaign/StatusChip";
 import { ThemeToggle } from "@/components/campaign/ThemeToggle";
 import { VariantCard } from "@/components/campaign/VariantCard";
@@ -17,6 +18,7 @@ import {
   listBlogLibrary,
   createPostFromText,
   createPostFromUpload,
+  deleteCampaignFn,
   loadDashboard,
   publishCampaignFn,
   regenerateCaptions,
@@ -25,18 +27,19 @@ import {
   scheduleCampaignFn,
   setPlatformRateLimit,
   tickWorker,
+  updateCampaignFn,
 } from "@/lib/flyrank.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Campaign studio · FlyRank" },
+      { title: "CampaignHub Studio" },
       {
         name: "description",
         content:
           "Generate captions and image variants from a blog post, schedule them, and watch the durable publish pipeline confirm delivery.",
       },
-      { property: "og:title", content: "Campaign studio · FlyRank" },
+      { property: "og:title", content: "CampaignHub Studio" },
       {
         property: "og:description",
         content: "Durable, idempotent multi-platform social publishing.",
@@ -59,6 +62,7 @@ function Dashboard() {
   const load = useServerFn(loadDashboard);
   const [busy, setBusy] = useState(false);
   const [scheduleAt, setScheduleAt] = useState(localIsoInMinutes(2));
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const dashboard = useQuery({
     queryKey: ["dashboard"],
@@ -78,6 +82,8 @@ function Dashboard() {
     retry: useServerFn(retryCampaignFn),
     tick: useServerFn(tickWorker),
     rateLimit: useServerFn(setPlatformRateLimit),
+    update: useServerFn(updateCampaignFn),
+    remove: useServerFn(deleteCampaignFn),
   };
 
   const libraryFn = useServerFn(listBlogLibrary);
@@ -111,6 +117,8 @@ function Dashboard() {
           data: {
             url: input.url!,
             ...(input.campaignName ? { name: input.campaignName } : {}),
+            brandName: input.brandName ?? null,
+            brandTone: input.brandTone ?? null,
           },
         });
       }
@@ -131,7 +139,13 @@ function Dashboard() {
                 url: input.url ?? null,
               },
             });
-      return fns.createCampaign({ data: { postId: post.id } });
+      return fns.createCampaign({
+        data: {
+          postId: post.id,
+          brandName: input.brandName ?? null,
+          brandTone: input.brandTone ?? null,
+        },
+      });
     },
     onSuccess: async () => {
       await refresh();
@@ -140,6 +154,21 @@ function Dashboard() {
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "Could not create the campaign"),
   });
+
+  async function saveEdit(edit: CampaignEdit) {
+    const done = await run("Campaign updated", () =>
+      fns.update({
+        data: {
+          campaignId: edit.campaignId,
+          name: edit.name,
+          brandName: edit.brandName || null,
+          brandTone: edit.brandTone || null,
+          captions: edit.captions,
+        },
+      }),
+    );
+    if (done) setEditingId(null);
+  }
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -163,9 +192,9 @@ function Dashboard() {
       <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
           <div className="flex items-baseline gap-3">
-            <span className="font-display text-lg text-foreground">FlyRank</span>
+            <span className="font-display text-lg text-foreground">CampaignHub</span>
             <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              campaign studio
+              studio
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -368,7 +397,37 @@ function Dashboard() {
                 >
                   Retry failed
                 </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setEditingId(snapshot.campaign.id)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={busy}
+                  className="text-status-failed hover:text-status-failed"
+                  onClick={() => {
+                    if (!confirm(`Delete "${snapshot.campaign.name}"? This cannot be undone.`)) return;
+                    void run("Campaign deleted", () =>
+                      fns.remove({ data: { campaignId: snapshot.campaign.id } }),
+                    );
+                  }}
+                >
+                  Delete
+                </Button>
               </div>
+
+              <CampaignEditDialog
+                snapshot={snapshot}
+                open={editingId === snapshot.campaign.id}
+                busy={busy}
+                onOpenChange={(open) => setEditingId(open ? snapshot.campaign.id : null)}
+                onSave={saveEdit}
+              />
 
               <div className="grid gap-4 p-5 md:grid-cols-2">
                 {snapshot.entries.map((entry) => (
@@ -384,6 +443,12 @@ function Dashboard() {
           </div>
         </div>
       </main>
+
+      <footer className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-6 font-mono text-[11px] text-muted-foreground">
+          © CampaignHub
+        </div>
+      </footer>
     </div>
   );
 }

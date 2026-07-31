@@ -23,6 +23,12 @@ export interface BlogPost {
   createdAt: string;
 }
 
+/** Optional, caption-only tenant context. Never affects publishing behaviour. */
+export interface BrandContext {
+  name?: string | null;
+  tone?: string | null;
+}
+
 export interface Campaign {
   id: string;
   userId: string;
@@ -30,6 +36,8 @@ export interface Campaign {
   name: string;
   status: CampaignStatus;
   scheduledFor: string | null;
+  brandName: string | null;
+  brandTone: string | null;
   createdAt: string;
   updatedAt: string;
 }

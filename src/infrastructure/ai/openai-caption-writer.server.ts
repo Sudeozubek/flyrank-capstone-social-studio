@@ -14,25 +14,27 @@
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
 import { clamp, composeCaption, summarize, type CaptionSource } from "@/domain/captions";
-import type { Platform } from "@/domain/entities";
+import type { BrandContext, Platform } from "@/domain/entities";
 import type { CaptionWriter } from "@/domain/ports";
 
 const MODEL = "gpt-4o-mini";
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
 const TIMEOUT_MS = 15_000;
 
-export function buildSystemPrompt(platform: Platform): string {
+export function buildSystemPrompt(platform: Platform, brand?: BrandContext): string {
   const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
+  const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
+  const brandTone = brand?.tone?.trim();
 
   return [
-    `You are the social copywriter for ${SHARED_VOICE.brandName}.`,
+    `You are the social copywriter for ${brandName}.`,
     `You write a single ${spec.label} caption promoting a published blog post.`,
     "",
     "Brand voice fragments (use them as raw material, do not list them verbatim):",
-    `- hooks: ${SHARED_VOICE.hooks.join(" | ")}`,
+    `- hooks: ${SHARED_VOICE.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
     `- value props: ${SHARED_VOICE.valueProps.join(" | ")}`,
-    `- sign-off: ${SHARED_VOICE.signOff}`,
+    `- sign-off: ${SHARED_VOICE.signOff.replaceAll("{brand}", brandName)}`,
     `- base hashtags: ${SHARED_VOICE.baseHashtags.join(", ")}`,
     "",
     `${spec.label} rules:`,
@@ -45,6 +47,10 @@ export function buildSystemPrompt(platform: Platform): string {
     `- summary length: about ${voice.summarySentences} sentence(s)`,
     `- emoji: ${voice.emoji ? "a little, tasteful" : "none"}`,
     `- line breaks: ${voice.lineBreaks ? "use them for scannability" : "single paragraph, no line breaks"}`,
+    "",
+    ...(brandTone
+      ? ["", `Brand tone requested by ${brandName}: ${brandTone}. Let it shape the wording.`]
+      : []),
     "",
     "Return ONLY the caption text. No markdown fences, no commentary, no quotes.",
   ].join("\n");
@@ -76,10 +82,15 @@ function sanitize(raw: string, platform: Platform): string {
 }
 
 /** Deterministic composer — the guaranteed floor. Never throws, never empty. */
-function fallbackCaption(post: CaptionSource, platform: Platform, reason: string): string {
+function fallbackCaption(
+  post: CaptionSource,
+  platform: Platform,
+  reason: string,
+  brand?: BrandContext,
+): string {
   console.warn(`[captions] falling back to deterministic composer (${platform}): ${reason}`);
   try {
-    const text = composeCaption(post, platform).trim();
+    const text = composeCaption(post, platform, brand).trim();
     if (text) return text;
   } catch (error) {
     console.error("[captions] deterministic composer failed", error);
@@ -95,9 +106,9 @@ function fallbackCaption(post: CaptionSource, platform: Platform, reason: string
 
 export const openAiCaptionWriter: CaptionWriter = {
   name: "openai",
-  async write(post, platform) {
+  async write(post, platform, brand) {
     const apiKey = process.env["OPENAI_API_KEY"];
-    if (!apiKey) return fallbackCaption(post, platform, "missing OPENAI_API_KEY");
+    if (!apiKey) return fallbackCaption(post, platform, "missing OPENAI_API_KEY", brand);
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -115,7 +126,7 @@ export const openAiCaptionWriter: CaptionWriter = {
           temperature: 0.8,
           max_tokens: 600,
           messages: [
-            { role: "system", content: buildSystemPrompt(platform) },
+            { role: "system", content: buildSystemPrompt(platform, brand) },
             { role: "user", content: buildUserPrompt(post, platform) },
           ],
         }),
@@ -129,17 +140,17 @@ export const openAiCaptionWriter: CaptionWriter = {
             : response.status === 401 || response.status === 403
               ? "auth rejected"
               : `HTTP ${response.status}`;
-        return fallbackCaption(post, platform, `${label}: ${detail.slice(0, 200)}`);
+        return fallbackCaption(post, platform, `${label}: ${detail.slice(0, 200)}`, brand);
       }
 
       const json = (await response.json()) as {
         choices?: Array<{ message?: { content?: string } }>;
       };
       const content = json.choices?.[0]?.message?.content?.trim();
-      if (!content) return fallbackCaption(post, platform, "empty completion");
+      if (!content) return fallbackCaption(post, platform, "empty completion", brand);
 
       const caption = sanitize(content, platform).trim();
-      if (!caption) return fallbackCaption(post, platform, "caption empty after sanitize");
+      if (!caption) return fallbackCaption(post, platform, "caption empty after sanitize", brand);
       return caption;
     } catch (error) {
       const reason =
@@ -148,7 +159,7 @@ export const openAiCaptionWriter: CaptionWriter = {
           : error instanceof Error
             ? error.message
             : "unknown error";
-      return fallbackCaption(post, platform, reason);
+      return fallbackCaption(post, platform, reason, brand);
     } finally {
       clearTimeout(timer);
     }

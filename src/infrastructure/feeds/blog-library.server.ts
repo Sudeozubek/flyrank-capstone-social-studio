@@ -9,7 +9,7 @@
  * already-published article with its canonical URL.
  */
 
-const UA = "Mozilla/5.0 (compatible; FlyRankBot/1.0)";
+const UA = "Mozilla/5.0 (compatible; CampaignHubBot/1.0)";
 const LIST_TTL_MS = 15 * 60 * 1000;
 const ARTICLE_TTL_MS = 60 * 60 * 1000;
 

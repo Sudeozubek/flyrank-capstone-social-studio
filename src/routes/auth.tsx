@@ -15,16 +15,16 @@ export const Route = createFileRoute("/auth")({
 
   head: () => ({
     meta: [
-      { title: "Sign in · FlyRank Campaign Studio" },
+      { title: "Sign in · CampaignHub Studio" },
       {
         name: "description",
         content:
-          "Sign in to FlyRank to turn blog posts into scheduled, platform-native social campaigns.",
+          "Sign in to CampaignHub to turn blog posts into scheduled, platform-native social campaigns.",
       },
-      { property: "og:title", content: "Sign in · FlyRank Campaign Studio" },
+      { property: "og:title", content: "Sign in · CampaignHub Studio" },
       {
         property: "og:description",
-        content: "Access your FlyRank campaigns, image variants and delivery logs.",
+        content: "Access your CampaignHub campaigns, image variants and delivery logs.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -85,14 +85,14 @@ function AuthPage() {
     <main className="grid min-h-screen lg:grid-cols-2">
       <section className="hidden flex-col justify-between border-r border-border bg-surface p-12 lg:flex">
         <div className="font-mono text-xs uppercase tracking-[0.35em] text-muted-foreground">
-          FlyRank
+          CampaignHub
         </div>
         <div className="max-w-md space-y-5">
           <h1 className="font-display text-4xl leading-tight text-foreground">
             One blog post. Every platform. Published on schedule.
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            FlyRank turns a published article into platform-native captions and correctly
+            CampaignHub turns a published article into platform-native captions and correctly
             framed image variants, then publishes them through a durable, idempotent,
             webhook-confirmed pipeline.
           </p>
