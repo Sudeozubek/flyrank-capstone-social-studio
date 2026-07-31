@@ -33,7 +33,9 @@ export async function runWorkerTick(
   if (error) throw new Error(`claim_due_entries: ${error.message}`);
 
   const claimed = (data ?? []).map(toEntry);
-  const context = createAppContext(db, userId, { requestUrl: options.requestUrl });
+  const context = createAppContext(db, userId, {
+    ...(options.requestUrl ? { requestUrl: options.requestUrl } : {}),
+  });
   const processed: TickResult["processed"] = [];
   const touchedCampaigns = new Set<string>();
 
