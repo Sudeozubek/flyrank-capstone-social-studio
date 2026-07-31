@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getImageRenderer } from "@/infrastructure/imaging/renderers.server";
+import { imageRenderer } from "@/infrastructure/imaging/renderers.server";
 
 /** Reads width/height straight out of the PNG IHDR chunk — no library trust. */
 function pngSize(bytes: Uint8Array): { width: number; height: number } {
@@ -11,7 +11,7 @@ function pngSize(bytes: Uint8Array): { width: number; height: number } {
 
 describe("image renderer emits real PNG artifacts", () => {
   it("renders exact platform dimensions", async () => {
-    const renderer = getImageRenderer();
+    const renderer = imageRenderer;
     for (const [platform, expected] of [
       ["instagram", { width: 1080, height: 1080 }],
       ["x", { width: 1600, height: 900 }],
