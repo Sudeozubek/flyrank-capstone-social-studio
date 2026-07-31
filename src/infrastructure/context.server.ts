@@ -5,7 +5,9 @@
 
 import type { Platform } from "@/domain/entities";
 import type { AppContext, Clock } from "@/domain/ports";
+import { openAiCaptionWriter } from "@/infrastructure/ai/openai-caption-writer.server";
 import { tokenCipher } from "@/infrastructure/crypto/token-cipher.server";
+
 import { imageRenderer } from "@/infrastructure/imaging/renderers.server";
 import { documentParser } from "@/infrastructure/parsing/document-parser.server";
 import {
@@ -56,6 +58,8 @@ export function createAppContext(db: Db, userId: string, options: ContextOptions
     webhooks: createWebhookEventRepository(db, userId),
     images: createImageStore(db),
     renderer: imageRenderer,
+    captionWriter: openAiCaptionWriter,
+
     parser: documentParser,
     publisherFor(platform) {
       const ciphertext = cipherCache.get(platform) ?? devCiphertext(userId, platform);
