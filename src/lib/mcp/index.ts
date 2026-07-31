@@ -27,6 +27,8 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
+  // Cast: the SDK's ToolDefinition declares an optional `outputSchema` that
+  // this project's `exactOptionalPropertyTypes` reads as required-or-undefined.
   tools: [
     createCampaignTool,
     listCampaignsTool,
@@ -35,5 +37,5 @@ export default defineMcp({
     scheduleCampaignTool,
     publishCampaignTool,
     retryCampaignTool,
-  ],
+  ] as never,
 });
