@@ -32,6 +32,8 @@ export interface LibraryGroup {
 export interface ComposerSubmit {
   mode: "paste" | "upload" | "library";
   campaignName?: string | undefined;
+  brandName?: string | undefined;
+  brandTone?: string | undefined;
   title?: string | undefined;
   body?: string | undefined;
   url?: string | null;
@@ -79,6 +81,8 @@ export function CampaignComposer({
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<string>(ALL_SOURCES);
   const [campaignName, setCampaignName] = useState("");
+  const [brandName, setBrandName] = useState("");
+  const [brandTone, setBrandTone] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
@@ -95,12 +99,23 @@ export function CampaignComposer({
     [visibleGroups],
   );
 
+  const brand = () => ({
+    brandName: brandName.trim() || undefined,
+    brandTone: brandTone.trim() || undefined,
+  });
+
   async function submitPaste() {
     if (body.trim().length < 40) {
       toast.error("Add at least 40 characters of blog body.");
       return;
     }
-    await onSubmit({ mode: "paste", title: title.trim() || undefined, body, url: url.trim() || null });
+    await onSubmit({
+      mode: "paste",
+      title: title.trim() || undefined,
+      body,
+      url: url.trim() || null,
+      ...brand(),
+    });
     setBody("");
     setTitle("");
   }
@@ -119,6 +134,7 @@ export function CampaignComposer({
       mode: "upload",
       url: url.trim() || null,
       file: { kind, filename: file.name, base64: await toBase64(file) },
+      ...brand(),
     });
     setFile(null);
     if (fileInput.current) fileInput.current.value = "";
@@ -133,6 +149,7 @@ export function CampaignComposer({
       mode: "library",
       url: selectedUrl,
       campaignName: campaignName.trim() || undefined,
+      ...brand(),
     });
     setCampaignName("");
   }
@@ -146,6 +163,35 @@ export function CampaignComposer({
           upload the document.
         </p>
       </header>
+
+      <div className="mb-5 grid gap-4 rounded-xl border border-border bg-background/50 p-4 sm:grid-cols-2">
+        <div className="space-y-2 min-w-0 sm:col-span-2">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Brand context (optional)
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Used only as extra context when captions are written. Leave empty for the default voice.
+          </p>
+        </div>
+        <div className="space-y-2 min-w-0">
+          <Label htmlFor="brand-name">Brand / company name</Label>
+          <Input
+            id="brand-name"
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
+            placeholder="Acme Inc."
+          />
+        </div>
+        <div className="space-y-2 min-w-0">
+          <Label htmlFor="brand-tone">Brand tone</Label>
+          <Input
+            id="brand-tone"
+            value={brandTone}
+            onChange={(e) => setBrandTone(e.target.value)}
+            placeholder="Professional and confident"
+          />
+        </div>
+      </div>
 
       <Tabs defaultValue="library">
         <TabsList className="mb-4">
