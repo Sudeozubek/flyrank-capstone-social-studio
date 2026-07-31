@@ -20,7 +20,7 @@ export function stableHash(input: string): number {
 }
 
 function pick<T>(items: readonly T[], seed: string): T {
-  return items[stableHash(seed) % items.length];
+  return items[stableHash(seed) % items.length]!;
 }
 
 export function splitSentences(body: string): string[] {
