@@ -24,108 +24,36 @@
   ],
   "entries": [
     {
-      "id": "spe_7f448a2a4fff476a",
-      "postId": "post_pipeline",
+      "id": "spe_0af045c9f0c8419d",
+      "postId": "post_variants",
       "platform": "instagram",
-      "caption": "We shipped something worth reading. ✨\n\nBUILDING A CRASH-SAFE PUBLISHING WORKER\n\nScheduling is the easy part; surviving a restart is not. We give every queued row a short lease and a status column, so a worker that dies mid-batch leaves behind claims that expire instead of ghosts. On restart the worker reclaims expired leases and replays them.\n\nPractical notes from a production pipeline, not theory.\n\nSwipe the carousel then read the full post (link in bio)\nhttps://flyrank.example/blog/crash-safe-worker\n\n— the FlyRank team\n\n#FlyRank #ContentOps #MarketingAutomation #SocialTooling #DevLife #BehindTheBuild #Startup #Engineering",
-      "imageUrl": "/api/image/variant?platform=instagram&seed=post_pipeline&title=Building+a+crash-safe+publishing+worker",
-      "status": "published",
-      "idempotencyKey": "flyrank:post_pipeline:instagram",
-      "attempts": 1,
-      "createdAt": "2026-07-31T13:05:19.008Z",
-      "updatedAt": "2026-07-31T13:30:20.234Z",
-      "scheduledFor": "2026-07-31T13:25:19.009Z",
-      "remoteId": "fp_9f78481ef7c84fe0",
-      "publishedAt": "2026-07-31T13:30:20.234Z"
+      "caption": "We shipped something worth reading. ✨\n\nONE SOURCE IMAGE, EVERY ASPECT RATIO\n\nA 1:1 square and a 16:9 banner are not the same picture cropped twice. We compute a cover crop per platform, then translate it so the subject box lands inside a configured safe zone. Overlays sit in the corner the platform does not cover with its own chrome.\n\nWritten by the team that maintains the thing.\n\nSwipe the carousel then read the full post (link in bio)\nhttps://flyrank.example/blog/image-variants\n\n— the FlyRank team\n\n#FlyRank #ContentOps #MarketingAutomation #SocialTooling #DevLife #BehindTheBuild #Startup #Engineering",
+      "imageUrl": "/api/image/variant?platform=instagram&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
+      "status": "queued",
+      "idempotencyKey": "flyrank:post_variants:instagram",
+      "attempts": 0,
+      "createdAt": "2026-07-31T13:07:34.919Z",
+      "updatedAt": "2026-07-31T13:07:34.919Z",
+      "scheduledFor": "2026-07-31T13:37:34.919Z"
     },
     {
-      "id": "spe_c2eb3b9c121f41e6",
-      "postId": "post_pipeline",
+      "id": "spe_9c2a0a0c6b274c1b",
+      "postId": "post_variants",
       "platform": "x",
-      "caption": "Building a crash-safe publishing worker Scheduling is the easy part; surviving a restart is not. Full write-up: https://flyrank.example/blog/crash-safe-worker #FlyRank #ContentOps",
-      "imageUrl": "/api/image/variant?platform=x&seed=post_pipeline&title=Building+a+crash-safe+publishing+worker",
-      "status": "published",
-      "idempotencyKey": "flyrank:post_pipeline:x",
-      "attempts": 1,
-      "createdAt": "2026-07-31T13:05:19.008Z",
-      "updatedAt": "2026-07-31T13:30:20.244Z",
-      "scheduledFor": "2026-07-31T13:25:19.009Z",
-      "remoteId": "fp_8c628d5a85244314",
-      "publishedAt": "2026-07-31T13:30:20.244Z"
+      "caption": "One source image, every aspect ratio A 1:1 square and a 16:9 banner are not the same picture cropped twice. Full write-up: https://flyrank.example/blog/image-variants #FlyRank #ContentOps",
+      "imageUrl": "/api/image/variant?platform=x&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
+      "status": "queued",
+      "idempotencyKey": "flyrank:post_variants:x",
+      "attempts": 0,
+      "createdAt": "2026-07-31T13:07:34.919Z",
+      "updatedAt": "2026-07-31T13:07:34.919Z",
+      "scheduledFor": "2026-07-31T13:37:34.919Z"
     }
   ],
-  "credentials": [
-    {
-      "platform": "instagram",
-      "accessTokenEncrypted": "Ny1Mckqwrh7B+M7K.161fwSvNc8GehrRXLg9SFQ==.sij/WkuW9Dhl6h3Z+fFjVPpcweFLCO6X5CZK19l3gy5D6wHK/4tx29VIOZ5TsQ==",
-      "issuedAt": "2026-07-31T13:05:19.025Z",
-      "expiresAt": "2026-07-31T14:05:19.025Z"
-    },
-    {
-      "platform": "x",
-      "accessTokenEncrypted": "XfYMumXjwyp+glAf.gKE+kX7/rAmgDyfFrc0oBA==.B1hnSdhFhh+EkFDK46x3+zAgyRCQy+iuxEa7uYmbrjf/vm9USHY=",
-      "issuedAt": "2026-07-31T13:05:19.038Z",
-      "expiresAt": "2026-07-31T14:05:19.038Z"
-    }
-  ],
-  "webhookLog": [
-    {
-      "postId": "post_pipeline",
-      "entryId": "spe_c2eb3b9c121f41e6",
-      "verified": true,
-      "status": 200,
-      "message": "signature ok → status published (x)",
-      "id": "wh_493f8e4b2b094d73",
-      "receivedAt": "2026-07-31T13:30:20.244Z"
-    },
-    {
-      "postId": "post_pipeline",
-      "entryId": "spe_7f448a2a4fff476a",
-      "verified": true,
-      "status": 200,
-      "message": "signature ok → status published (instagram)",
-      "id": "wh_59edb5492e8f49a1",
-      "receivedAt": "2026-07-31T13:30:20.235Z"
-    }
-  ],
-  "workerLog": [
-    {
-      "id": "wl_36fe985422794ba4",
-      "at": "2026-07-31T13:30:19.043Z",
-      "level": "info",
-      "message": "x post_pipeline: accepted [attempt 1]"
-    },
-    {
-      "id": "wl_b624832492a74f68",
-      "at": "2026-07-31T13:30:19.032Z",
-      "level": "info",
-      "message": "instagram post_pipeline: accepted [attempt 1]"
-    },
-    {
-      "id": "wl_14238783abe44274",
-      "at": "2026-07-31T13:30:19.020Z",
-      "level": "info",
-      "message": "dev: clock advanced 25m → 2026-07-31T13:30:19.020Z"
-    }
-  ],
-  "platformPosts": [
-    {
-      "id": "fp_9f78481ef7c84fe0",
-      "platform": "instagram",
-      "idempotencyKey": "flyrank:post_pipeline:instagram",
-      "caption": "We shipped something worth reading. ✨\n\nBUILDING A CRASH-SAFE PUBLISHING WORKER\n\nScheduling is the easy part; surviving a restart is not. We give every queued row a short lease and a status column, so a worker that dies mid-batch leaves behind claims that expire instead of ghosts. On restart the worker reclaims expired leases and replays them.\n\nPractical notes from a production pipeline, not theory.\n\nSwipe the carousel then read the full post (link in bio)\nhttps://flyrank.example/blog/crash-safe-worker\n\n— the FlyRank team\n\n#FlyRank #ContentOps #MarketingAutomation #SocialTooling #DevLife #BehindTheBuild #Startup #Engineering",
-      "imageUrl": "/api/image/variant?platform=instagram&seed=post_pipeline&title=Building+a+crash-safe+publishing+worker",
-      "createdAt": "2026-07-31T13:05:19.028Z"
-    },
-    {
-      "id": "fp_8c628d5a85244314",
-      "platform": "x",
-      "idempotencyKey": "flyrank:post_pipeline:x",
-      "caption": "Building a crash-safe publishing worker Scheduling is the easy part; surviving a restart is not. Full write-up: https://flyrank.example/blog/crash-safe-worker #FlyRank #ContentOps",
-      "imageUrl": "/api/image/variant?platform=x&seed=post_pipeline&title=Building+a+crash-safe+publishing+worker",
-      "createdAt": "2026-07-31T13:05:19.042Z"
-    }
-  ],
+  "credentials": [],
+  "webhookLog": [],
+  "workerLog": [],
+  "platformPosts": [],
   "force429": 0,
-  "clockOffsetMs": 1500000
+  "clockOffsetMs": 1860000
 }
