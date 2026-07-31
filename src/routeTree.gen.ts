@@ -14,7 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as OauthConsentRouteImport } from './routes/oauth.consent'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicWebhooksDeliveryRouteImport } from './routes/api/public/webhooks/delivery'
 import { Route as ApiPublicFakePlatformPlatformPostsRouteImport } from './routes/api/public/fake-platform/$platform/posts'
@@ -44,9 +44,9 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
-  id: '/.lovable/oauth/consent',
-  path: '/.lovable/oauth/consent',
+const OauthConsentRoute = OauthConsentRouteImport.update({
+  id: '/oauth/consent',
+  path: '/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
@@ -72,7 +72,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/oauth/consent': typeof OauthConsentRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
@@ -82,7 +82,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/oauth/consent': typeof OauthConsentRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
@@ -94,7 +94,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/oauth/consent': typeof OauthConsentRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
@@ -106,7 +106,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/.well-known/oauth-protected-resource'
     | '/dashboard'
-    | '/.lovable/oauth/consent'
+    | '/oauth/consent'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/api/public/fake-platform/$platform/posts'
@@ -116,7 +116,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/.well-known/oauth-protected-resource'
     | '/dashboard'
-    | '/.lovable/oauth/consent'
+    | '/oauth/consent'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/api/public/fake-platform/$platform/posts'
@@ -127,7 +127,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/dashboard'
-    | '/.lovable/oauth/consent'
+    | '/oauth/consent'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/api/public/fake-platform/$platform/posts'
@@ -138,7 +138,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  OauthConsentRoute: typeof OauthConsentRoute
   ApiPublicMcpRoute: typeof ApiPublicMcpRoute
   ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
   ApiPublicFakePlatformPlatformPostsRoute: typeof ApiPublicFakePlatformPlatformPostsRoute
@@ -181,11 +181,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/.lovable/oauth/consent': {
-      id: '/.lovable/oauth/consent'
-      path: '/.lovable/oauth/consent'
-      fullPath: '/.lovable/oauth/consent'
-      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+    '/oauth/consent': {
+      id: '/oauth/consent'
+      path: '/oauth/consent'
+      fullPath: '/oauth/consent'
+      preLoaderRoute: typeof OauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/mcp': {
@@ -229,7 +229,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
-  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  OauthConsentRoute: OauthConsentRoute,
   ApiPublicMcpRoute: ApiPublicMcpRoute,
   ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,
   ApiPublicFakePlatformPlatformPostsRoute:
