@@ -14,7 +14,7 @@ export interface DeliveryPayload {
   platform: string;
   remoteId: string;
   status: "delivered" | "rejected";
-  reason?: string;
+  reason?: string | undefined;
 }
 
 export async function applyDelivery(
