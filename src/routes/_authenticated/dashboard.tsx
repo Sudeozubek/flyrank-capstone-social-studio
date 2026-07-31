@@ -381,8 +381,11 @@ function Dashboard() {
               </div>
             </section>
           ))}
+          </div>
         </div>
       </main>
     </div>
   );
+}
+
 }
