@@ -119,7 +119,7 @@ export async function generateImages(
       height: spec.height,
       title: post.title,
       seed: `${post.id}:${entry.platform}`,
-      brand: "FlyRank",
+      brand: campaign.brandName?.trim() || "CampaignHub",
       subject,
     });
 
