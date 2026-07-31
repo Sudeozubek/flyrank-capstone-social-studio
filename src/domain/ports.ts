@@ -140,10 +140,20 @@ export interface ImageStore {
   signedUrl(path: string, expiresInSec?: number): Promise<string | null>;
 }
 
+/** Writes the final platform-specific caption from a post (LLM-backed adapter). */
+export interface CaptionWriter {
+  readonly name: string;
+  write(
+    post: { id: string; title: string; body: string; url?: string | null },
+    platform: Platform,
+  ): Promise<string>;
+}
+
 export interface ParsedDocument {
   title: string;
   body: string;
 }
+
 
 export interface DocumentParser {
   /** @param kind mime-ish hint: markdown | pdf | docx */
@@ -167,7 +177,9 @@ export interface AppContext {
   webhooks: WebhookEventRepository;
   images: ImageStore;
   renderer: ImageRenderer;
+  captionWriter: CaptionWriter;
   parser: DocumentParser;
+
   publisherFor(platform: Platform): SocialPublisher;
 }
 

@@ -4,7 +4,6 @@
  */
 
 import { PLATFORM_SPECS } from "@/config/platform-specs";
-import { composeCaption } from "@/domain/captions";
 import {
   PLATFORMS,
   buildIdempotencyKey,
@@ -43,15 +42,20 @@ export async function generateCaptions(
   const post = await context.posts.findById(campaign.postId);
   if (!post) throw new Error("Blog post not found");
 
-  return context.entries.upsertForCampaign(
-    campaign.id,
-    PLATFORMS.map((platform) => ({
+  const captions = await Promise.all(
+    PLATFORMS.map(async (platform) => ({
       platform,
-      caption: composeCaption({ id: post.id, title: post.title, body: post.body, url: post.url }, platform),
+      caption: await context.captionWriter.write(
+        { id: post.id, title: post.title, body: post.body, url: post.url },
+        platform,
+      ),
       idempotencyKey: buildIdempotencyKey(campaign.id, platform),
     })),
   );
+
+  return context.entries.upsertForCampaign(campaign.id, captions);
 }
+
 
 /** Renders + stores one real PNG per platform, sized to the platform spec. */
 export async function generateImages(
