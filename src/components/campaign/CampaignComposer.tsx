@@ -296,12 +296,9 @@ function PostPreviewCard({
   const published = formatDate(item.publishedAt);
 
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      aria-pressed={active}
+    <div
       className={
-        "flex h-64 w-full flex-col overflow-hidden rounded-xl border text-left transition " +
+        "flex h-72 w-full flex-col overflow-hidden rounded-xl border text-left transition " +
         (active
           ? "border-primary bg-primary/10 ring-1 ring-primary/40"
           : "border-border bg-background hover:border-primary/50")
@@ -339,8 +336,26 @@ function PostPreviewCard({
         <span className="mt-auto truncate font-mono text-[10px] text-muted-foreground">
           {published ?? new URL(item.url).hostname}
         </span>
+
+        <div className="mt-2 flex gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={active ? "default" : "secondary"}
+            aria-pressed={active}
+            onClick={onSelect}
+            className="flex-1"
+          >
+            {active ? "Selected" : "Select"}
+          </Button>
+          <Button type="button" size="sm" variant="outline" asChild className="flex-1">
+            <a href={item.url} target="_blank" rel="noreferrer noopener">
+              Open
+            </a>
+          </Button>
+        </div>
       </div>
-    </button>
+    </div>
   );
 }
 
