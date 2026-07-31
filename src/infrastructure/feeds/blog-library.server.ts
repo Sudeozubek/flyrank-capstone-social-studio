@@ -100,6 +100,20 @@ function tag(block: string, name: string): string {
   return match?.[1] ? decode(match[1]) : "";
 }
 
+/** Preview artwork advertised by a feed entry, in descending order of reliability. */
+function extractImage(block: string): string | null {
+  const candidate =
+    /<media:content[^>]+url="([^"]+)"/i.exec(block)?.[1] ??
+    /<media:thumbnail[^>]+url="([^"]+)"/i.exec(block)?.[1] ??
+    /<enclosure[^>]+type="image\/[^"]*"[^>]+url="([^"]+)"/i.exec(block)?.[1] ??
+    /<enclosure[^>]+url="([^"]+\.(?:png|jpe?g|webp|avif|gif))"/i.exec(block)?.[1] ??
+    /<img[^>]+src="([^"]+)"/i.exec(decode(block))?.[1] ??
+    null;
+  if (!candidate) return null;
+  const url = decode(candidate);
+  return /^https?:\/\//.test(url) ? url : null;
+}
+
 function parseRss(xml: string, source: BlogSource): LibraryItem[] {
   const blocks = xml.match(/<(item|entry)[\s\S]*?<\/\1>/gi) ?? [];
   return blocks
@@ -116,6 +130,7 @@ function parseRss(xml: string, source: BlogSource): LibraryItem[] {
         title: tag(block, "title"),
         url: decode(link ?? ""),
         summary: stripHtml(summaryHtml).slice(0, 320),
+        image: extractImage(block),
         publishedAt: published ? new Date(published).toISOString() : null,
       };
     })
@@ -134,6 +149,7 @@ function parseAnthropicListing(html: string, source: BlogSource): LibraryItem[] 
       .join(" "),
     url: `https://www.anthropic.com/news/${slug}`,
     summary: "Published on Anthropic News.",
+    image: null,
     publishedAt: null,
   }));
 }
