@@ -181,18 +181,21 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[380px_1fr]">
-        <div className="space-y-6">
-          <CampaignComposer
-            library={library.data ?? []}
-            libraryLoading={library.isLoading}
-            busy={compose.isPending}
-            onSubmit={async (input) => {
-              await compose.mutateAsync(input);
-            }}
-          />
+      <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+        {/* Full width so the blog-library previews get a real three-up grid. */}
+        <CampaignComposer
+          library={library.data ?? []}
+          libraryLoading={library.isLoading}
+          busy={compose.isPending}
+          onSubmit={async (input) => {
+            await compose.mutateAsync(input);
+          }}
+        />
 
-          <section className="rounded-2xl border border-border bg-surface p-5">
+        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+          <div className="space-y-6">
+            <section className="rounded-2xl border border-border bg-surface p-5">
+
             <h2 className="font-display text-lg text-foreground">Operations</h2>
             <p className="mb-4 text-sm text-muted-foreground">
               Drive the durable worker and simulate platform rate limits.
