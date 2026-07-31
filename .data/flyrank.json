@@ -1,0 +1,59 @@
+{
+  "posts": [
+    {
+      "id": "post_pipeline",
+      "title": "Building a crash-safe publishing worker",
+      "body": "Scheduling is the easy part; surviving a restart is not. We give every queued row a short lease and a status column, so a worker that dies mid-batch leaves behind claims that expire instead of ghosts. On restart the worker reclaims expired leases and replays them. Because every publish carries an idempotency key, a replay is a no-op on the platform side rather than a duplicate post. The result is a queue you can kill at any moment without apologising to anyone's timeline.",
+      "url": "https://flyrank.example/blog/crash-safe-worker",
+      "createdAt": "2026-07-02T09:00:00.000Z"
+    },
+    {
+      "id": "post_variants",
+      "title": "One source image, every aspect ratio",
+      "body": "A 1:1 square and a 16:9 banner are not the same picture cropped twice. We compute a cover crop per platform, then translate it so the subject box lands inside a configured safe zone. Overlays sit in the corner the platform does not cover with its own chrome. Every step is pure geometry, so a unit test can assert exact output dimensions instead of eyeballing a screenshot.",
+      "url": "https://flyrank.example/blog/image-variants",
+      "createdAt": "2026-07-14T09:00:00.000Z"
+    },
+    {
+      "id": "post_voice",
+      "title": "Captions that do not read like a mail merge",
+      "body": "Shipping the same sentence to five networks is how a brand starts sounding like a bot. We keep a shared voice file and per-platform overrides: tone, template, hashtag budget, target length. X gets one idea and a link. Instagram gets a hook, a story and room to breathe. The composer assembles fragments rather than truncating a master string, so the outputs differ structurally, not just in length.",
+      "url": "https://flyrank.example/blog/caption-composer",
+      "createdAt": "2026-07-24T09:00:00.000Z"
+    }
+  ],
+  "entries": [
+    {
+      "id": "spe_0af045c9f0c8419d",
+      "postId": "post_variants",
+      "platform": "instagram",
+      "caption": "We shipped something worth reading. ✨\n\nONE SOURCE IMAGE, EVERY ASPECT RATIO\n\nA 1:1 square and a 16:9 banner are not the same picture cropped twice. We compute a cover crop per platform, then translate it so the subject box lands inside a configured safe zone. Overlays sit in the corner the platform does not cover with its own chrome.\n\nWritten by the team that maintains the thing.\n\nSwipe the carousel then read the full post (link in bio)\nhttps://flyrank.example/blog/image-variants\n\n— the FlyRank team\n\n#FlyRank #ContentOps #MarketingAutomation #SocialTooling #DevLife #BehindTheBuild #Startup #Engineering",
+      "imageUrl": "/api/image/variant?platform=instagram&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
+      "status": "queued",
+      "idempotencyKey": "flyrank:post_variants:instagram",
+      "attempts": 0,
+      "createdAt": "2026-07-31T13:07:34.919Z",
+      "updatedAt": "2026-07-31T13:07:34.919Z",
+      "scheduledFor": "2026-07-31T13:37:34.919Z"
+    },
+    {
+      "id": "spe_9c2a0a0c6b274c1b",
+      "postId": "post_variants",
+      "platform": "x",
+      "caption": "One source image, every aspect ratio A 1:1 square and a 16:9 banner are not the same picture cropped twice. Full write-up: https://flyrank.example/blog/image-variants #FlyRank #ContentOps",
+      "imageUrl": "/api/image/variant?platform=x&seed=post_variants&title=One+source+image%2C+every+aspect+ratio",
+      "status": "queued",
+      "idempotencyKey": "flyrank:post_variants:x",
+      "attempts": 0,
+      "createdAt": "2026-07-31T13:07:34.919Z",
+      "updatedAt": "2026-07-31T13:07:34.919Z",
+      "scheduledFor": "2026-07-31T13:37:34.919Z"
+    }
+  ],
+  "credentials": [],
+  "webhookLog": [],
+  "workerLog": [],
+  "platformPosts": [],
+  "force429": 0,
+  "clockOffsetMs": 1860000
+}
