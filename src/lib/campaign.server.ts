@@ -35,9 +35,9 @@ export function previewCampaign(post: BlogPost) {
 
 export interface CreateCampaignInput {
   postId: string;
-  platforms?: Platform[];
+  platforms?: Platform[] | undefined;
   /** ISO date; when omitted the entries are due immediately. */
-  scheduledFor?: string;
+  scheduledFor?: string | undefined;
 }
 
 export function createCampaign(input: CreateCampaignInput): ContentSocials {
