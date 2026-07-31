@@ -27,10 +27,18 @@ export interface PostRepository {
 }
 
 export interface CampaignRepository {
-  create(input: { postId: string; name: string }): Promise<Campaign>;
+  create(input: {
+    postId: string;
+    name: string;
+    brandName?: string | null;
+    brandTone?: string | null;
+  }): Promise<Campaign>;
   list(): Promise<Campaign[]>;
   findById(id: string): Promise<Campaign | null>;
-  update(id: string, patch: Partial<Pick<Campaign, "status" | "scheduledFor">>): Promise<Campaign>;
+  update(
+    id: string,
+    patch: Partial<Pick<Campaign, "status" | "scheduledFor" | "name" | "brandName" | "brandTone">>,
+  ): Promise<Campaign>;
   delete(id: string): Promise<void>;
 }
 
