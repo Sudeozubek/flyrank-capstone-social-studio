@@ -82,21 +82,65 @@ export const deletePost = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const brandFields = {
+  brandName: z.string().max(120).nullish(),
+  brandTone: z.string().max(200).nullish(),
+};
+
 /** Create campaign + captions + rendered image variants in one call. */
 export const createCampaignWithAssets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ postId: uuid, name: z.string().max(200).optional() }).parse(input),
+    z.object({ postId: uuid, name: z.string().max(200).optional(), ...brandFields }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
     const snapshot = await createCampaign(app, {
       postId: data.postId,
       ...(data.name ? { name: data.name } : {}),
+      brandName: data.brandName ?? null,
+      brandTone: data.brandTone ?? null,
     });
     await generateImages(app, snapshot.campaign.id);
     return getCampaignSnapshot(app, snapshot.campaign.id);
   });
+
+/** Manual edit: campaign name, brand context and hand-written captions. */
+export const updateCampaignFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        campaignId: uuid,
+        name: z.string().max(200).optional(),
+        ...brandFields,
+        captions: z
+          .array(z.object({ entryId: uuid, caption: z.string().max(5000) }))
+          .max(10)
+          .optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const app = createAppContext(context.supabase as never, context.userId);
+    return editCampaign(app, {
+      campaignId: data.campaignId,
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.brandName !== undefined ? { brandName: data.brandName } : {}),
+      ...(data.brandTone !== undefined ? { brandTone: data.brandTone } : {}),
+      ...(data.captions ? { captions: data.captions } : {}),
+    });
+  });
+
+export const deleteCampaignFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ campaignId: uuid }).parse(input))
+  .handler(async ({ data, context }) => {
+    const app = createAppContext(context.supabase as never, context.userId);
+    await deleteCampaign(app, data.campaignId);
+    return { ok: true };
+  });
+
 
 export const regenerateCaptions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
