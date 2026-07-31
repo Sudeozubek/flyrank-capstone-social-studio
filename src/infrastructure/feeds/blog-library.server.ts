@@ -51,6 +51,8 @@ export interface LibraryItem {
   title: string;
   url: string;
   summary: string;
+  /** Preview artwork advertised by the feed (media/enclosure/inline img), when present. */
+  image: string | null;
   publishedAt: string | null;
 }
 
