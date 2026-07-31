@@ -318,17 +318,14 @@ function PostPreviewCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          /* No feed artwork: fall back to a typographic preview of the article itself. */
-          <div className="flex h-full flex-col justify-center gap-1 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 px-3 pt-6">
-            <p className="line-clamp-2 font-display text-sm leading-snug text-foreground">
-              {item.title}
-            </p>
-            <p className="line-clamp-2 font-mono text-[10px] leading-relaxed text-muted-foreground">
-              {item.summary || new URL(item.url).hostname}
-            </p>
+          /* No feed artwork: fall back to a typographic monogram tile. */
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/15 via-transparent to-accent/15">
+            <span className="font-display text-3xl tracking-tight text-foreground/70">
+              {item.sourceName.slice(0, 2).toUpperCase()}
+            </span>
           </div>
-
         )}
+
         <span className="absolute left-2 top-2 rounded-md bg-background/85 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground backdrop-blur">
           {item.sourceName}
         </span>
