@@ -1,0 +1,184 @@
+# capstone.yaml — FlyRank capstone submission metadata
+
+capstone:
+  name: FlyRank
+  track: Multi-Platform Social Campaign Engine
+  submission_version: "1.0.0"
+  submitted_at: "2026-07-31"
+
+project:
+  name: CampaignHub Studio
+  tagline: Transform a single blog post into a complete multi-platform social campaign.
+  description: >-
+    Given a published post (title + body + URL), CampaignHub Studio generates per-platform
+    image variants and platform-tailored captions, then publishes them immediately or on a
+    schedule through a unified adapter interface. The publish path is idempotent, honours
+    429 Retry-After, stores OAuth tokens encrypted at rest, and only marks work terminal on a
+    signature-verified delivery webhook. A durable lease-based worker makes scheduling
+    crash-safe. No real social platform API is ever called.
+  repository: "<REPO_URL>"
+  license: MIT
+  demo_url: ""
+
+author:
+  name: "<YOUR NAME>"
+  email: "<YOUR EMAIL>"
+  github: "<YOUR GITHUB HANDLE>"
+
+stack:
+  language: TypeScript
+  runtime: Node.js 20+ / Bun 1.1+
+  framework: TanStack Start v1 (React 19, Vite 7)
+  database: PostgreSQL with Row Level Security
+  storage: Private object storage bucket for generated PNGs
+  imaging: [sharp, jimp]
+  parsing: [unpdf, mammoth]
+  ai: OpenAI gpt-4o-mini (optional; deterministic fallback)
+  validation: zod
+  testing: vitest
+  styling: [tailwindcss v4, shadcn/ui]
+
+architecture:
+  style: Clean Architecture (SOLID), dependency rule interfaces -> application -> domain
+  layers:
+    domain: src/domain          # entities, pure caption + image logic, ports. Zero I/O.
+    application: src/application # use cases, depend only on ports
+    infrastructure: src/infrastructure # Postgres, imaging, parsing, crypto, AI, publishing
+    interfaces:
+      http: src/routes/api/public
+      server_functions: src/lib/flyrank.functions.ts
+      mcp: src/mcp
+      web: src/routes, src/components
+
+platforms:
+  - id: instagram
+    image: { width: 1080, height: 1080, aspect: "1:1" }
+    caption: { max_length: 2200, max_hashtags: 8 }
+  - id: x
+    image: { width: 1600, height: 900, aspect: "16:9" }
+    caption: { max_length: 280, max_hashtags: 2 }
+
+features:
+  - Content ingestion: paste, markdown, PDF, DOCX, curated published-article library
+  - Per-platform PNG variants at exact dimensions with safe-zone enforcement
+  - LLM-written captions from shared + per-platform prompt fragments, deterministic fallback
+  - Unified SocialPublisher adapter interface over an in-repo fake platform
+  - Deterministic idempotency keys enforced by a unique database constraint
+  - 429 Retry-After handling with exponential backoff and a persisted attempt log
+  - Durable lease-based scheduling that resumes after a crash without duplicates
+  - HMAC-SHA256 signed delivery webhooks as the only writer of terminal status
+  - AES-256-GCM encrypted OAuth tokens with a fresh IV per write
+  - Multi-tenant auth (email/password + Google) with per-user RLS
+  - Standalone Model Context Protocol server exposing the campaign lifecycle
+
+definition_of_done:
+  - id: DOD-1
+    name: One post in, per-platform variants out
+    evidence: EVIDENCE.md#dod-1--one-post-in-per-platform-variants-out
+  - id: DOD-2
+    name: Exact per-platform image dimensions with subject in the safe zone
+    evidence: EVIDENCE.md#dod-2--exact-per-platform-image-dimensions-with-subject-in-the-safe-zone
+  - id: DOD-3
+    name: Platform-tailored captions
+    evidence: EVIDENCE.md#dod-3--platform-tailored-captions-not-truncations-of-each-other
+  - id: DOD-4
+    name: Unified publisher interface, fake platform only
+    evidence: EVIDENCE.md#dod-4--unified-publisher-interface-fake-platform-only
+  - id: DOD-5
+    name: Idempotent publishing
+    evidence: EVIDENCE.md#dod-5--idempotency-publish-twice--retry-after-timeout--exactly-one-post
+  - id: DOD-6
+    name: Rate limiting with Retry-After
+    evidence: EVIDENCE.md#dod-6--rate-limiting-429--retry-after-honoured-with-backoff-and-attempt-log
+  - id: DOD-7
+    name: Crash-safe durable scheduling
+    evidence: EVIDENCE.md#dod-7--durable-scheduling-that-survives-a-crash-without-duplicates
+  - id: DOD-8
+    name: Signature-verified delivery webhooks
+    evidence: EVIDENCE.md#dod-8--signature-verified-delivery-webhooks-own-the-terminal-status
+  - id: DOD-9
+    name: OAuth tokens encrypted at rest
+    evidence: EVIDENCE.md#dod-9--oauth-tokens-encrypted-at-rest-never-logged
+  - id: DOD-10
+    name: Tenant isolation, validation, clean architecture
+    evidence: EVIDENCE.md#dod-10--tenant-isolation-validation-and-clean-architecture
+  - id: DOD-11
+    name: Documentation and submission pack
+    evidence: EVIDENCE.md#dod-11--documentation-and-submission-pack
+
+api:
+  server_functions: src/lib/flyrank.functions.ts
+  public_endpoints:
+    - method: POST
+      path: /api/public/fake-platform/{platform}/posts
+      purpose: Fake platform publish (Bearer auth, idempotency, 429, async signed webhook)
+    - method: GET
+      path: /api/public/fake-platform/{platform}/posts
+      purpose: Inspect fake platform state
+    - method: POST
+      path: /api/public/webhooks/delivery
+      purpose: HMAC-verified delivery webhook; only writer of terminal status
+    - method: POST
+      path: /api/public/mcp
+      purpose: MCP JSON-RPC endpoint
+    - method: GET
+      path: /.well-known/oauth-protected-resource
+      purpose: RFC 9728 discovery for MCP clients
+
+mcp:
+  transport: JSON-RPC 2.0 over HTTP POST
+  endpoint: /api/public/mcp
+  auth: OAuth 2.1 bearer token, consent screen at /oauth/consent
+  vendor_neutral: true
+  tools:
+    - create_campaign
+    - list_campaigns
+    - get_campaign
+    - campaign_status
+    - schedule_campaign
+    - publish_campaign
+    - retry_campaign
+  constraints:
+    - MCP is only an interface; it holds no business logic
+    - No caption generation, no blog generation, no direct model calls
+
+testing:
+  command: bun run test
+  framework: vitest
+  suites:
+    - path: tests/domain.test.ts
+      covers: [image geometry, safe zones, captions, idempotency key, backoff, status derivation]
+    - path: tests/imaging.test.ts
+      covers: [real PNG output at exact platform dimensions]
+    - path: tests/security.test.ts
+      covers: [token encryption, webhook signatures, no real platform endpoints]
+  totals:
+    files: 3
+    tests: 20
+
+setup:
+  install: bun install
+  env: cp .env.example .env
+  database: apply supabase/migrations/*.sql in order
+  dev: bun run dev   # http://localhost:8080
+  test: bun run test
+  build: bun run build
+
+documentation:
+  readme: README.md
+  evidence: EVIDENCE.md
+  buildlog: BUILDLOG.md
+  decisions: DECISIONS.md
+  env_example: .env.example
+  license: LICENSE
+
+constraints:
+  no_real_social_apis: true
+  fake_platform_only: true
+
+out_of_scope:
+  - Real social platform integration
+  - Brand templating
+  - A/B caption testing
+  - Analytics loopback
+  - Approval workflow
