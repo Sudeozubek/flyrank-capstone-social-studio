@@ -55,6 +55,8 @@ export const toCampaign = (row: CampaignRow): Campaign => ({
   name: row.name,
   status: row.status,
   scheduledFor: row.scheduled_for,
+  brandName: row.brand_name ?? null,
+  brandTone: row.brand_tone ?? null,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });

@@ -5,6 +5,7 @@
 
 import type {
   BlogPost,
+  BrandContext,
   Campaign,
   CampaignStatus,
   EntryStatus,
@@ -154,6 +155,7 @@ export interface CaptionWriter {
   write(
     post: { id: string; title: string; body: string; url?: string | null },
     platform: Platform,
+    brand?: BrandContext,
   ): Promise<string>;
 }
 
