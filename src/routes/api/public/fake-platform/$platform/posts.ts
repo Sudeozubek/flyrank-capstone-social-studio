@@ -87,8 +87,8 @@ export const Route = createFileRoute("/api/public/fake-platform/$platform/posts"
         }
 
         const payload = (await request.json().catch(() => ({}))) as Record<string, any>;
-        const caption = String(payload.caption ?? payload.text ?? "");
-        const clientRef = String(payload.client_ref ?? "");
+        const caption = String(payload["caption"] ?? payload["text"] ?? "");
+        const clientRef = String(payload["client_ref"] ?? "");
         const origin = new URL(request.url).origin;
 
         const existing = posts.get(idempotencyKey);
