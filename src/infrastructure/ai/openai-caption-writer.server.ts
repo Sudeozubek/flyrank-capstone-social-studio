@@ -19,6 +19,7 @@ import type { CaptionWriter } from "@/domain/ports";
 
 const MODEL = "gpt-4o-mini";
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
+const TIMEOUT_MS = 15_000;
 
 export function buildSystemPrompt(platform: Platform): string {
   const spec = PLATFORM_SPECS[platform]!;
