@@ -57,8 +57,8 @@ export function clamp(text: string, limit: number): string {
 }
 
 export function composeCaption(post: CaptionSource, platform: Platform): string {
-  const spec = PLATFORM_SPECS[platform];
-  const voice = PLATFORM_VOICE[platform];
+  const spec = PLATFORM_SPECS[platform]!;
+  const voice = PLATFORM_VOICE[platform]!;
   const seed = `${post.id}:${platform}`;
 
   const hashtags = formatHashtags(
