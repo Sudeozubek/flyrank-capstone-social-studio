@@ -443,6 +443,12 @@ function Dashboard() {
           </div>
         </div>
       </main>
+
+      <footer className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-6 font-mono text-[11px] text-muted-foreground">
+          © CampaignHub
+        </div>
+      </footer>
     </div>
   );
 }
