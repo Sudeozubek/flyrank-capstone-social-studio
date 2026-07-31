@@ -1,14 +1,14 @@
-import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { getCampaignSnapshot } from "@/application/campaign-usecases";
 import { withApp } from "../context";
+import { defineTool } from "../types";
 
 export default defineTool({
   name: "campaign_status",
   title: "Campaign status",
   description:
     "Compact delivery status for one campaign: overall status plus per-platform entry status, attempts, remote id and last error.",
-  inputSchema: { campaignId: z.string().uuid().describe("Campaign ID.") },
+  schema: z.object({ campaignId: z.string().uuid().describe("Campaign ID.") }),
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ campaignId }, ctx) =>
     withApp(ctx, async (app) => {

@@ -25,7 +25,7 @@ function oauthApi(): OAuthApi {
   return (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 }
 
-export const Route = createFileRoute("/.lovable/oauth/consent")({
+export const Route = createFileRoute("/oauth/consent")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>) => ({
     authorization_id: typeof search['authorization_id'] === "string" ? search['authorization_id'] : "",
