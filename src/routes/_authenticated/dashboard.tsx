@@ -63,6 +63,7 @@ function Dashboard() {
   const [busy, setBusy] = useState(false);
   const [scheduleAt, setScheduleAt] = useState(localIsoInMinutes(2));
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const dashboard = useQuery({
     queryKey: ["dashboard"],
@@ -155,6 +156,28 @@ function Dashboard() {
       toast.error(error instanceof Error ? error.message : "Could not create the campaign"),
   });
 
+  /** Soft-delete with a 10s undo window: hide locally, commit when the toast expires. */
+  function requestDelete(campaignId: string, name: string) {
+    const timer = setTimeout(() => {
+      setPendingDelete(({ [campaignId]: _removed, ...rest }) => rest);
+      void run("Campaign deleted", () => fns.remove({ data: { campaignId } }));
+    }, 10_000);
+
+    setPendingDelete((current) => ({ ...current, [campaignId]: timer }));
+
+    toast(`"${name}" deleted`, {
+      description: "Removing in 10 seconds.",
+      duration: 10_000,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          clearTimeout(timer);
+          setPendingDelete(({ [campaignId]: _removed, ...rest }) => rest);
+        },
+      },
+    });
+  }
+
   async function saveEdit(edit: CampaignEdit) {
     const done = await run("Campaign updated", () =>
       fns.update({
@@ -177,7 +200,8 @@ function Dashboard() {
     void navigate({ to: "/auth", replace: true });
   }
 
-  const campaigns = dashboard.data?.campaigns ?? [];
+  const allCampaigns = dashboard.data?.campaigns ?? [];
+  const campaigns = allCampaigns.filter((c) => !pendingDelete[c.campaign.id]);
   const webhooks = dashboard.data?.webhooks ?? [];
   const totals = campaigns.reduce(
     (acc, c) => {
@@ -410,12 +434,7 @@ function Dashboard() {
                   variant="ghost"
                   disabled={busy}
                   className="text-status-failed hover:text-status-failed"
-                  onClick={() => {
-                    if (!confirm(`Delete "${snapshot.campaign.name}"? This cannot be undone.`)) return;
-                    void run("Campaign deleted", () =>
-                      fns.remove({ data: { campaignId: snapshot.campaign.id } }),
-                    );
-                  }}
+                  onClick={() => requestDelete(snapshot.campaign.id, snapshot.campaign.name)}
                 >
                   Delete
                 </Button>
