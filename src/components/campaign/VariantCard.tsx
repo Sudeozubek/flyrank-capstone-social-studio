@@ -13,7 +13,7 @@ export function VariantCard({ platform, caption, imageUrl, entry }: Props) {
   const spec = PLATFORM_SPECS[platform];
 
   return (
-    <article className="panel flex flex-col overflow-hidden">
+    <article className="panel flex flex-col self-start overflow-hidden">
       <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div>
           <h3 className="text-base font-semibold">{spec.label}</h3>
