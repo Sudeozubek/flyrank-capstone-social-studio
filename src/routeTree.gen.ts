@@ -18,6 +18,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicWebhooksDeliveryRouteImport } from './routes/api/public/webhooks/delivery'
 import { Route as ApiPublicFakePlatformPlatformPostsRouteImport } from './routes/api/public/fake-platform/$platform/posts'
 
@@ -68,6 +69,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
+  id: '/api/public/mcp',
+  path: '/api/public/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhooksDeliveryRoute =
   ApiPublicWebhooksDeliveryRouteImport.update({
     id: '/api/public/webhooks/delivery',
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/api/public/fake-platform/$platform/posts'
   fileRoutesByTo: FileRoutesByTo
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/api/public/fake-platform/$platform/posts'
   id:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/api/public/fake-platform/$platform/posts'
   fileRoutesById: FileRoutesById
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicMcpRoute: typeof ApiPublicMcpRoute
   ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
   ApiPublicFakePlatformPlatformPostsRoute: typeof ApiPublicFakePlatformPlatformPostsRoute
 }
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/mcp': {
+      id: '/api/public/mcp'
+      path: '/api/public/mcp'
+      fullPath: '/api/public/mcp'
+      preLoaderRoute: typeof ApiPublicMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/delivery': {
       id: '/api/public/webhooks/delivery'
       path: '/api/public/webhooks/delivery'
@@ -275,6 +295,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicMcpRoute: ApiPublicMcpRoute,
   ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,
   ApiPublicFakePlatformPlatformPostsRoute:
     ApiPublicFakePlatformPlatformPostsRoute,
