@@ -10,33 +10,44 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicFakePlatformPlatformPostsRouteImport } from './routes/api/public/fake-platform/$platform/posts'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFakePlatformPlatformPostsRoute =
+  ApiPublicFakePlatformPlatformPostsRouteImport.update({
+    id: '/api/public/fake-platform/$platform/posts',
+    path: '/api/public/fake-platform/$platform/posts',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/fake-platform/$platform/posts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/fake-platform/$platform/posts'
+  id: '__root__' | '/' | '/api/public/fake-platform/$platform/posts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicFakePlatformPlatformPostsRoute: typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +59,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/fake-platform/$platform/posts': {
+      id: '/api/public/fake-platform/$platform/posts'
+      path: '/api/public/fake-platform/$platform/posts'
+      fullPath: '/api/public/fake-platform/$platform/posts'
+      preLoaderRoute: typeof ApiPublicFakePlatformPlatformPostsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicFakePlatformPlatformPostsRoute:
+    ApiPublicFakePlatformPlatformPostsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
