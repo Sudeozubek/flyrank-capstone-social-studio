@@ -6,7 +6,7 @@
 
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
-import type { Platform } from "./entities";
+import type { BrandContext, Platform } from "./entities";
 
 export interface CaptionSource {
   id: string;
@@ -56,10 +56,16 @@ export function clamp(text: string, limit: number): string {
   return `${(boundary > limit * 0.6 ? cut.slice(0, boundary) : cut).trimEnd()}…`;
 }
 
-export function composeCaption(post: CaptionSource, platform: Platform): string {
+export function composeCaption(
+  post: CaptionSource,
+  platform: Platform,
+  brand?: BrandContext,
+): string {
   const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
   const seed = `${post.id}:${platform}`;
+  const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
+  const withBrand = (text: string) => text.replaceAll("{brand}", brandName);
 
   const hashtags = formatHashtags(
     [...SHARED_VOICE.baseHashtags, ...voice.hashtags],
@@ -70,13 +76,13 @@ export function composeCaption(post: CaptionSource, platform: Platform): string 
   if (!voice.emoji) summary = summary.replace(/\p{Extended_Pictographic}/gu, "").trim();
 
   const filled = voice.template
-    .replace("{hook}", pick(SHARED_VOICE.hooks, seed))
+    .replace("{hook}", withBrand(pick(SHARED_VOICE.hooks, seed)))
     .replace("{title}", platform === "x" ? post.title : post.title.toUpperCase())
     .replace("{summary}", summary)
     .replace("{value}", pick(SHARED_VOICE.valueProps, seed))
     .replace("{cta}", pick(voice.ctas, seed))
     .replace("{url}", post.url ?? "")
-    .replace("{signOff}", SHARED_VOICE.signOff)
+    .replace("{signOff}", withBrand(SHARED_VOICE.signOff))
     .replace("{hashtags}", hashtags)
     .replace(/[ \t]+\n/g, "\n")
     .trim();
