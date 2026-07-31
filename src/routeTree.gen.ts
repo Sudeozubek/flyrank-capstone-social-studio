@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
+import { Route as ApiDevRouteImport } from './routes/api/dev'
 import { Route as ApiLogsRouteImport } from './routes/api/logs'
 import { Route as ApiPostsRouteImport } from './routes/api/posts'
 import { Route as ApiCampaignsPostIdRouteImport } from './routes/api/campaigns.$postId'
@@ -29,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
   id: '/api/campaigns',
   path: '/api/campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDevRoute = ApiDevRouteImport.update({
+  id: '/api/dev',
+  path: '/api/dev',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiLogsRoute = ApiLogsRouteImport.update({
@@ -85,6 +91,7 @@ const ApiPublicFakePlatformOauthTokenRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
+  '/api/dev': typeof ApiDevRoute
   '/api/logs': typeof ApiLogsRoute
   '/api/posts': typeof ApiPostsRoute
   '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
+  '/api/dev': typeof ApiDevRoute
   '/api/logs': typeof ApiLogsRoute
   '/api/posts': typeof ApiPostsRoute
   '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/campaigns': typeof ApiCampaignsRouteWithChildren
+  '/api/dev': typeof ApiDevRoute
   '/api/logs': typeof ApiLogsRoute
   '/api/posts': typeof ApiPostsRoute
   '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/api/campaigns'
+    | '/api/dev'
     | '/api/logs'
     | '/api/posts'
     | '/api/campaigns/$postId'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/api/campaigns'
+    | '/api/dev'
     | '/api/logs'
     | '/api/posts'
     | '/api/campaigns/$postId'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/api/campaigns'
+    | '/api/dev'
     | '/api/logs'
     | '/api/posts'
     | '/api/campaigns/$postId'
@@ -167,6 +179,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiCampaignsRoute: typeof ApiCampaignsRouteWithChildren
+  ApiDevRoute: typeof ApiDevRoute
   ApiLogsRoute: typeof ApiLogsRoute
   ApiPostsRoute: typeof ApiPostsRoute
   ApiImageVariantRoute: typeof ApiImageVariantRoute
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/api/campaigns'
       fullPath: '/api/campaigns'
       preLoaderRoute: typeof ApiCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dev': {
+      id: '/api/dev'
+      path: '/api/dev'
+      fullPath: '/api/dev'
+      preLoaderRoute: typeof ApiDevRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/logs': {
@@ -285,6 +305,7 @@ const ApiCampaignsRouteWithChildren = ApiCampaignsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiCampaignsRoute: ApiCampaignsRouteWithChildren,
+  ApiDevRoute: ApiDevRoute,
   ApiLogsRoute: ApiLogsRoute,
   ApiPostsRoute: ApiPostsRoute,
   ApiImageVariantRoute: ApiImageVariantRoute,
