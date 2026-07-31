@@ -10,33 +10,92 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiImageVariantRouteImport } from './routes/api/image/variant'
+import { Route as ApiPublicFakePlatformPublishRouteImport } from './routes/api/public/fake-platform/publish'
+import { Route as ApiPublicWebhooksDeliveryRouteImport } from './routes/api/public/webhooks/delivery'
+import { Route as ApiPublicFakePlatformOauthTokenRouteImport } from './routes/api/public/fake-platform/oauth/token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiImageVariantRoute = ApiImageVariantRouteImport.update({
+  id: '/api/image/variant',
+  path: '/api/image/variant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicFakePlatformPublishRoute =
+  ApiPublicFakePlatformPublishRouteImport.update({
+    id: '/api/public/fake-platform/publish',
+    path: '/api/public/fake-platform/publish',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWebhooksDeliveryRoute =
+  ApiPublicWebhooksDeliveryRouteImport.update({
+    id: '/api/public/webhooks/delivery',
+    path: '/api/public/webhooks/delivery',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicFakePlatformOauthTokenRoute =
+  ApiPublicFakePlatformOauthTokenRouteImport.update({
+    id: '/api/public/fake-platform/oauth/token',
+    path: '/api/public/fake-platform/oauth/token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/image/variant': typeof ApiImageVariantRoute
+  '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
+  '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
+  '/api/public/fake-platform/oauth/token': typeof ApiPublicFakePlatformOauthTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/image/variant': typeof ApiImageVariantRoute
+  '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
+  '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
+  '/api/public/fake-platform/oauth/token': typeof ApiPublicFakePlatformOauthTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/image/variant': typeof ApiImageVariantRoute
+  '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
+  '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
+  '/api/public/fake-platform/oauth/token': typeof ApiPublicFakePlatformOauthTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/api/image/variant'
+    | '/api/public/fake-platform/publish'
+    | '/api/public/webhooks/delivery'
+    | '/api/public/fake-platform/oauth/token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/api/image/variant'
+    | '/api/public/fake-platform/publish'
+    | '/api/public/webhooks/delivery'
+    | '/api/public/fake-platform/oauth/token'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/image/variant'
+    | '/api/public/fake-platform/publish'
+    | '/api/public/webhooks/delivery'
+    | '/api/public/fake-platform/oauth/token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiImageVariantRoute: typeof ApiImageVariantRoute
+  ApiPublicFakePlatformPublishRoute: typeof ApiPublicFakePlatformPublishRoute
+  ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
+  ApiPublicFakePlatformOauthTokenRoute: typeof ApiPublicFakePlatformOauthTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +107,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/image/variant': {
+      id: '/api/image/variant'
+      path: '/api/image/variant'
+      fullPath: '/api/image/variant'
+      preLoaderRoute: typeof ApiImageVariantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/fake-platform/publish': {
+      id: '/api/public/fake-platform/publish'
+      path: '/api/public/fake-platform/publish'
+      fullPath: '/api/public/fake-platform/publish'
+      preLoaderRoute: typeof ApiPublicFakePlatformPublishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/delivery': {
+      id: '/api/public/webhooks/delivery'
+      path: '/api/public/webhooks/delivery'
+      fullPath: '/api/public/webhooks/delivery'
+      preLoaderRoute: typeof ApiPublicWebhooksDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/fake-platform/oauth/token': {
+      id: '/api/public/fake-platform/oauth/token'
+      path: '/api/public/fake-platform/oauth/token'
+      fullPath: '/api/public/fake-platform/oauth/token'
+      preLoaderRoute: typeof ApiPublicFakePlatformOauthTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiImageVariantRoute: ApiImageVariantRoute,
+  ApiPublicFakePlatformPublishRoute: ApiPublicFakePlatformPublishRoute,
+  ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,
+  ApiPublicFakePlatformOauthTokenRoute: ApiPublicFakePlatformOauthTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
