@@ -38,7 +38,7 @@ export const SHARED_VOICE: SharedVoice = {
     "Everything here is running in an internal tool today.",
     "Written by the team that maintains the thing.",
   ],
-  baseHashtags: ["FlyRank", "ContentOps"],
+  baseHashtags: ["ContentOps"],
   signOff: "— the {brand} team",
 };
 
