@@ -6,7 +6,7 @@ export function ThemeToggle() {
   const [light, setLight] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("flyrank-theme");
+    const stored = localStorage.getItem("campaignhub-theme");
     const prefersLight =
       stored === null && window.matchMedia("(prefers-color-scheme: light)").matches;
     const next = stored === "light" || prefersLight;
@@ -18,7 +18,7 @@ export function ThemeToggle() {
     const next = !light;
     setLight(next);
     document.documentElement.classList.toggle("light", next);
-    localStorage.setItem("flyrank-theme", next ? "light" : "dark");
+    localStorage.setItem("campaignhub-theme", next ? "light" : "dark");
   }
 
   return (

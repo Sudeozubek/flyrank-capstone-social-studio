@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FlyRank — multi-platform social campaign publisher" },
+      { title: "CampaignHub — multi-platform social campaign publisher" },
       {
         name: "description",
         content:
           "Turn one blog post into platform-native captions and image variants, then publish them through a durable, idempotent, webhook-confirmed pipeline.",
       },
-      { property: "og:title", content: "FlyRank — social campaign publisher" },
+      { property: "og:title", content: "CampaignHub — social campaign publisher" },
       {
         property: "og:description",
         content: "Captions, image variants, durable scheduling and signed delivery webhooks.",
@@ -45,7 +45,7 @@ function Landing() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <span className="font-display text-lg text-foreground">FlyRank</span>
+          <span className="font-display text-lg text-foreground">CampaignHub</span>
           <nav className="flex items-center gap-2">
             <Link
               to="/auth"
@@ -72,11 +72,10 @@ function Landing() {
             Multi-platform campaign engine
           </p>
           <h1 className="mt-5 max-w-3xl font-display text-5xl leading-[1.05] text-foreground">
-            Publish one blog post everywhere — without duplicate posts, lost schedules or
-            guessed crops.
+            Transform a single blog post into a complete multi-platform social campaign.
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            FlyRank generates platform-specific captions and correctly framed image variants,
+            CampaignHub generates platform-specific captions and correctly framed image variants,
             then drives them through a publishing pipeline built for real failure modes:
             rate limits, retries, crashes and asynchronous delivery confirmation.
           </p>
@@ -114,7 +113,7 @@ function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-6xl px-6 py-8 font-mono text-[11px] text-muted-foreground">
-          FlyRank capstone · publishes only to the bundled fake platform
+          © CampaignHub · publishes only to the bundled fake platform
         </div>
       </footer>
     </div>
