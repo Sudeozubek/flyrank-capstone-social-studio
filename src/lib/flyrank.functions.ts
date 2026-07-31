@@ -4,6 +4,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -86,9 +87,7 @@ export const createCampaignWithAssets = createServerFn({ method: "POST" })
     z.object({ postId: uuid, name: z.string().max(200).optional() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const app = createAppContext(context.supabase as never, context.userId, {
-      requestUrl: context.request?.url ?? "",
-    });
+    const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
     const snapshot = await createCampaign(app, {
       postId: data.postId,
       ...(data.name ? { name: data.name } : {}),
@@ -130,9 +129,7 @@ export const publishCampaignFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ campaignId: uuid }).parse(input))
   .handler(async ({ data, context }) => {
-    const app = createAppContext(context.supabase as never, context.userId, {
-      requestUrl: context.request?.url ?? "",
-    });
+    const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
     await publishCampaign(app, data.campaignId);
     return getCampaignSnapshot(app, data.campaignId);
   });
@@ -141,9 +138,7 @@ export const retryCampaignFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ campaignId: uuid }).parse(input))
   .handler(async ({ data, context }) => {
-    const app = createAppContext(context.supabase as never, context.userId, {
-      requestUrl: context.request?.url ?? "",
-    });
+    const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
     await retryCampaign(app, data.campaignId);
     return getCampaignSnapshot(app, data.campaignId);
   });
@@ -186,9 +181,7 @@ export const loadDashboard = createServerFn({ method: "GET" })
 export const tickWorker = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    return runWorkerTick(context.supabase as never, context.userId, {
-      requestUrl: context.request?.url ?? "",
-    });
+    return runWorkerTick(context.supabase as never, context.userId, { requestUrl: getRequest().url });
   });
 
 export const setPlatformRateLimit = createServerFn({ method: "POST" })
