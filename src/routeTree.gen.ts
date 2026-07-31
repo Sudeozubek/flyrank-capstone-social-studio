@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicWebhooksDeliveryRouteImport } from './routes/api/public/webhooks/delivery'
 import { Route as ApiPublicFakePlatformPlatformPostsRouteImport } from './routes/api/public/fake-platform/$platform/posts'
 
 const IndexRoute = IndexRouteImport.update({
@@ -17,6 +18,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhooksDeliveryRoute =
+  ApiPublicWebhooksDeliveryRouteImport.update({
+    id: '/api/public/webhooks/delivery',
+    path: '/api/public/webhooks/delivery',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFakePlatformPlatformPostsRoute =
   ApiPublicFakePlatformPlatformPostsRouteImport.update({
     id: '/api/public/fake-platform/$platform/posts',
@@ -26,27 +33,41 @@ const ApiPublicFakePlatformPlatformPostsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/fake-platform/$platform/posts'
+  fullPaths:
+    | '/'
+    | '/api/public/webhooks/delivery'
+    | '/api/public/fake-platform/$platform/posts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/fake-platform/$platform/posts'
-  id: '__root__' | '/' | '/api/public/fake-platform/$platform/posts'
+  to:
+    | '/'
+    | '/api/public/webhooks/delivery'
+    | '/api/public/fake-platform/$platform/posts'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/public/webhooks/delivery'
+    | '/api/public/fake-platform/$platform/posts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
   ApiPublicFakePlatformPlatformPostsRoute: typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 
@@ -57,6 +78,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/delivery': {
+      id: '/api/public/webhooks/delivery'
+      path: '/api/public/webhooks/delivery'
+      fullPath: '/api/public/webhooks/delivery'
+      preLoaderRoute: typeof ApiPublicWebhooksDeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/fake-platform/$platform/posts': {
@@ -71,6 +99,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,
   ApiPublicFakePlatformPlatformPostsRoute:
     ApiPublicFakePlatformPlatformPostsRoute,
 }
