@@ -7,6 +7,7 @@ import { ActionButton } from "@/components/campaign/ActionButton";
 import { DevPanel } from "@/components/campaign/DevPanel";
 import { StatusChip } from "@/components/campaign/StatusChip";
 import { VariantCard } from "@/components/campaign/VariantCard";
+import { ThemeToggle } from "@/components/campaign/ThemeToggle";
 
 const TITLE = "FlyRank — Multi-Platform Social Campaign Engine";
 const DESCRIPTION =
@@ -118,9 +119,12 @@ function CampaignDashboard() {
             <h1 className="mt-2 text-4xl font-bold">Social Campaign Engine</h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{DESCRIPTION}</p>
           </div>
-          <div className="panel px-4 py-3 text-right font-mono text-[11px] text-muted-foreground">
-            <div>sandbox: fake-platform only</div>
-            <div>fake posts delivered: {logsQuery.data?.platformPostCount ?? 0}</div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <div className="panel px-4 py-3 text-right font-mono text-[11px] text-muted-foreground">
+              <div>sandbox: fake-platform only</div>
+              <div>fake posts delivered: {logsQuery.data?.platformPostCount ?? 0}</div>
+            </div>
           </div>
         </div>
       </header>
