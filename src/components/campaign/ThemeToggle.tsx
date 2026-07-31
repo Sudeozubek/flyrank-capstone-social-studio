@@ -1,41 +1,29 @@
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-type Theme = "light" | "dark";
-const STORAGE_KEY = "flyrank-theme";
-
-function applyTheme(theme: Theme) {
-  document.documentElement.classList.toggle("light", theme === "light");
-}
-
+/** Persisted light/dark toggle. Dark is the product's default surface. */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [light, setLight] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY) as Theme | null;
-    const initial: Theme =
-      stored ?? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-    setTheme(initial);
-    applyTheme(initial);
+    const stored = localStorage.getItem("flyrank-theme");
+    const prefersLight =
+      stored === null && window.matchMedia("(prefers-color-scheme: light)").matches;
+    const next = stored === "light" || prefersLight;
+    setLight(next);
+    document.documentElement.classList.toggle("light", next);
   }, []);
 
-  const toggle = () => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    applyTheme(next);
-    window.localStorage.setItem(STORAGE_KEY, next);
-  };
+  function toggle() {
+    const next = !light;
+    setLight(next);
+    document.documentElement.classList.toggle("light", next);
+    localStorage.setItem("flyrank-theme", next ? "light" : "dark");
+  }
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      title={theme === "dark" ? "Light mode" : "Dark mode"}
-      className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent-strong/60"
-    >
-      {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-      <span className="hidden sm:inline">{theme === "dark" ? "Light" : "Dark"}</span>
-    </button>
+    <Button variant="ghost" size="sm" onClick={toggle} aria-label="Toggle color theme">
+      {light ? "Dark" : "Light"}
+    </Button>
   );
 }

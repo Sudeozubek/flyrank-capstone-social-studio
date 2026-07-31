@@ -1,14 +1,12 @@
 /**
- * Wk3 — Platform specs.
- * Single source of truth for image geometry + hard platform limits.
- * Consumed by the image-variant pipeline, the caption composer and the UI.
+ * Platform specs — single source of truth for output geometry and hard limits.
+ * Pure config consumed by the image pipeline, the caption composer and the UI.
  */
 
-export const PLATFORMS = ["instagram", "x"] as const;
-export type Platform = (typeof PLATFORMS)[number];
+import type { Platform } from "@/domain/entities";
+import { PLATFORMS } from "@/domain/entities";
 
 export interface SafeZone {
-  /** Fractions (0..1) of the target frame that must stay free of the subject. */
   top: number;
   right: number;
   bottom: number;
@@ -18,15 +16,12 @@ export interface SafeZone {
 export interface PlatformSpec {
   id: Platform;
   label: string;
-  /** Output pixel dimensions of the rendered variant. */
   width: number;
   height: number;
   aspectLabel: string;
   safeZone: SafeZone;
-  /** Hard caption limit enforced by the composer. */
   maxCaptionLength: number;
   maxHashtags: number;
-  /** Corner used for the brand overlay. */
   brandCorner: "top-left" | "top-right" | "bottom-left" | "bottom-right";
 }
 
@@ -56,7 +51,3 @@ export const PLATFORM_SPECS: Record<Platform, PlatformSpec> = {
 };
 
 export const platformSpecList = PLATFORMS.map((p) => PLATFORM_SPECS[p]);
-
-export function isPlatform(value: string): value is Platform {
-  return (PLATFORMS as readonly string[]).includes(value);
-}

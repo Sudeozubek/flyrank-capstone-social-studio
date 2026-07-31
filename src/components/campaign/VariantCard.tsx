@@ -1,51 +1,73 @@
-import { PLATFORM_SPECS, type Platform } from "@/config/platform-specs";
-import type { SocialPostEntry } from "@/lib/types";
+import { PLATFORM_SPECS } from "@/config/platform-specs";
+import type { SocialPostEntry } from "@/domain/entities";
 import { StatusChip } from "./StatusChip";
 
-interface Props {
-  platform: Platform;
-  caption: string;
-  imageUrl: string;
-  entry?: SocialPostEntry | undefined;
-}
-
-export function VariantCard({ platform, caption, imageUrl, entry }: Props) {
-  const spec = PLATFORM_SPECS[platform];
-
+export function VariantCard({
+  entry,
+  imageUrl,
+}: {
+  entry: SocialPostEntry;
+  imageUrl: string | null;
+}) {
+  const spec = PLATFORM_SPECS[entry.platform];
   return (
-    <article className="panel flex flex-col self-start overflow-hidden">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <div>
-          <h3 className="text-base font-semibold">{spec.label}</h3>
-          <p className="font-mono text-[11px] text-muted-foreground">
-            {spec.width}×{spec.height} · {spec.aspectLabel} · ≤{spec.maxCaptionLength} chars
-          </p>
+    <article className="overflow-hidden rounded-xl border border-border bg-surface">
+      <header className="flex items-center justify-between border-b border-border px-4 py-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground">{spec.label}</span>
+          <span className="font-mono text-[11px] text-muted-foreground">
+            {spec.width}×{spec.height} · {spec.aspectLabel}
+          </span>
         </div>
-        {entry ? <StatusChip status={entry.status} /> : <span className="eyebrow">preview</span>}
+        <StatusChip status={entry.status} />
       </header>
 
       <div className="bg-background/60 p-4">
-        <img
-          src={`${imageUrl}&guides=1`}
-          alt={`${spec.label} variant, ${spec.aspectLabel}`}
-          width={spec.width}
-          height={spec.height}
-          className="w-full rounded-lg border border-border"
-          style={{ aspectRatio: `${spec.width} / ${spec.height}` }}
-          loading="lazy"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={`${spec.label} variant for this campaign`}
+            width={spec.width}
+            height={spec.height}
+            loading="lazy"
+            className="w-full rounded-lg border border-border"
+            style={{ aspectRatio: `${spec.width} / ${spec.height}` }}
+          />
+        ) : (
+          <div
+            className="flex w-full items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground"
+            style={{ aspectRatio: `${spec.width} / ${spec.height}` }}
+          >
+            No variant rendered yet
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 px-4 pb-4">
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{caption}</p>
-        <div className="mt-auto flex items-center justify-between border-t border-border pt-3 font-mono text-[11px] text-muted-foreground">
-          <span>{caption.length} chars</span>
-          {entry?.scheduledFor && entry.status === "queued" ? (
-            <span>due {new Date(entry.scheduledFor).toLocaleTimeString()}</span>
-          ) : null}
-          {entry?.remoteId ? <span>{entry.remoteId}</span> : null}
-        </div>
-        {entry?.error ? <p className="text-xs text-status-failed">{entry.error}</p> : null}
+      <div className="space-y-3 border-t border-border px-4 py-3">
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+          {entry.caption}
+        </p>
+        <dl className="grid grid-cols-3 gap-2 font-mono text-[11px] text-muted-foreground">
+          <div>
+            <dt>chars</dt>
+            <dd className="text-foreground/80">
+              {entry.caption.length}/{spec.maxCaptionLength}
+            </dd>
+          </div>
+          <div>
+            <dt>attempts</dt>
+            <dd className="text-foreground/80">{entry.attempts}</dd>
+          </div>
+          <div>
+            <dt>remote id</dt>
+            <dd className="truncate text-foreground/80">{entry.remoteId ?? "—"}</dd>
+          </div>
+        </dl>
+        {entry.error ? (
+          <p className="rounded-md border border-status-failed/40 bg-status-failed/10 px-2 py-1 font-mono text-[11px] text-status-failed">
+            {entry.error}
+          </p>
+        ) : null}
       </div>
     </article>
   );

@@ -1,26 +1,44 @@
-import type { PostStatus } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import type { EntryStatus, CampaignStatus } from "@/domain/entities";
 
-const MAP: Record<PostStatus, { label: string; className: string }> = {
-  queued: { label: "Queued", className: "text-status-queued border-status-queued/40 bg-status-queued/10" },
-  publishing: {
-    label: "Publishing",
-    className: "text-status-publishing border-status-publishing/40 bg-status-publishing/10",
-  },
-  published: {
-    label: "Published",
-    className: "text-status-published border-status-published/40 bg-status-published/10",
-  },
-  failed: { label: "Failed", className: "text-status-failed border-status-failed/40 bg-status-failed/10" },
+const ENTRY_STYLES: Record<EntryStatus, string> = {
+  queued: "text-status-queued border-status-queued/40 bg-status-queued/10",
+  publishing: "text-status-publishing border-status-publishing/40 bg-status-publishing/10",
+  published: "text-status-published border-status-published/40 bg-status-published/10",
+  failed: "text-status-failed border-status-failed/40 bg-status-failed/10",
 };
 
-export function StatusChip({ status }: { status: PostStatus }) {
-  const { label, className } = MAP[status];
+const CAMPAIGN_STYLES: Record<CampaignStatus, string> = {
+  draft: "text-muted-foreground border-border bg-muted/40",
+  scheduled: "text-status-queued border-status-queued/40 bg-status-queued/10",
+  publishing: "text-status-publishing border-status-publishing/40 bg-status-publishing/10",
+  completed: "text-status-published border-status-published/40 bg-status-published/10",
+  failed: "text-status-failed border-status-failed/40 bg-status-failed/10",
+};
+
+export function StatusChip({
+  status,
+  kind = "entry",
+  className,
+}: {
+  status: EntryStatus | CampaignStatus;
+  kind?: "entry" | "campaign";
+  className?: string;
+}) {
+  const styles =
+    kind === "entry"
+      ? ENTRY_STYLES[status as EntryStatus]
+      : CAMPAIGN_STYLES[status as CampaignStatus];
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${className}`}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wider",
+        styles,
+        className,
+      )}
     >
       <span className="size-1.5 rounded-full bg-current" />
-      {label}
+      {status}
     </span>
   );
 }

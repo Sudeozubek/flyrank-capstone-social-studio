@@ -10,195 +10,98 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
-import { Route as ApiDevRouteImport } from './routes/api/dev'
-import { Route as ApiLogsRouteImport } from './routes/api/logs'
-import { Route as ApiPostsRouteImport } from './routes/api/posts'
-import { Route as ApiCampaignsPostIdRouteImport } from './routes/api/campaigns.$postId'
-import { Route as ApiImageVariantRouteImport } from './routes/api/image/variant'
-import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
-import { Route as ApiCampaignsPostIdPublishRouteImport } from './routes/api/campaigns.$postId.publish'
-import { Route as ApiCampaignsPostIdScheduleRouteImport } from './routes/api/campaigns.$postId.schedule'
-import { Route as ApiPublicFakePlatformPublishRouteImport } from './routes/api/public/fake-platform/publish'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiPublicWebhooksDeliveryRouteImport } from './routes/api/public/webhooks/delivery'
-import { Route as ApiPublicFakePlatformOauthTokenRouteImport } from './routes/api/public/fake-platform/oauth/token'
+import { Route as ApiPublicFakePlatformPlatformPostsRouteImport } from './routes/api/public/fake-platform/$platform/posts'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
-  id: '/api/campaigns',
-  path: '/api/campaigns',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiDevRoute = ApiDevRouteImport.update({
-  id: '/api/dev',
-  path: '/api/dev',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiLogsRoute = ApiLogsRouteImport.update({
-  id: '/api/logs',
-  path: '/api/logs',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const ApiPostsRoute = ApiPostsRouteImport.update({
-  id: '/api/posts',
-  path: '/api/posts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCampaignsPostIdRoute = ApiCampaignsPostIdRouteImport.update({
-  id: '/$postId',
-  path: '/$postId',
-  getParentRoute: () => ApiCampaignsRoute,
-} as any)
-const ApiImageVariantRoute = ApiImageVariantRouteImport.update({
-  id: '/api/image/variant',
-  path: '/api/image/variant',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
-  id: '/api/public/mcp',
-  path: '/api/public/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCampaignsPostIdPublishRoute =
-  ApiCampaignsPostIdPublishRouteImport.update({
-    id: '/publish',
-    path: '/publish',
-    getParentRoute: () => ApiCampaignsPostIdRoute,
-  } as any)
-const ApiCampaignsPostIdScheduleRoute =
-  ApiCampaignsPostIdScheduleRouteImport.update({
-    id: '/schedule',
-    path: '/schedule',
-    getParentRoute: () => ApiCampaignsPostIdRoute,
-  } as any)
-const ApiPublicFakePlatformPublishRoute =
-  ApiPublicFakePlatformPublishRouteImport.update({
-    id: '/api/public/fake-platform/publish',
-    path: '/api/public/fake-platform/publish',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicWebhooksDeliveryRoute =
   ApiPublicWebhooksDeliveryRouteImport.update({
     id: '/api/public/webhooks/delivery',
     path: '/api/public/webhooks/delivery',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicFakePlatformOauthTokenRoute =
-  ApiPublicFakePlatformOauthTokenRouteImport.update({
-    id: '/api/public/fake-platform/oauth/token',
-    path: '/api/public/fake-platform/oauth/token',
+const ApiPublicFakePlatformPlatformPostsRoute =
+  ApiPublicFakePlatformPlatformPostsRouteImport.update({
+    id: '/api/public/fake-platform/$platform/posts',
+    path: '/api/public/fake-platform/$platform/posts',
     getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/campaigns': typeof ApiCampaignsRouteWithChildren
-  '/api/dev': typeof ApiDevRoute
-  '/api/logs': typeof ApiLogsRoute
-  '/api/posts': typeof ApiPostsRoute
-  '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
-  '/api/image/variant': typeof ApiImageVariantRoute
-  '/api/public/mcp': typeof ApiPublicMcpRoute
-  '/api/campaigns/$postId/publish': typeof ApiCampaignsPostIdPublishRoute
-  '/api/campaigns/$postId/schedule': typeof ApiCampaignsPostIdScheduleRoute
-  '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
+  '/auth': typeof AuthRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
-  '/api/public/fake-platform/oauth/token': typeof ApiPublicFakePlatformOauthTokenRoute
+  '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/campaigns': typeof ApiCampaignsRouteWithChildren
-  '/api/dev': typeof ApiDevRoute
-  '/api/logs': typeof ApiLogsRoute
-  '/api/posts': typeof ApiPostsRoute
-  '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
-  '/api/image/variant': typeof ApiImageVariantRoute
-  '/api/public/mcp': typeof ApiPublicMcpRoute
-  '/api/campaigns/$postId/publish': typeof ApiCampaignsPostIdPublishRoute
-  '/api/campaigns/$postId/schedule': typeof ApiCampaignsPostIdScheduleRoute
-  '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
+  '/auth': typeof AuthRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
-  '/api/public/fake-platform/oauth/token': typeof ApiPublicFakePlatformOauthTokenRoute
+  '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/campaigns': typeof ApiCampaignsRouteWithChildren
-  '/api/dev': typeof ApiDevRoute
-  '/api/logs': typeof ApiLogsRoute
-  '/api/posts': typeof ApiPostsRoute
-  '/api/campaigns/$postId': typeof ApiCampaignsPostIdRouteWithChildren
-  '/api/image/variant': typeof ApiImageVariantRoute
-  '/api/public/mcp': typeof ApiPublicMcpRoute
-  '/api/campaigns/$postId/publish': typeof ApiCampaignsPostIdPublishRoute
-  '/api/campaigns/$postId/schedule': typeof ApiCampaignsPostIdScheduleRoute
-  '/api/public/fake-platform/publish': typeof ApiPublicFakePlatformPublishRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
-  '/api/public/fake-platform/oauth/token': typeof ApiPublicFakePlatformOauthTokenRoute
+  '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/api/campaigns'
-    | '/api/dev'
-    | '/api/logs'
-    | '/api/posts'
-    | '/api/campaigns/$postId'
-    | '/api/image/variant'
-    | '/api/public/mcp'
-    | '/api/campaigns/$postId/publish'
-    | '/api/campaigns/$postId/schedule'
-    | '/api/public/fake-platform/publish'
+    | '/auth'
+    | '/dashboard'
     | '/api/public/webhooks/delivery'
-    | '/api/public/fake-platform/oauth/token'
+    | '/api/public/fake-platform/$platform/posts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/api/campaigns'
-    | '/api/dev'
-    | '/api/logs'
-    | '/api/posts'
-    | '/api/campaigns/$postId'
-    | '/api/image/variant'
-    | '/api/public/mcp'
-    | '/api/campaigns/$postId/publish'
-    | '/api/campaigns/$postId/schedule'
-    | '/api/public/fake-platform/publish'
+    | '/auth'
+    | '/dashboard'
     | '/api/public/webhooks/delivery'
-    | '/api/public/fake-platform/oauth/token'
+    | '/api/public/fake-platform/$platform/posts'
   id:
     | '__root__'
     | '/'
-    | '/api/campaigns'
-    | '/api/dev'
-    | '/api/logs'
-    | '/api/posts'
-    | '/api/campaigns/$postId'
-    | '/api/image/variant'
-    | '/api/public/mcp'
-    | '/api/campaigns/$postId/publish'
-    | '/api/campaigns/$postId/schedule'
-    | '/api/public/fake-platform/publish'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/dashboard'
     | '/api/public/webhooks/delivery'
-    | '/api/public/fake-platform/oauth/token'
+    | '/api/public/fake-platform/$platform/posts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiCampaignsRoute: typeof ApiCampaignsRouteWithChildren
-  ApiDevRoute: typeof ApiDevRoute
-  ApiLogsRoute: typeof ApiLogsRoute
-  ApiPostsRoute: typeof ApiPostsRoute
-  ApiImageVariantRoute: typeof ApiImageVariantRoute
-  ApiPublicMcpRoute: typeof ApiPublicMcpRoute
-  ApiPublicFakePlatformPublishRoute: typeof ApiPublicFakePlatformPublishRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
-  ApiPublicFakePlatformOauthTokenRoute: typeof ApiPublicFakePlatformOauthTokenRoute
+  ApiPublicFakePlatformPlatformPostsRoute: typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -210,75 +113,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/campaigns': {
-      id: '/api/campaigns'
-      path: '/api/campaigns'
-      fullPath: '/api/campaigns'
-      preLoaderRoute: typeof ApiCampaignsRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/dev': {
-      id: '/api/dev'
-      path: '/api/dev'
-      fullPath: '/api/dev'
-      preLoaderRoute: typeof ApiDevRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/logs': {
-      id: '/api/logs'
-      path: '/api/logs'
-      fullPath: '/api/logs'
-      preLoaderRoute: typeof ApiLogsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/posts': {
-      id: '/api/posts'
-      path: '/api/posts'
-      fullPath: '/api/posts'
-      preLoaderRoute: typeof ApiPostsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/campaigns/$postId': {
-      id: '/api/campaigns/$postId'
-      path: '/$postId'
-      fullPath: '/api/campaigns/$postId'
-      preLoaderRoute: typeof ApiCampaignsPostIdRouteImport
-      parentRoute: typeof ApiCampaignsRoute
-    }
-    '/api/image/variant': {
-      id: '/api/image/variant'
-      path: '/api/image/variant'
-      fullPath: '/api/image/variant'
-      preLoaderRoute: typeof ApiImageVariantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/mcp': {
-      id: '/api/public/mcp'
-      path: '/api/public/mcp'
-      fullPath: '/api/public/mcp'
-      preLoaderRoute: typeof ApiPublicMcpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/campaigns/$postId/publish': {
-      id: '/api/campaigns/$postId/publish'
-      path: '/publish'
-      fullPath: '/api/campaigns/$postId/publish'
-      preLoaderRoute: typeof ApiCampaignsPostIdPublishRouteImport
-      parentRoute: typeof ApiCampaignsPostIdRoute
-    }
-    '/api/campaigns/$postId/schedule': {
-      id: '/api/campaigns/$postId/schedule'
-      path: '/schedule'
-      fullPath: '/api/campaigns/$postId/schedule'
-      preLoaderRoute: typeof ApiCampaignsPostIdScheduleRouteImport
-      parentRoute: typeof ApiCampaignsPostIdRoute
-    }
-    '/api/public/fake-platform/publish': {
-      id: '/api/public/fake-platform/publish'
-      path: '/api/public/fake-platform/publish'
-      fullPath: '/api/public/fake-platform/publish'
-      preLoaderRoute: typeof ApiPublicFakePlatformPublishRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/webhooks/delivery': {
       id: '/api/public/webhooks/delivery'
@@ -287,53 +141,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksDeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/fake-platform/oauth/token': {
-      id: '/api/public/fake-platform/oauth/token'
-      path: '/api/public/fake-platform/oauth/token'
-      fullPath: '/api/public/fake-platform/oauth/token'
-      preLoaderRoute: typeof ApiPublicFakePlatformOauthTokenRouteImport
+    '/api/public/fake-platform/$platform/posts': {
+      id: '/api/public/fake-platform/$platform/posts'
+      path: '/api/public/fake-platform/$platform/posts'
+      fullPath: '/api/public/fake-platform/$platform/posts'
+      preLoaderRoute: typeof ApiPublicFakePlatformPlatformPostsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface ApiCampaignsPostIdRouteChildren {
-  ApiCampaignsPostIdPublishRoute: typeof ApiCampaignsPostIdPublishRoute
-  ApiCampaignsPostIdScheduleRoute: typeof ApiCampaignsPostIdScheduleRoute
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
-const ApiCampaignsPostIdRouteChildren: ApiCampaignsPostIdRouteChildren = {
-  ApiCampaignsPostIdPublishRoute: ApiCampaignsPostIdPublishRoute,
-  ApiCampaignsPostIdScheduleRoute: ApiCampaignsPostIdScheduleRoute,
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 
-const ApiCampaignsPostIdRouteWithChildren =
-  ApiCampaignsPostIdRoute._addFileChildren(ApiCampaignsPostIdRouteChildren)
-
-interface ApiCampaignsRouteChildren {
-  ApiCampaignsPostIdRoute: typeof ApiCampaignsPostIdRouteWithChildren
-}
-
-const ApiCampaignsRouteChildren: ApiCampaignsRouteChildren = {
-  ApiCampaignsPostIdRoute: ApiCampaignsPostIdRouteWithChildren,
-}
-
-const ApiCampaignsRouteWithChildren = ApiCampaignsRoute._addFileChildren(
-  ApiCampaignsRouteChildren,
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiCampaignsRoute: ApiCampaignsRouteWithChildren,
-  ApiDevRoute: ApiDevRoute,
-  ApiLogsRoute: ApiLogsRoute,
-  ApiPostsRoute: ApiPostsRoute,
-  ApiImageVariantRoute: ApiImageVariantRoute,
-  ApiPublicMcpRoute: ApiPublicMcpRoute,
-  ApiPublicFakePlatformPublishRoute: ApiPublicFakePlatformPublishRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,
-  ApiPublicFakePlatformOauthTokenRoute: ApiPublicFakePlatformOauthTokenRoute,
+  ApiPublicFakePlatformPlatformPostsRoute:
+    ApiPublicFakePlatformPlatformPostsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
