@@ -49,6 +49,8 @@ export type Database = {
       }
       campaigns: {
         Row: {
+          brand_name: string | null
+          brand_tone: string | null
           created_at: string
           id: string
           name: string
@@ -59,6 +61,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          brand_name?: string | null
+          brand_tone?: string | null
           created_at?: string
           id?: string
           name: string
@@ -69,6 +73,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          brand_name?: string | null
+          brand_tone?: string | null
           created_at?: string
           id?: string
           name?: string
