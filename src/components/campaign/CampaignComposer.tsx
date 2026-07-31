@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface ComposerSubmit {
   mode: "paste" | "upload";
-  title?: string;
-  body?: string;
+  title?: string | undefined;
+  body?: string | undefined;
   url?: string | null;
   file?: { kind: "markdown" | "pdf" | "docx"; filename: string; base64: string };
 }
