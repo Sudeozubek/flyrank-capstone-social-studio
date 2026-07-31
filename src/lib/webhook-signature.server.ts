@@ -8,7 +8,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export const SIGNATURE_HEADER = "x-flyrank-signature";
 
 export function webhookSecret(): string {
-  return process.env.WEBHOOK_SIGNING_SECRET ?? "flyrank-dev-webhook-secret";
+  return process.env['WEBHOOK_SIGNING_SECRET'] ?? "flyrank-dev-webhook-secret";
 }
 
 export function signPayload(body: string, timestamp = Math.floor(Date.now() / 1000)): string {
@@ -24,8 +24,8 @@ export function verifySignature(body: string, header: string | null, toleranceSe
       return [k ?? "", rest.join("=")];
     }),
   );
-  const t = Number(parts.t);
-  const v1 = parts.v1;
+  const t = Number(parts['t']);
+  const v1 = parts['v1'];
   if (!Number.isFinite(t) || !v1) return false;
   if (Math.abs(Math.floor(Date.now() / 1000) - t) > toleranceSec) return false;
 

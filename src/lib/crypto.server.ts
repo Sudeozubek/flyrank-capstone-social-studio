@@ -7,7 +7,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 
 function key(): Buffer {
-  const secret = process.env.TOKEN_ENCRYPTION_KEY;
+  const secret = process.env['TOKEN_ENCRYPTION_KEY'];
   if (!secret) {
     // Dev fallback so the sandbox boots without secrets; see .env.example.
     return createHash("sha256").update("flyrank-dev-insecure-token-key").digest();
