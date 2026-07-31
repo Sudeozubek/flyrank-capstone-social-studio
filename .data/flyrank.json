@@ -90,6 +90,12 @@
   ],
   "workerLog": [
     {
+      "id": "wl_e96d8c231ebb43b3",
+      "at": "2026-07-31T18:02:30.864Z",
+      "level": "info",
+      "message": "scheduler worker started"
+    },
+    {
       "id": "wl_f14c9ca5b7b94c14",
       "at": "2026-07-31T14:08:58.541Z",
       "level": "info",
