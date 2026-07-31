@@ -82,16 +82,11 @@ export const deletePost = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-const brandFields = {
-  brandName: z.string().max(120).nullish(),
-  brandTone: z.string().max(200).nullish(),
-};
-
 /** Create campaign + captions + rendered image variants in one call. */
 export const createCampaignWithAssets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ postId: uuid, name: z.string().max(200).optional(), ...brandFields }).parse(input),
+    z.object({ postId: uuid, name: z.string().max(200).optional(), brandName: z.string().max(120).nullish(), brandTone: z.string().max(200).nullish() }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
@@ -113,7 +108,8 @@ export const updateCampaignFn = createServerFn({ method: "POST" })
       .object({
         campaignId: uuid,
         name: z.string().max(200).optional(),
-        ...brandFields,
+        brandName: z.string().max(120).nullish(),
+        brandTone: z.string().max(200).nullish(),
         captions: z
           .array(z.object({ entryId: uuid, caption: z.string().max(5000) }))
           .max(10)
@@ -254,7 +250,12 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
     z
-      .object({ url: z.string().url().max(500), name: z.string().max(200).optional() })
+      .object({
+        url: z.string().url().max(500),
+        name: z.string().max(200).optional(),
+        brandName: z.string().max(120).nullish(),
+        brandTone: z.string().max(200).nullish(),
+      })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -268,6 +269,8 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
     const snapshot = await createCampaign(app, {
       postId: post.id,
       ...(data.name ? { name: data.name } : {}),
+      brandName: data.brandName ?? null,
+      brandTone: data.brandTone ?? null,
     });
     await generateImages(app, snapshot.campaign.id);
     return getCampaignSnapshot(app, snapshot.campaign.id);
