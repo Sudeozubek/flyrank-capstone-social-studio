@@ -4,7 +4,6 @@
  */
 
 import { PLATFORM_SPECS } from "@/config/platform-specs";
-import { composeCaption } from "@/domain/captions";
 import {
   PLATFORMS,
   buildIdempotencyKey,
