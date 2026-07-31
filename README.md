@@ -46,10 +46,11 @@ A campaign is created from one blog post. The engine then:
 4. **Confirms delivery** only when an HMAC-signed webhook arrives — the sole writer of the
    terminal `published` / `failed` state.
 
-Captions are written by an LLM (OpenAI `gpt-4o-mini`) using the shared brand-voice +
-platform-fragment prompt architecture, with an automatic, silent fall back to the
-deterministic composer whenever the LLM is unavailable. Campaign creation never fails
-because of the model.
+Captions are produced by the caption pipeline in this repository: it composes the shared
+brand-voice + platform-fragment prompts, calls an LLM (OpenAI `gpt-4o-mini`) as the writing
+step, then validates and normalises the result against each platform's constraints. If the
+model is unavailable it falls back silently to the deterministic composer, so campaign
+creation never fails because of the model.
 
 ## Architecture
 
