@@ -194,3 +194,35 @@ export const setPlatformRateLimit = createServerFn({ method: "POST" })
     setRateLimit(data.platform, data.failures);
     return { ok: true, ...data };
   });
+
+/** Published-blog library: catalogued sources fetched in the background. */
+export const listBlogLibrary = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { listLibrary } = await import("@/infrastructure/feeds/blog-library.server");
+    return listLibrary(8);
+  });
+
+/** Import a published post from the library and campaign on it in one call. */
+export const createCampaignFromLibrary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({ url: z.string().url().max(500), name: z.string().max(200).optional() })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const app = createAppContext(context.supabase as never, context.userId, {
+      requestUrl: getRequest().url,
+    });
+    const { fetchArticle } = await import("@/infrastructure/feeds/blog-library.server");
+    const { importLibraryPost } = await import("@/application/import-library-post");
+    const article = await fetchArticle(data.url);
+    const post = await importLibraryPost(app, { ...article, url: data.url });
+    const snapshot = await createCampaign(app, {
+      postId: post.id,
+      ...(data.name ? { name: data.name } : {}),
+    });
+    await generateImages(app, snapshot.campaign.id);
+    return getCampaignSnapshot(app, snapshot.campaign.id);
+  });

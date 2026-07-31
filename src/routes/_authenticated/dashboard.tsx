@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import {
   createCampaignWithAssets,
+  createCampaignFromLibrary,
+  listBlogLibrary,
   createPostFromText,
   createPostFromUpload,
   loadDashboard,
@@ -66,6 +68,7 @@ function Dashboard() {
 
   const fns = {
     createText: useServerFn(createPostFromText),
+    fromLibrary: useServerFn(createCampaignFromLibrary),
     createUpload: useServerFn(createPostFromUpload),
     createCampaign: useServerFn(createCampaignWithAssets),
     captions: useServerFn(regenerateCaptions),
@@ -76,6 +79,13 @@ function Dashboard() {
     tick: useServerFn(tickWorker),
     rateLimit: useServerFn(setPlatformRateLimit),
   };
+
+  const libraryFn = useServerFn(listBlogLibrary);
+  const library = useQuery({
+    queryKey: ["blog-library"],
+    queryFn: () => libraryFn(),
+    staleTime: 10 * 60 * 1000,
+  });
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["dashboard"] });
 
@@ -96,6 +106,14 @@ function Dashboard() {
 
   const compose = useMutation({
     mutationFn: async (input: ComposerSubmit) => {
+      if (input.mode === "library") {
+        return fns.fromLibrary({
+          data: {
+            url: input.url!,
+            ...(input.campaignName ? { name: input.campaignName } : {}),
+          },
+        });
+      }
       const post =
         input.mode === "paste"
           ? await fns.createText({
@@ -166,6 +184,8 @@ function Dashboard() {
       <main className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[380px_1fr]">
         <div className="space-y-6">
           <CampaignComposer
+            library={library.data ?? []}
+            libraryLoading={library.isLoading}
             busy={compose.isPending}
             onSubmit={async (input) => {
               await compose.mutateAsync(input);
