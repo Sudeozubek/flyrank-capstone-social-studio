@@ -7,6 +7,7 @@ import { ActionButton } from "@/components/campaign/ActionButton";
 import { DevPanel } from "@/components/campaign/DevPanel";
 import { StatusChip } from "@/components/campaign/StatusChip";
 import { VariantCard } from "@/components/campaign/VariantCard";
+import { ThemeToggle } from "@/components/campaign/ThemeToggle";
 
 const TITLE = "FlyRank — Multi-Platform Social Campaign Engine";
 const DESCRIPTION =
