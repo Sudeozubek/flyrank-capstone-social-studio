@@ -306,7 +306,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_due_entries: {
+        Args: { p_lease_seconds?: number; p_limit?: number }
+        Returns: {
+          attempts: number
+          campaign_id: string
+          caption: string
+          created_at: string
+          error: string | null
+          id: string
+          idempotency_key: string
+          image_height: number | null
+          image_path: string | null
+          image_width: number | null
+          lease_until: string | null
+          next_attempt_at: string | null
+          platform: Database["public"]["Enums"]["platform"]
+          published_at: string | null
+          remote_id: string | null
+          scheduled_for: string | null
+          status: Database["public"]["Enums"]["entry_status"]
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "social_post_entries"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       campaign_status:
