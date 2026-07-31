@@ -9,6 +9,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   createCampaign,
+  deleteCampaign,
+  editCampaign,
   generateCaptions,
   generateImages,
   getCampaignSnapshot,
