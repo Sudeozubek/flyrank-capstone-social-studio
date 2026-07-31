@@ -12,7 +12,8 @@ bun install && bun run test
 # 3 files, 20 tests, all passing
 ```
 
-Screenshots live in `docs/screenshots/` (placeholders referenced below).
+Screenshots are captured and committed under `docs/screenshots/` (12 images, referenced per
+requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png`).
 
 ---
 
@@ -56,8 +57,9 @@ trusted — and the geometry assertions check safe-zone containment and aspect r
 ## DoD 3 — Platform-tailored captions (not truncations of each other)
 
 **Explanation.** Captions are composed from shared brand voice + per-platform fragments and
-differ in structure, tone, length and hashtag budget. The LLM writes them; the deterministic
-composer is the fallback and the tested reference implementation.
+differ in structure, tone, length and hashtag budget. I built the caption pipeline — prompt
+composition, platform constraints, validation and post-processing — and it drives an LLM as the
+writing step; the deterministic composer is the fallback and the tested reference implementation.
 
 **Evidence.** Assertions prove divergence (neither caption prefixes the other), per-platform
 length limits (X ≤ 280, Instagram ≤ 2200), hashtag budgets (X ≤ 2, Instagram ≤ 8) and
