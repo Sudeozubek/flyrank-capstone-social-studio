@@ -11,6 +11,12 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>) => ({
     mode: search['mode'] === "signup" ? ("signup" as const) : ("signin" as const),
+    // Same-origin relative path to return to after sign-in (used by the MCP
+    // OAuth consent flow so the authorization survives the login round-trip).
+    next:
+      typeof search['next'] === "string" && search['next'].startsWith("/") && !search['next'].startsWith("//")
+        ? search['next']
+        : undefined,
   }),
 
   head: () => ({
@@ -35,22 +41,31 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { mode: initialMode } = Route.useSearch();
+  const { mode: initialMode, next } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">(initialMode);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
+  function afterAuth() {
+    if (next) {
+      window.location.replace(next);
+      return;
+    }
+    void navigate({ to: "/dashboard", replace: true });
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
+      const returnTo = next ? window.location.origin + next : window.location.origin;
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: returnTo },
         });
         if (error) throw error;
         if (!data.session) {
@@ -61,7 +76,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      void navigate({ to: "/dashboard", replace: true });
+      afterAuth();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Authentication failed");
     } finally {
@@ -71,15 +86,16 @@ function AuthPage() {
 
   async function google() {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: next ? window.location.origin + next : window.location.origin,
     });
     if (result.error) {
       toast.error("Google sign-in failed");
       return;
     }
     if (result.redirected) return;
-    void navigate({ to: "/dashboard", replace: true });
+    afterAuth();
   }
+
 
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
