@@ -91,7 +91,7 @@ tests/*                             unit + end-to-end suites
 | GET/POST | `/api/public/fake-platform/publish` | **Fake** publish (429 / idempotency / async webhook) |
 | POST | `/api/public/webhooks/delivery` | Signed delivery webhook (only writer of terminal status) |
 | GET | `/api/image/variant?platform&seed&title` | Rendered variant at exact platform dimensions |
-| POST | `/api/public/mcp` | Optional read-only MCP server (JSON-RPC) |
+| POST | `/api/public/mcp` | Standalone MCP server (JSON-RPC, bearer-authenticated) |
 
 All request bodies are validated with zod; invalid input returns `400` with the issue list.
 
@@ -114,11 +114,21 @@ Application code imports **only** `getPublisher()` and the `SocialPublisher` int
 folder boundary documented at the top of `src/lib/publisher/types.ts`. Adding LinkedIn means
 one new spec, one voice block, one adapter file and one registry line.
 
-## MCP (optional, read-only)
+## MCP server (standalone)
 
-`POST /api/public/mcp` speaks JSON-RPC and exposes `list_campaigns`,
-`get_campaign_status(postId)` and `get_webhook_log(postId)`. Observability only —
-there are deliberately no publish/write tools.
+`POST /api/public/mcp` speaks the Model Context Protocol over JSON-RPC
+(`initialize`, `tools/list`, `tools/call`) and is framework- and vendor-neutral:
+the whole implementation lives in `src/mcp/` and depends only on `zod`.
+
+Tools: `create_campaign`, `list_campaigns`, `get_campaign`, `campaign_status`,
+`schedule_campaign`, `publish_campaign`, `retry_campaign`. Each one delegates to
+an existing use case in `src/application/` — the MCP layer holds no business
+logic, generates no captions and never calls a model itself.
+
+Auth: send `Authorization: Bearer <access token>`. The token is verified against
+the auth server and every query runs under the caller's RLS scope. Clients can
+discover the authorization server at `/.well-known/oauth-protected-resource`;
+the OAuth consent screen is `/oauth/consent`.
 
 ## Environment
 
