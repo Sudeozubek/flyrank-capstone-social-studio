@@ -4,10 +4,9 @@
  */
 
 import { z } from "zod";
-import { BRAND_TONE_IDS } from "@/config/brand-tones.config";
+import { brandToneInputSchema } from "@/config/brand-tones.config";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   createCampaign,
@@ -28,7 +27,7 @@ import { createAppContext } from "@/infrastructure/context.server";
 import type { CampaignSnapshot } from "@/domain/entities";
 
 const uuid = z.string().uuid();
-const brandTone = z.enum(BRAND_TONE_IDS).nullish();
+const brandTone = brandToneInputSchema;
 
 export const listPosts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

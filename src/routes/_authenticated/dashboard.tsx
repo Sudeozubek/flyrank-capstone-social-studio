@@ -118,8 +118,8 @@ function Dashboard() {
           data: {
             url: input.url!,
             ...(input.campaignName ? { name: input.campaignName } : {}),
-            brandName: input.brandName ?? null,
-            brandTone: input.brandTone ?? null,
+            brandName: input.brandName?.trim() || null,
+            brandTone: input.brandTone?.trim() || null,
           },
         });
       }
@@ -143,8 +143,8 @@ function Dashboard() {
       return fns.createCampaign({
         data: {
           postId: post.id,
-          brandName: input.brandName ?? null,
-          brandTone: input.brandTone ?? null,
+          brandName: input.brandName?.trim() || null,
+          brandTone: input.brandTone?.trim() || null,
         },
       });
     },
@@ -184,8 +184,8 @@ function Dashboard() {
         data: {
           campaignId: edit.campaignId,
           name: edit.name,
-          brandName: edit.brandName || null,
-          brandTone: edit.brandTone || null,
+          brandName: edit.brandName.trim() || null,
+          brandTone: edit.brandTone.trim() || null,
           captions: edit.captions,
         },
       }),

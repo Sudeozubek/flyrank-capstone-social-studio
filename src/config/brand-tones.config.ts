@@ -4,6 +4,7 @@
  * composer and the OpenAI caption writer.
  */
 
+import { z } from "zod";
 import type { Platform } from "@/domain/entities";
 
 export interface BrandToneOption {
@@ -235,6 +236,11 @@ export const BRAND_TONE_IDS = BRAND_TONE_OPTIONS.map((tone) => tone.id) as [
   BrandToneId,
   ...BrandToneId[],
 ];
+
+export const brandToneInputSchema = z
+  .union([z.enum(BRAND_TONE_IDS), z.literal("")])
+  .nullish()
+  .transform((value) => value || null);
 
 const toneById = new Map(BRAND_TONE_OPTIONS.map((tone) => [tone.id, tone]));
 
