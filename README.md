@@ -135,7 +135,7 @@ Adding LinkedIn = one platform spec + one voice block + one adapter + one regist
 | --- | --- |
 | Language | TypeScript (strict) |
 | Framework | TanStack Start v1 (React 19, Vite 7), file-based routing + server functions |
-| Data | Postgres (Lovable Cloud / Supabase) with RLS, SQL migrations |
+| Data | Postgres (Supabase) with RLS, SQL migrations |
 | Storage | Private bucket for generated PNGs, per-user paths |
 | Imaging | `sharp` (primary) / `jimp` (serverless fallback) |
 | Parsing | `unpdf`, `mammoth` |
@@ -151,10 +151,11 @@ Adding LinkedIn = one platform spec + one voice block + one adapter + one regist
 ```bash
 git clone <repository-url>
 cd campaignhub-studio
-bun install         # or: npm install
+npm install         # or: bun install
 ```
 
-Requires Node.js 20+ (or Bun 1.1+).
+Requires **Node.js 22+** (recommended). Node 20 works for local dev — the `ws` package
+backfills WebSocket for Supabase on the server. Install with `npm install` (or `bun install`).
 
 ## Environment setup
 
@@ -162,23 +163,64 @@ Requires Node.js 20+ (or Bun 1.1+).
 cp .env.example .env
 ```
 
-Every variable and its purpose is documented in `.env.example`. Nothing is strictly required
-in the sandbox — missing `TOKEN_ENCRYPTION_KEY` / `WEBHOOK_SIGNING_SECRET` fall back to
-clearly labelled dev values, and a missing `OPENAI_API_KEY` simply routes caption generation
-to the deterministic composer. Generate real secrets with `openssl rand -hex 32` before any
-deployment. `.env` is git-ignored and contains no committed secrets.
+Every variable and its purpose is documented in `.env.example`. Copy the example file,
+then fill in your **own Supabase project** credentials (not Lovable Cloud):
 
-Database: apply `supabase/migrations/*.sql` in order (or `supabase/flyrank-full-schema.sql`
-as a single script) to your Postgres project. The schema creates every table with explicit
-`GRANT`s, RLS policies and indexes.
+```bash
+cp .env.example .env
+```
+
+Required for database and auth:
+
+| Variable | Purpose |
+| --- | --- |
+| `SUPABASE_URL` | Project API URL (`https://<ref>.supabase.co`) |
+| `SUPABASE_PUBLISHABLE_KEY` | Publishable (anon) key — safe in the browser; RLS enforces access |
+| `VITE_SUPABASE_URL` | Browser-visible copy of `SUPABASE_URL` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser-visible copy of `SUPABASE_PUBLISHABLE_KEY` |
+| `VITE_SUPABASE_PROJECT_ID` | Project ref (subdomain) — used for MCP OAuth discovery |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only secret — sign-up (no email confirm), webhooks, privileged server work |
+
+Optional but recommended before deployment:
+
+| Variable | Purpose |
+| --- | --- |
+| `TOKEN_ENCRYPTION_KEY` | AES-256-GCM key for OAuth tokens at rest (`openssl rand -hex 32`) |
+| `WEBHOOK_SIGNING_SECRET` | HMAC secret shared with the fake platform (`openssl rand -hex 32`) |
+| `OPENAI_API_KEY` | LLM captions; missing key falls back to the deterministic composer |
+
+When `TOKEN_ENCRYPTION_KEY` / `WEBHOOK_SIGNING_SECRET` are absent, clearly labelled dev
+fallbacks are derived so local development boots without secrets. `.env` is git-ignored.
+
+**Supabase setup**
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. In **Project Settings → API**, copy the project URL, publishable key and service-role key.
+3. In **SQL Editor**, run `supabase/flyrank-full-schema.sql`. The script is idempotent —
+   safe to run on a fresh project and safe to re-run to upgrade an existing one. It creates
+   all tables with RLS, the `campaign-images` storage bucket, the auth→profile trigger and
+   the `claim_due_entries` worker RPC. (Alternatively apply `supabase/migrations/*.sql` in
+   timestamp order.)
+4. Enable **Authentication → Providers → Google** if you want Google sign-in; add your app
+   redirect URL (`http://localhost:8080` for local dev).
+5. Paste the values into `.env` and start the app.
+
+Google OAuth uses Supabase Auth directly (`supabase.auth.signInWithOAuth`), not Lovable Cloud.
+
+**Sign-up without email confirmation:** new accounts are created server-side via
+`signUpAccount` (`src/lib/auth.functions.ts`) using the service-role key with
+`email_confirm: true`, then the client signs in immediately — no confirmation email.
+`SUPABASE_SERVICE_ROLE_KEY` must be set in `.env`. Optionally disable **Confirm email** in
+Supabase Dashboard → Authentication → Providers → Email for consistency.
 
 ## Running locally
 
 ```bash
-bun run dev        # http://localhost:8080
-bun run test       # vitest
-bun run lint
-bun run build
+npm run dev        # http://localhost:8080
+npm run test       # vitest — 14 files, 78 tests, no network/DB required
+npm run test:watch # vitest in watch mode
+npm run lint
+npm run build
 ```
 
 Sign up on `/auth`, then land on `/dashboard`.
@@ -253,20 +295,39 @@ src/
     components/campaign/       composer, variant cards, status chips, edit dialog
   config/                      platform specs, prompt fragments
 supabase/migrations/           schema, grants, RLS, indexes
-tests/                         vitest suites
+tests/                         vitest suites (see Testing below)
+tests/helpers/                 in-memory AppContext fakes for use-case tests
 ```
 
 ## Testing
 
 ```bash
-bun run test
+npm run test        # single run
+npm run test:watch  # watch mode
 ```
+
+All tests are deterministic: no network, no live database, no API keys required. Vitest runs
+in Node with `@/` path aliases (`vitest.config.ts`).
 
 | Suite | Covers |
 | --- | --- |
 | `tests/domain.test.ts` | exact per-platform geometry, safe-zone containment, aspect ratio, caption divergence/limits/hashtag budget/determinism, idempotency key, `Retry-After` vs exponential backoff, campaign status derivation |
+| `tests/captions.test.ts` | `stableHash`, `splitSentences`, `summarize`, `clamp`, brand `{brand}` substitution, length limits |
+| `tests/entities.test.ts` | `isPlatform` type guard, `PLATFORMS` exhaustiveness |
+| `tests/publish-usecases.test.ts` | `isDue`, `attemptEntry` (missing image, rate limit, acceptance), `scheduleCampaign`, `retryCampaign` |
+| `tests/delivery-usecases.test.ts` | `applyDelivery` — delivered/rejected webhooks, campaign status sync, unknown entry |
+| `tests/ingest-content.test.ts` | `ingestPastedPost`, `ingestUploadedPost`, `importLibraryPost` validation and dedup |
+| `tests/document-parser.test.ts` | `parseMarkdown`, `kindFromFilename` |
+| `tests/publishing-adapters.test.ts` | fake Instagram/X adapters — accepted, duplicate, 429, 4xx mapping |
+| `tests/fake-platform-transport.test.ts` | `resolveFakePlatformBaseUrl`, HTTP transport to in-repo fake platform |
+| `tests/mcp-server.test.ts` | JSON-RPC `initialize`, `tools/list`, `tools/call` validation, unknown method/tool |
+| `tests/mcp-context.test.ts` | `jsonResult`, `errorResult`, Supabase env resolution |
+| `tests/supabase-mappers.test.ts` | `toPost` / `toCampaign` / `toEntry` row mapping, `imagePath` |
 | `tests/imaging.test.ts` | real PNG bytes decoded from the IHDR chunk at `1080×1080` and `1600×900` |
 | `tests/security.test.ts` | AES-256-GCM round-trip, fresh IV per write, auth-tag tamper rejection, log redaction, webhook signature accept/forge/tamper/replay, repo-wide scan proving no real platform endpoint is referenced |
+
+Use-case tests build an in-memory `AppContext` via `tests/helpers/mock-app-context.ts` so
+application logic is tested without Postgres.
 
 Behaviours that need a live database and worker (duplicate publish → one post, crash-resume,
 forged webhook → `400`) are exercised through the dashboard demo rail; see

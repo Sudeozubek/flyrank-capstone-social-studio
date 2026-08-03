@@ -1,5 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { DEFAULT_CAMPAIGN_LANGUAGE } from "@/config/campaign-languages.config";
+import { BrandContextFields } from "@/components/campaign/BrandContextFields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +36,7 @@ export interface ComposerSubmit {
   campaignName?: string | undefined;
   brandName?: string | undefined;
   brandTone?: string | undefined;
+  brandLanguage?: string | undefined;
   title?: string | undefined;
   body?: string | undefined;
   url?: string | null;
@@ -83,6 +86,7 @@ export function CampaignComposer({
   const [campaignName, setCampaignName] = useState("");
   const [brandName, setBrandName] = useState("");
   const [brandTone, setBrandTone] = useState("");
+  const [brandLanguage, setBrandLanguage] = useState(DEFAULT_CAMPAIGN_LANGUAGE);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
@@ -102,6 +106,7 @@ export function CampaignComposer({
   const brand = () => ({
     brandName: brandName.trim() || undefined,
     brandTone: brandTone.trim() || undefined,
+    brandLanguage: brandLanguage || DEFAULT_CAMPAIGN_LANGUAGE,
   });
 
   async function submitPaste() {
@@ -164,34 +169,15 @@ export function CampaignComposer({
         </p>
       </header>
 
-      <div className="mb-5 grid gap-4 rounded-xl border border-border bg-background/50 p-4 sm:grid-cols-2">
-        <div className="space-y-2 min-w-0 sm:col-span-2">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            Brand context (optional)
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Used only as extra context when captions are written. Leave empty for the default voice.
-          </p>
-        </div>
-        <div className="space-y-2 min-w-0">
-          <Label htmlFor="brand-name">Brand / company name</Label>
-          <Input
-            id="brand-name"
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-            placeholder="Acme Inc."
-          />
-        </div>
-        <div className="space-y-2 min-w-0">
-          <Label htmlFor="brand-tone">Brand tone</Label>
-          <Input
-            id="brand-tone"
-            value={brandTone}
-            onChange={(e) => setBrandTone(e.target.value)}
-            placeholder="Professional and confident"
-          />
-        </div>
-      </div>
+      <BrandContextFields
+        className="mb-5"
+        brandName={brandName}
+        brandTone={brandTone}
+        brandLanguage={brandLanguage}
+        onBrandNameChange={setBrandName}
+        onBrandToneChange={setBrandTone}
+        onBrandLanguageChange={setBrandLanguage}
+      />
 
       <Tabs defaultValue="library">
         <TabsList className="mb-4">

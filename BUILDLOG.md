@@ -142,6 +142,22 @@ Then wrote the submission pack: `README.md`, `EVIDENCE.md`, `BUILDLOG.md`, `caps
 `.env.example`, MIT `LICENSE`, and refreshed `DECISIONS.md` so it describes the final Postgres +
 sharp implementation rather than the prototype.
 
+## Phase 10 — Standalone Supabase + expanded test suite
+
+- Replaced Lovable Cloud database credentials with a **standalone Supabase project**
+  (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `VITE_*` mirrors, `VITE_SUPABASE_PROJECT_ID`).
+  Google OAuth now calls `supabase.auth.signInWithOAuth` directly instead of
+  `@lovable.dev/cloud-auth-js`.
+- Expanded Vitest from 3 files / 20 tests to **14 files / 78 tests**, all deterministic
+  (no network, no live database):
+  - use-case coverage: `publish-usecases`, `delivery-usecases`, `ingest-content`
+  - infrastructure: `document-parser`, `publishing-adapters`, `fake-platform-transport`,
+    `supabase-mappers`
+  - MCP: `mcp-server`, `mcp-context`
+  - domain helpers: `captions`, `entities`
+  - shared `tests/helpers/mock-app-context.ts` for in-memory `AppContext` fakes
+- Ran `npm install` to sync `node_modules` from `package-lock.json`.
+
 ## Final notes
 
 **What the architecture bought.** Swapping the store (file → Postgres) and the renderer

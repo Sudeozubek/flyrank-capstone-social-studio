@@ -57,6 +57,7 @@ export const toCampaign = (row: CampaignRow): Campaign => ({
   scheduledFor: row.scheduled_for,
   brandName: row.brand_name ?? null,
   brandTone: row.brand_tone ?? null,
+  brandLanguage: row.brand_language ?? null,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -146,6 +147,7 @@ export function createCampaignRepository(db: Db, userId: string): CampaignReposi
           name: input.name,
           brand_name: input.brandName ?? null,
           brand_tone: input.brandTone ?? null,
+          brand_language: input.brandLanguage ?? null,
         })
         .select()
         .single();
@@ -174,6 +176,7 @@ export function createCampaignRepository(db: Db, userId: string): CampaignReposi
           ...(patch.name !== undefined ? { name: patch.name } : {}),
           ...(patch.brandName !== undefined ? { brand_name: patch.brandName } : {}),
           ...(patch.brandTone !== undefined ? { brand_tone: patch.brandTone } : {}),
+          ...(patch.brandLanguage !== undefined ? { brand_language: patch.brandLanguage } : {}),
         })
         .eq("id", id)
         .select()

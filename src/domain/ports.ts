@@ -33,12 +33,13 @@ export interface CampaignRepository {
     name: string;
     brandName?: string | null;
     brandTone?: string | null;
+    brandLanguage?: string | null;
   }): Promise<Campaign>;
   list(): Promise<Campaign[]>;
   findById(id: string): Promise<Campaign | null>;
   update(
     id: string,
-    patch: Partial<Pick<Campaign, "status" | "scheduledFor" | "name" | "brandName" | "brandTone">>,
+    patch: Partial<Pick<Campaign, "status" | "scheduledFor" | "name" | "brandName" | "brandTone" | "brandLanguage">>,
   ): Promise<Campaign>;
   delete(id: string): Promise<void>;
 }
@@ -138,8 +139,11 @@ export interface ImageRenderer {
     width: number;
     height: number;
     title: string;
+    body?: string;
     seed: string;
     brand: string;
+    brandTone?: string | null;
+    brandLanguage?: string | null;
     subject: { x: number; y: number; width: number; height: number };
   }): Promise<RenderedImage>;
 }

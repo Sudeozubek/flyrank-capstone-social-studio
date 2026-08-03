@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import type { CampaignSnapshot } from "@/domain/entities";
+import { DEFAULT_CAMPAIGN_LANGUAGE } from "@/config/campaign-languages.config";
+import { BrandContextFields } from "@/components/campaign/BrandContextFields";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +21,7 @@ export interface CampaignEdit {
   name: string;
   brandName: string;
   brandTone: string;
+  brandLanguage: string;
   captions: Array<{ entryId: string; caption: string }>;
 }
 
@@ -39,6 +42,9 @@ export function CampaignEditDialog({
   const [name, setName] = useState(snapshot.campaign.name);
   const [brandName, setBrandName] = useState(snapshot.campaign.brandName ?? "");
   const [brandTone, setBrandTone] = useState(snapshot.campaign.brandTone ?? "");
+  const [brandLanguage, setBrandLanguage] = useState(
+    snapshot.campaign.brandLanguage ?? DEFAULT_CAMPAIGN_LANGUAGE,
+  );
   const [captions, setCaptions] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -46,6 +52,7 @@ export function CampaignEditDialog({
     setName(snapshot.campaign.name);
     setBrandName(snapshot.campaign.brandName ?? "");
     setBrandTone(snapshot.campaign.brandTone ?? "");
+    setBrandLanguage(snapshot.campaign.brandLanguage ?? DEFAULT_CAMPAIGN_LANGUAGE);
     setCaptions(Object.fromEntries(snapshot.entries.map((e) => [e.id, e.caption])));
   }, [open, snapshot]);
 
@@ -65,26 +72,16 @@ export function CampaignEditDialog({
             <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="edit-brand-name">Brand / company name</Label>
-              <Input
-                id="edit-brand-name"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                placeholder="Acme Inc."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-brand-tone">Brand tone</Label>
-              <Input
-                id="edit-brand-tone"
-                value={brandTone}
-                onChange={(e) => setBrandTone(e.target.value)}
-                placeholder="Professional and confident"
-              />
-            </div>
-          </div>
+          <BrandContextFields
+            brandName={brandName}
+            brandTone={brandTone}
+            brandLanguage={brandLanguage}
+            onBrandNameChange={setBrandName}
+            onBrandToneChange={setBrandTone}
+            onBrandLanguageChange={setBrandLanguage}
+            nameInputId="edit-brand-name"
+            toneSelectId="edit-brand-tone"
+          />
 
           {snapshot.entries.map((entry) => (
             <div key={entry.id} className="space-y-2">
@@ -120,6 +117,7 @@ export function CampaignEditDialog({
                 name,
                 brandName,
                 brandTone,
+                brandLanguage,
                 captions: snapshot.entries.map((entry) => ({
                   entryId: entry.id,
                   caption: captions[entry.id] ?? entry.caption,

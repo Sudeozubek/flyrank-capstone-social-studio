@@ -1,3 +1,5 @@
+import { CAMPAIGN_LANGUAGE_IDS } from "@/config/campaign-languages.config";
+import { BRAND_TONE_IDS } from "@/config/brand-tones.config";
 import { z } from "zod";
 import { createCampaign, generateImages, getCampaignSnapshot } from "@/application/campaign-usecases";
 import { withApp } from "../context";
@@ -12,7 +14,8 @@ export default defineTool({
     postId: z.string().uuid().describe("ID of an existing blog post owned by the caller."),
     name: z.string().max(200).optional().describe("Optional campaign name."),
     brandName: z.string().max(120).optional().describe("Optional brand / company name."),
-    brandTone: z.string().max(200).optional().describe("Optional brand tone of voice."),
+    brandTone: z.enum(BRAND_TONE_IDS).optional().describe("Optional brand tone id (friendly, professional, casual, …)."),
+    brandLanguage: z.enum(CAMPAIGN_LANGUAGE_IDS).optional().describe("Caption/image language (en, tr, de, bs, fr, ar). Defaults to en."),
   }),
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
   handler: async (input, ctx) =>
@@ -22,6 +25,7 @@ export default defineTool({
         ...(input.name ? { name: input.name } : {}),
         brandName: input.brandName ?? null,
         brandTone: input.brandTone ?? null,
+        brandLanguage: input.brandLanguage ?? "en",
       });
       await generateImages(app, snapshot.campaign.id);
       return getCampaignSnapshot(app, snapshot.campaign.id);

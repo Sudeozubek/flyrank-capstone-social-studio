@@ -3,6 +3,7 @@
  * One campaign fans out into exactly one SocialPostEntry per platform.
  */
 
+import { DEFAULT_CAMPAIGN_LANGUAGE } from "@/config/campaign-languages.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import {
   PLATFORMS,
@@ -19,7 +20,7 @@ import { imagePath } from "@/infrastructure/storage/image-store.server";
 
 export async function createCampaign(
   context: AppContext,
-  input: { postId: string; name?: string; brandName?: string | null; brandTone?: string | null },
+  input: { postId: string; name?: string; brandName?: string | null; brandTone?: string | null; brandLanguage?: string | null },
 ): Promise<CampaignSnapshot> {
   const post = await context.posts.findById(input.postId);
   if (!post) throw new Error("Blog post not found");
@@ -29,6 +30,7 @@ export async function createCampaign(
     name: (input.name?.trim() || post.title).slice(0, 200),
     brandName: input.brandName?.trim() || null,
     brandTone: input.brandTone?.trim() || null,
+    brandLanguage: input.brandLanguage?.trim() || DEFAULT_CAMPAIGN_LANGUAGE,
   });
 
   const entries = await generateCaptions(context, campaign.id);
@@ -44,7 +46,7 @@ export async function generateCaptions(
   const post = await context.posts.findById(campaign.postId);
   if (!post) throw new Error("Blog post not found");
 
-  const brand = { name: campaign.brandName, tone: campaign.brandTone };
+  const brand = { name: campaign.brandName, tone: campaign.brandTone, language: campaign.brandLanguage };
 
   const captions = await Promise.all(
     PLATFORMS.map(async (platform) => ({
@@ -69,6 +71,7 @@ export async function editCampaign(
     name?: string;
     brandName?: string | null;
     brandTone?: string | null;
+    brandLanguage?: string | null;
     captions?: Array<{ entryId: string; caption: string }>;
   },
 ): Promise<CampaignSnapshot> {
@@ -78,6 +81,9 @@ export async function editCampaign(
     ...(input.name !== undefined ? { name: input.name.trim().slice(0, 200) || campaign.name } : {}),
     ...(input.brandName !== undefined ? { brandName: input.brandName?.trim() || null } : {}),
     ...(input.brandTone !== undefined ? { brandTone: input.brandTone?.trim() || null } : {}),
+    ...(input.brandLanguage !== undefined
+      ? { brandLanguage: input.brandLanguage?.trim() || DEFAULT_CAMPAIGN_LANGUAGE }
+      : {}),
   });
 
   for (const patch of input.captions ?? []) {
@@ -118,8 +124,11 @@ export async function generateImages(
       width: spec.width,
       height: spec.height,
       title: post.title,
+      body: post.body,
       seed: `${post.id}:${entry.platform}`,
       brand: campaign.brandName?.trim() || "CampaignHub",
+      brandTone: campaign.brandTone,
+      brandLanguage: campaign.brandLanguage,
       subject,
     });
 

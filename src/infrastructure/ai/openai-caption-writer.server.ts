@@ -11,9 +11,11 @@
  * deterministic composer so campaign generation never hard-fails.
  */
 
+import { resolveCampaignLanguage } from "@/config/campaign-languages.config";
+import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
-import { clamp, composeCaption, summarize, type CaptionSource } from "@/domain/captions";
+import { clamp, composeCaption, captionLimit, fitCaptionToLimit, summarize, type CaptionSource } from "@/domain/captions";
 import type { BrandContext, Platform } from "@/domain/entities";
 import type { CaptionWriter } from "@/domain/ports";
 
@@ -25,16 +27,31 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
   const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
   const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
-  const brandTone = brand?.tone?.trim();
+  const tone = resolveBrandTone(brand?.tone);
+  const language = resolveCampaignLanguage(brand?.language);
+  const legacyTone = !tone ? brand?.tone?.trim() : null;
+  const langFragments =
+    language.id === "en"
+      ? {
+          hooks: SHARED_VOICE.hooks,
+          valueProps: SHARED_VOICE.valueProps,
+          signOff: SHARED_VOICE.signOff,
+        }
+      : {
+          hooks: language.hooks,
+          valueProps: language.valueProps,
+          signOff: language.signOff,
+        };
 
   return [
     `You are the social copywriter for ${brandName}.`,
     `You write a single ${spec.label} caption promoting a published blog post.`,
+    `Write the entire caption in ${language.promptName}. Do not mix languages.`,
     "",
     "Brand voice fragments (use them as raw material, do not list them verbatim):",
-    `- hooks: ${SHARED_VOICE.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
-    `- value props: ${SHARED_VOICE.valueProps.join(" | ")}`,
-    `- sign-off: ${SHARED_VOICE.signOff.replaceAll("{brand}", brandName)}`,
+    `- hooks: ${langFragments.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
+    `- value props: ${langFragments.valueProps.join(" | ")}`,
+    `- sign-off: ${langFragments.signOff.replaceAll("{brand}", brandName)}`,
     `- base hashtags: ${SHARED_VOICE.baseHashtags.join(", ")}`,
     "",
     `${spec.label} rules:`,
@@ -43,14 +60,31 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
     `- calls to action to choose from: ${voice.ctas.join(" | ")}`,
     `- platform hashtags to draw from: ${voice.hashtags.join(", ")}`,
     `- at most ${spec.maxHashtags} hashtags total`,
-    `- aim for ~${voice.targetLength} characters, hard limit ${Math.min(spec.maxCaptionLength, voice.targetLength)}`,
+    `- aim for ~${voice.targetLength} characters, hard limit ${captionLimit(platform)}`,
     `- summary length: about ${voice.summarySentences} sentence(s)`,
     `- emoji: ${voice.emoji ? "a little, tasteful" : "none"}`,
     `- line breaks: ${voice.lineBreaks ? "use them for scannability" : "single paragraph, no line breaks"}`,
-    "",
-    ...(brandTone
-      ? ["", `Brand tone requested by ${brandName}: ${brandTone}. Let it shape the wording.`]
+    ...(platform === "x"
+      ? [
+          "- X format: one complete hook + one crisp sentence + link. Never end mid-sentence.",
+          '- Never use "…" or an ellipsis. If tight on space, shorten — do not trail off.',
+          "- Keep the title short; put the insight in one full sentence.",
+        ]
       : []),
+    "",
+    ...(tone
+      ? [
+          "",
+          `Required brand tone: ${tone.label}.`,
+          tone.description,
+          "The tone must be obvious in word choice, rhythm, and energy — not just mentioned once.",
+          ...(tone.hooks.length
+            ? [`Tone-appropriate hooks to draw from: ${tone.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`]
+            : []),
+        ]
+      : legacyTone
+        ? ["", `Brand tone requested by ${brandName}: ${legacyTone}. Let it shape the wording.`]
+        : []),
     "",
     "Return ONLY the caption text. No markdown fences, no commentary, no quotes.",
   ].join("\n");
@@ -68,7 +102,6 @@ export function buildUserPrompt(post: CaptionSource, platform: Platform): string
 }
 
 function sanitize(raw: string, platform: Platform): string {
-  const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
   let text = raw
     .trim()
@@ -78,7 +111,12 @@ function sanitize(raw: string, platform: Platform): string {
     .replace(/[ \t]+\n/g, "\n")
     .trim();
   if (!voice.lineBreaks) text = text.replace(/\s*\n+\s*/g, " ");
-  return clamp(text, Math.min(spec.maxCaptionLength, voice.targetLength));
+  else text = text.replace(/[ \t]+\n/g, "\n").trim();
+  text = text.replace(/…+$/u, "").trim();
+  return fitCaptionToLimit(text, captionLimit(platform), {
+    allowEllipsis: platform !== "x",
+    preserveLineBreaks: voice.lineBreaks,
+  });
 }
 
 /** Deterministic composer — the guaranteed floor. Never throws, never empty. */
@@ -96,12 +134,13 @@ function fallbackCaption(
     console.error("[captions] deterministic composer failed", error);
   }
   // Last resort: still platform-shaped, still valid.
-  const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
   const base = [post.title, summarize(post.body, voice.summarySentences), post.url ?? ""]
     .filter(Boolean)
     .join(voice.lineBreaks ? "\n\n" : " ");
-  return clamp(base || post.title || SHARED_VOICE.brandName, Math.min(spec.maxCaptionLength, voice.targetLength));
+  return fitCaptionToLimit(base || post.title || SHARED_VOICE.brandName, captionLimit(platform), {
+    allowEllipsis: platform !== "x",
+  });
 }
 
 export const openAiCaptionWriter: CaptionWriter = {

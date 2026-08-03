@@ -51,6 +51,7 @@ export type Database = {
         Row: {
           brand_name: string | null
           brand_tone: string | null
+          brand_language: string | null
           created_at: string
           id: string
           name: string
@@ -63,6 +64,7 @@ export type Database = {
         Insert: {
           brand_name?: string | null
           brand_tone?: string | null
+          brand_language?: string | null
           created_at?: string
           id?: string
           name: string
@@ -75,6 +77,7 @@ export type Database = {
         Update: {
           brand_name?: string | null
           brand_tone?: string | null
+          brand_language?: string | null
           created_at?: string
           id?: string
           name?: string

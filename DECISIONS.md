@@ -82,6 +82,14 @@ server (`src/mcp/`) depending only on `zod` + `zod-to-json-schema`, transported 
 an existing use case: the MCP layer holds no business logic, generates no captions and calls no
 model.
 
+## D14 — Standalone Supabase, not Lovable Cloud
+The app connects to a **self-hosted Supabase project** via `.env` (`SUPABASE_URL`,
+`SUPABASE_PUBLISHABLE_KEY`, `VITE_*` mirrors, `SUPABASE_SERVICE_ROLE_KEY` for server-only
+work). Schema ships in `supabase/migrations/` and is applied manually in the Supabase SQL
+Editor. Google OAuth uses `supabase.auth.signInWithOAuth` directly; Lovable Cloud auth is no
+longer on the sign-in path. MCP OAuth discovery reads `VITE_SUPABASE_PROJECT_ID` to point
+clients at `https://<ref>.supabase.co/auth/v1`.
+
 ## D13 — Stretch goals not started
 Real-platform integration, brand templating, A/B captions, analytics loopback and the approval
 workflow are untouched by design. The MCP interface and document import were included because

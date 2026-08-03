@@ -1,1 +1,5 @@
-project_id = "rpkxetgjjzdydjsvzldw"
+project_id = "urqzlvbmuouiwwjuqasd"
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
