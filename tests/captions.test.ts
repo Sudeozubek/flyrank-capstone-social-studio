@@ -54,3 +54,23 @@ describe("composeCaption brand substitution", () => {
     }
   });
 });
+
+describe("composeCaption brand tone", () => {
+  it("changes the caption when a brand tone is selected", () => {
+    const defaultCaption = composeCaption(post, "instagram");
+    const playful = composeCaption(post, "instagram", { tone: "playful" });
+    const professional = composeCaption(post, "instagram", { tone: "professional" });
+
+    expect(playful).not.toEqual(defaultCaption);
+    expect(professional).not.toEqual(defaultCaption);
+    expect(playful).not.toEqual(professional);
+  });
+
+  it("uses tone-specific sign-offs", () => {
+    const playful = composeCaption(post, "instagram", { name: "Acme", tone: "playful" });
+    const professional = composeCaption(post, "instagram", { name: "Acme", tone: "professional" });
+
+    expect(playful).toContain("— Acme (yes, we write too)");
+    expect(professional).toContain("— the Acme team");
+  });
+});

@@ -11,6 +11,7 @@
  * deterministic composer so campaign generation never hard-fails.
  */
 
+import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
 import { clamp, composeCaption, summarize, type CaptionSource } from "@/domain/captions";
@@ -25,7 +26,8 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
   const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
   const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
-  const brandTone = brand?.tone?.trim();
+  const tone = resolveBrandTone(brand?.tone);
+  const legacyTone = !tone ? brand?.tone?.trim() : null;
 
   return [
     `You are the social copywriter for ${brandName}.`,
@@ -48,9 +50,19 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
     `- emoji: ${voice.emoji ? "a little, tasteful" : "none"}`,
     `- line breaks: ${voice.lineBreaks ? "use them for scannability" : "single paragraph, no line breaks"}`,
     "",
-    ...(brandTone
-      ? ["", `Brand tone requested by ${brandName}: ${brandTone}. Let it shape the wording.`]
-      : []),
+    ...(tone
+      ? [
+          "",
+          `Required brand tone: ${tone.label}.`,
+          tone.description,
+          "The tone must be obvious in word choice, rhythm, and energy — not just mentioned once.",
+          ...(tone.hooks.length
+            ? [`Tone-appropriate hooks to draw from: ${tone.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`]
+            : []),
+        ]
+      : legacyTone
+        ? ["", `Brand tone requested by ${brandName}: ${legacyTone}. Let it shape the wording.`]
+        : []),
     "",
     "Return ONLY the caption text. No markdown fences, no commentary, no quotes.",
   ].join("\n");

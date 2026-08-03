@@ -3,6 +3,8 @@
  * one of these delegates straight into an application use case.
  */
 
+import { z } from "zod";
+import { BRAND_TONE_IDS } from "@/config/brand-tones.config";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -26,6 +28,7 @@ import { createAppContext } from "@/infrastructure/context.server";
 import type { CampaignSnapshot } from "@/domain/entities";
 
 const uuid = z.string().uuid();
+const brandTone = z.enum(BRAND_TONE_IDS).nullish();
 
 export const listPosts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -86,7 +89,7 @@ export const deletePost = createServerFn({ method: "POST" })
 export const createCampaignWithAssets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ postId: uuid, name: z.string().max(200).optional(), brandName: z.string().max(120).nullish(), brandTone: z.string().max(200).nullish() }).parse(input),
+    z.object({ postId: uuid, name: z.string().max(200).optional(), brandName: z.string().max(120).nullish(), brandTone }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
@@ -109,7 +112,7 @@ export const updateCampaignFn = createServerFn({ method: "POST" })
         campaignId: uuid,
         name: z.string().max(200).optional(),
         brandName: z.string().max(120).nullish(),
-        brandTone: z.string().max(200).nullish(),
+        brandTone,
         captions: z
           .array(z.object({ entryId: uuid, caption: z.string().max(5000) }))
           .max(10)
@@ -254,7 +257,7 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
         url: z.string().url().max(500),
         name: z.string().max(200).optional(),
         brandName: z.string().max(120).nullish(),
-        brandTone: z.string().max(200).nullish(),
+        brandTone,
       })
       .parse(input),
   )

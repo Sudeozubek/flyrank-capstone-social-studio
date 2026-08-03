@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import type { CampaignSnapshot } from "@/domain/entities";
+import { BrandContextFields } from "@/components/campaign/BrandContextFields";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -65,26 +66,14 @@ export function CampaignEditDialog({
             <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="edit-brand-name">Brand / company name</Label>
-              <Input
-                id="edit-brand-name"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                placeholder="Acme Inc."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-brand-tone">Brand tone</Label>
-              <Input
-                id="edit-brand-tone"
-                value={brandTone}
-                onChange={(e) => setBrandTone(e.target.value)}
-                placeholder="Professional and confident"
-              />
-            </div>
-          </div>
+          <BrandContextFields
+            brandName={brandName}
+            brandTone={brandTone}
+            onBrandNameChange={setBrandName}
+            onBrandToneChange={setBrandTone}
+            nameInputId="edit-brand-name"
+            toneSelectId="edit-brand-tone"
+          />
 
           {snapshot.entries.map((entry) => (
             <div key={entry.id} className="space-y-2">

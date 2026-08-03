@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { BrandContextFields } from "@/components/campaign/BrandContextFields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -164,34 +165,13 @@ export function CampaignComposer({
         </p>
       </header>
 
-      <div className="mb-5 grid gap-4 rounded-xl border border-border bg-background/50 p-4 sm:grid-cols-2">
-        <div className="space-y-2 min-w-0 sm:col-span-2">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            Brand context (optional)
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Used only as extra context when captions are written. Leave empty for the default voice.
-          </p>
-        </div>
-        <div className="space-y-2 min-w-0">
-          <Label htmlFor="brand-name">Brand / company name</Label>
-          <Input
-            id="brand-name"
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-            placeholder="Acme Inc."
-          />
-        </div>
-        <div className="space-y-2 min-w-0">
-          <Label htmlFor="brand-tone">Brand tone</Label>
-          <Input
-            id="brand-tone"
-            value={brandTone}
-            onChange={(e) => setBrandTone(e.target.value)}
-            placeholder="Professional and confident"
-          />
-        </div>
-      </div>
+      <BrandContextFields
+        className="mb-5"
+        brandName={brandName}
+        brandTone={brandTone}
+        onBrandNameChange={setBrandName}
+        onBrandToneChange={setBrandTone}
+      />
 
       <Tabs defaultValue="library">
         <TabsList className="mb-4">

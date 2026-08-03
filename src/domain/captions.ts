@@ -4,6 +4,7 @@
  * structure, tone, length and hashtag count; neither is a truncation of the other.
  */
 
+import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
 import type { BrandContext, Platform } from "./entities";
@@ -66,6 +67,11 @@ export function composeCaption(
   const seed = `${post.id}:${platform}`;
   const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
   const withBrand = (text: string) => text.replaceAll("{brand}", brandName);
+  const tone = resolveBrandTone(brand?.tone);
+  const hooks = tone?.hooks ?? SHARED_VOICE.hooks;
+  const valueProps = tone?.valueProps ?? SHARED_VOICE.valueProps;
+  const ctas = tone?.ctas[platform] ?? voice.ctas;
+  const signOff = tone?.signOff ?? SHARED_VOICE.signOff;
 
   const hashtags = formatHashtags(
     [...SHARED_VOICE.baseHashtags, ...voice.hashtags],
@@ -76,13 +82,13 @@ export function composeCaption(
   if (!voice.emoji) summary = summary.replace(/\p{Extended_Pictographic}/gu, "").trim();
 
   const filled = voice.template
-    .replace("{hook}", withBrand(pick(SHARED_VOICE.hooks, seed)))
+    .replace("{hook}", withBrand(pick(hooks, seed)))
     .replace("{title}", platform === "x" ? post.title : post.title.toUpperCase())
     .replace("{summary}", summary)
-    .replace("{value}", pick(SHARED_VOICE.valueProps, seed))
-    .replace("{cta}", pick(voice.ctas, seed))
+    .replace("{value}", pick(valueProps, seed))
+    .replace("{cta}", pick(ctas, seed))
     .replace("{url}", post.url ?? "")
-    .replace("{signOff}", withBrand(SHARED_VOICE.signOff))
+    .replace("{signOff}", withBrand(signOff))
     .replace("{hashtags}", hashtags)
     .replace(/[ \t]+\n/g, "\n")
     .trim();
