@@ -44,11 +44,11 @@ export const SHARED_VOICE: SharedVoice = {
 
 export const PLATFORM_VOICE: Record<Platform, PlatformVoice> = {
   x: {
-    tone: "terse, punchy, one idea only",
-    template: "{title}\n\n{summary} {cta} {url} {hashtags}",
-    ctas: ["Full write-up:", "Read it:", "Details:"],
+    tone: "terse, punchy, one complete idea — never trail off",
+    template: "{title} {summary} {cta} {url} {hashtags}",
+    ctas: ["→", "Oku:", "Read:"],
     hashtags: ["BuildInPublic"],
-    targetLength: 240,
+    targetLength: 275,
     summarySentences: 1,
     emoji: false,
     lineBreaks: false,

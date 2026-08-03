@@ -41,6 +41,31 @@ describe("caption helpers", () => {
   });
 });
 
+describe("composeCaption X length", () => {
+  const longPost = {
+    id: "post-tr",
+    title:
+      "Yeni yazı: Dış araştırmaları desteklemek için Anthropic Ekonomik Gelecekler Araştırma Fonu",
+    body: "Anthropic, toplumun AI'nın ekonomik etkilerine hazırlanmasına yönelik hırslı dış araştırmaları desteklemek için 200 milyon dolar taahhüt ediyor.",
+    url: "https://example.com/anthropic-fund",
+  };
+
+  it("avoids trailing ellipsis on long Turkish posts", () => {
+    const caption = composeCaption(longPost, "x", { language: "tr" });
+    expect(caption.endsWith("…")).toBe(false);
+    expect(caption).not.toContain("…");
+    expect(caption.length).toBeLessThanOrEqual(PLATFORM_SPECS.x.maxCaptionLength);
+  });
+});
+
+describe("composeCaption Instagram layout", () => {
+  it("keeps multi-paragraph line breaks in the template", () => {
+    const caption = composeCaption(post, "instagram");
+    expect(caption.split("\n\n").length).toBeGreaterThanOrEqual(3);
+    expect(caption).toContain("\n\n");
+  });
+});
+
 describe("composeCaption brand substitution", () => {
   it("replaces {brand} with the provided brand name", () => {
     const caption = composeCaption(post, "instagram", { name: "Acme Corp" });

@@ -15,7 +15,7 @@ import { resolveCampaignLanguage } from "@/config/campaign-languages.config";
 import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
-import { clamp, composeCaption, summarize, type CaptionSource } from "@/domain/captions";
+import { clamp, composeCaption, captionLimit, fitCaptionToLimit, summarize, type CaptionSource } from "@/domain/captions";
 import type { BrandContext, Platform } from "@/domain/entities";
 import type { CaptionWriter } from "@/domain/ports";
 
@@ -60,10 +60,17 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
     `- calls to action to choose from: ${voice.ctas.join(" | ")}`,
     `- platform hashtags to draw from: ${voice.hashtags.join(", ")}`,
     `- at most ${spec.maxHashtags} hashtags total`,
-    `- aim for ~${voice.targetLength} characters, hard limit ${Math.min(spec.maxCaptionLength, voice.targetLength)}`,
+    `- aim for ~${voice.targetLength} characters, hard limit ${captionLimit(platform)}`,
     `- summary length: about ${voice.summarySentences} sentence(s)`,
     `- emoji: ${voice.emoji ? "a little, tasteful" : "none"}`,
     `- line breaks: ${voice.lineBreaks ? "use them for scannability" : "single paragraph, no line breaks"}`,
+    ...(platform === "x"
+      ? [
+          "- X format: one complete hook + one crisp sentence + link. Never end mid-sentence.",
+          '- Never use "…" or an ellipsis. If tight on space, shorten — do not trail off.',
+          "- Keep the title short; put the insight in one full sentence.",
+        ]
+      : []),
     "",
     ...(tone
       ? [
@@ -95,7 +102,6 @@ export function buildUserPrompt(post: CaptionSource, platform: Platform): string
 }
 
 function sanitize(raw: string, platform: Platform): string {
-  const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
   let text = raw
     .trim()
@@ -105,7 +111,12 @@ function sanitize(raw: string, platform: Platform): string {
     .replace(/[ \t]+\n/g, "\n")
     .trim();
   if (!voice.lineBreaks) text = text.replace(/\s*\n+\s*/g, " ");
-  return clamp(text, Math.min(spec.maxCaptionLength, voice.targetLength));
+  else text = text.replace(/[ \t]+\n/g, "\n").trim();
+  text = text.replace(/…+$/u, "").trim();
+  return fitCaptionToLimit(text, captionLimit(platform), {
+    allowEllipsis: platform !== "x",
+    preserveLineBreaks: voice.lineBreaks,
+  });
 }
 
 /** Deterministic composer — the guaranteed floor. Never throws, never empty. */
@@ -123,12 +134,13 @@ function fallbackCaption(
     console.error("[captions] deterministic composer failed", error);
   }
   // Last resort: still platform-shaped, still valid.
-  const spec = PLATFORM_SPECS[platform]!;
   const voice = PLATFORM_VOICE[platform]!;
   const base = [post.title, summarize(post.body, voice.summarySentences), post.url ?? ""]
     .filter(Boolean)
     .join(voice.lineBreaks ? "\n\n" : " ");
-  return clamp(base || post.title || SHARED_VOICE.brandName, Math.min(spec.maxCaptionLength, voice.targetLength));
+  return fitCaptionToLimit(base || post.title || SHARED_VOICE.brandName, captionLimit(platform), {
+    allowEllipsis: platform !== "x",
+  });
 }
 
 export const openAiCaptionWriter: CaptionWriter = {
