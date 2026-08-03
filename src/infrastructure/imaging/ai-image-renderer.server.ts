@@ -22,6 +22,7 @@ export function createAiImageRenderer(fallback: ImageRenderer): ImageRenderer {
           platform: spec.platform,
           brand: spec.brand,
           brandTone: spec.brandTone ?? null,
+          language: spec.brandLanguage ?? null,
         });
 
         const raw = await generateOpenAiImage(prompt, spec.platform);

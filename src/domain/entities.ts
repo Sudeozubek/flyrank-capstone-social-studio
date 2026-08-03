@@ -27,6 +27,7 @@ export interface BlogPost {
 export interface BrandContext {
   name?: string | null;
   tone?: string | null;
+  language?: string | null;
 }
 
 export interface Campaign {
@@ -38,6 +39,7 @@ export interface Campaign {
   scheduledFor: string | null;
   brandName: string | null;
   brandTone: string | null;
+  brandLanguage: string | null;
   createdAt: string;
   updatedAt: string;
 }

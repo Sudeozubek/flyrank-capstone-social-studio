@@ -4,6 +4,7 @@
  * structure, tone, length and hashtag count; neither is a truncation of the other.
  */
 
+import { resolveCampaignLanguage } from "@/config/campaign-languages.config";
 import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
@@ -68,10 +69,12 @@ export function composeCaption(
   const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
   const withBrand = (text: string) => text.replaceAll("{brand}", brandName);
   const tone = resolveBrandTone(brand?.tone);
-  const hooks = tone?.hooks ?? SHARED_VOICE.hooks;
-  const valueProps = tone?.valueProps ?? SHARED_VOICE.valueProps;
-  const ctas = tone?.ctas[platform] ?? voice.ctas;
-  const signOff = tone?.signOff ?? SHARED_VOICE.signOff;
+  const language = resolveCampaignLanguage(brand?.language);
+  const useToneFragments = tone && language.id === "en";
+  const hooks = (useToneFragments ? tone.hooks : language.hooks) ?? SHARED_VOICE.hooks;
+  const valueProps = (useToneFragments ? tone.valueProps : language.valueProps) ?? SHARED_VOICE.valueProps;
+  const ctas = (useToneFragments ? tone.ctas[platform] : language.ctas[platform]) ?? voice.ctas;
+  const signOff = (useToneFragments ? tone.signOff : language.signOff) ?? SHARED_VOICE.signOff;
 
   const hashtags = formatHashtags(
     [...SHARED_VOICE.baseHashtags, ...voice.hashtags],

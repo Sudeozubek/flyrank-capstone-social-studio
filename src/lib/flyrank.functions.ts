@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { campaignLanguageInputSchema } from "@/config/campaign-languages.config";
 import { brandToneInputSchema } from "@/config/brand-tones.config";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
@@ -28,6 +29,7 @@ import type { CampaignSnapshot } from "@/domain/entities";
 
 const uuid = z.string().uuid();
 const brandTone = brandToneInputSchema;
+const brandLanguage = campaignLanguageInputSchema;
 
 export const listPosts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -88,7 +90,7 @@ export const deletePost = createServerFn({ method: "POST" })
 export const createCampaignWithAssets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ postId: uuid, name: z.string().max(200).optional(), brandName: z.string().max(120).nullish(), brandTone }).parse(input),
+    z.object({ postId: uuid, name: z.string().max(200).optional(), brandName: z.string().max(120).nullish(), brandTone, brandLanguage }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
@@ -97,6 +99,7 @@ export const createCampaignWithAssets = createServerFn({ method: "POST" })
       ...(data.name ? { name: data.name } : {}),
       brandName: data.brandName ?? null,
       brandTone: data.brandTone ?? null,
+      brandLanguage: data.brandLanguage,
     });
     await generateImages(app, snapshot.campaign.id);
     return getCampaignSnapshot(app, snapshot.campaign.id);
@@ -112,6 +115,7 @@ export const updateCampaignFn = createServerFn({ method: "POST" })
         name: z.string().max(200).optional(),
         brandName: z.string().max(120).nullish(),
         brandTone,
+        brandLanguage,
         captions: z
           .array(z.object({ entryId: uuid, caption: z.string().max(5000) }))
           .max(10)
@@ -126,6 +130,7 @@ export const updateCampaignFn = createServerFn({ method: "POST" })
       ...(data.name !== undefined ? { name: data.name } : {}),
       ...(data.brandName !== undefined ? { brandName: data.brandName } : {}),
       ...(data.brandTone !== undefined ? { brandTone: data.brandTone } : {}),
+      ...(data.brandLanguage !== undefined ? { brandLanguage: data.brandLanguage } : {}),
       ...(data.captions ? { captions: data.captions } : {}),
     });
   });
@@ -257,6 +262,7 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
         name: z.string().max(200).optional(),
         brandName: z.string().max(120).nullish(),
         brandTone,
+        brandLanguage,
       })
       .parse(input),
   )
@@ -273,6 +279,7 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
       ...(data.name ? { name: data.name } : {}),
       brandName: data.brandName ?? null,
       brandTone: data.brandTone ?? null,
+      brandLanguage: data.brandLanguage,
     });
     await generateImages(app, snapshot.campaign.id);
     return getCampaignSnapshot(app, snapshot.campaign.id);

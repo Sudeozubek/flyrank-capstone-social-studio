@@ -11,6 +11,7 @@
  * deterministic composer so campaign generation never hard-fails.
  */
 
+import { resolveCampaignLanguage } from "@/config/campaign-languages.config";
 import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
@@ -27,16 +28,30 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
   const voice = PLATFORM_VOICE[platform]!;
   const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
   const tone = resolveBrandTone(brand?.tone);
+  const language = resolveCampaignLanguage(brand?.language);
   const legacyTone = !tone ? brand?.tone?.trim() : null;
+  const langFragments =
+    language.id === "en"
+      ? {
+          hooks: SHARED_VOICE.hooks,
+          valueProps: SHARED_VOICE.valueProps,
+          signOff: SHARED_VOICE.signOff,
+        }
+      : {
+          hooks: language.hooks,
+          valueProps: language.valueProps,
+          signOff: language.signOff,
+        };
 
   return [
     `You are the social copywriter for ${brandName}.`,
     `You write a single ${spec.label} caption promoting a published blog post.`,
+    `Write the entire caption in ${language.promptName}. Do not mix languages.`,
     "",
     "Brand voice fragments (use them as raw material, do not list them verbatim):",
-    `- hooks: ${SHARED_VOICE.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
-    `- value props: ${SHARED_VOICE.valueProps.join(" | ")}`,
-    `- sign-off: ${SHARED_VOICE.signOff.replaceAll("{brand}", brandName)}`,
+    `- hooks: ${langFragments.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
+    `- value props: ${langFragments.valueProps.join(" | ")}`,
+    `- sign-off: ${langFragments.signOff.replaceAll("{brand}", brandName)}`,
     `- base hashtags: ${SHARED_VOICE.baseHashtags.join(", ")}`,
     "",
     `${spec.label} rules:`,

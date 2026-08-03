@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { DEFAULT_CAMPAIGN_LANGUAGE } from "@/config/campaign-languages.config";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -120,6 +121,7 @@ function Dashboard() {
             ...(input.campaignName ? { name: input.campaignName } : {}),
             brandName: input.brandName?.trim() || null,
             brandTone: input.brandTone?.trim() || null,
+            brandLanguage: input.brandLanguage || DEFAULT_CAMPAIGN_LANGUAGE,
           },
         });
       }
@@ -145,6 +147,7 @@ function Dashboard() {
           postId: post.id,
           brandName: input.brandName?.trim() || null,
           brandTone: input.brandTone?.trim() || null,
+          brandLanguage: input.brandLanguage || DEFAULT_CAMPAIGN_LANGUAGE,
         },
       });
     },
@@ -186,6 +189,7 @@ function Dashboard() {
           name: edit.name,
           brandName: edit.brandName.trim() || null,
           brandTone: edit.brandTone.trim() || null,
+          brandLanguage: edit.brandLanguage || DEFAULT_CAMPAIGN_LANGUAGE,
           captions: edit.captions,
         },
       }),

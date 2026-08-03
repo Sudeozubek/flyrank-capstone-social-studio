@@ -99,6 +99,7 @@ export function createMockAppContext(options: MockAppOptions = {}): {
           scheduledFor: null,
           brandName: input.brandName ?? null,
           brandTone: input.brandTone ?? null,
+          brandLanguage: input.brandLanguage ?? "en",
           createdAt: clock.now().toISOString(),
           updatedAt: clock.now().toISOString(),
         };
@@ -289,6 +290,7 @@ export function seedCampaign(state: MockState, overrides: Partial<Campaign> = {}
     scheduledFor: overrides.scheduledFor ?? null,
     brandName: overrides.brandName ?? null,
     brandTone: overrides.brandTone ?? null,
+    brandLanguage: overrides.brandLanguage ?? "en",
     createdAt: overrides.createdAt ?? "2026-01-15T12:00:00.000Z",
     updatedAt: overrides.updatedAt ?? "2026-01-15T12:00:00.000Z",
   };

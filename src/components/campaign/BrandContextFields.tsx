@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import {
+  CAMPAIGN_LANGUAGE_OPTIONS,
+  DEFAULT_CAMPAIGN_LANGUAGE,
+  getCampaignLanguageLabel,
+  resolveCampaignLanguage,
+} from "@/config/campaign-languages.config";
 import { BRAND_TONE_OPTIONS, resolveBrandTone } from "@/config/brand-tones.config";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,21 +24,30 @@ const DEFAULT_TONE = "__default__";
 export function BrandContextFields({
   brandName,
   brandTone,
+  brandLanguage,
   onBrandNameChange,
   onBrandToneChange,
+  onBrandLanguageChange,
   nameInputId = "brand-name",
   toneSelectId = "brand-tone",
+  languageSelectId = "brand-language",
   className,
 }: {
   brandName: string;
   brandTone: string;
+  brandLanguage: string;
   onBrandNameChange: (value: string) => void;
   onBrandToneChange: (value: string) => void;
+  onBrandLanguageChange: (value: string) => void;
   nameInputId?: string;
   toneSelectId?: string;
+  languageSelectId?: string;
   className?: string;
 }) {
-  const [open, setOpen] = useState(Boolean(brandName.trim() || brandTone));
+  const resolvedLanguage = resolveCampaignLanguage(brandLanguage || DEFAULT_CAMPAIGN_LANGUAGE);
+  const [open, setOpen] = useState(
+    Boolean(brandName.trim() || brandTone || brandLanguage !== DEFAULT_CAMPAIGN_LANGUAGE),
+  );
   const selectedTone = brandTone ? resolveBrandTone(brandTone) : null;
 
   return (
@@ -48,8 +63,8 @@ export function BrandContextFields({
           </p>
           <p className="text-xs text-muted-foreground">
             {selectedTone
-              ? `Captions will use a ${selectedTone.label.toLowerCase()} tone.`
-              : "Expand to set a brand name and tone of voice for generated captions."}
+              ? `Captions in ${getCampaignLanguageLabel(brandLanguage)} with a ${selectedTone.label.toLowerCase()} tone.`
+              : `Captions will be generated in ${getCampaignLanguageLabel(brandLanguage)}.`}
           </p>
         </div>
         <ChevronDown
@@ -62,7 +77,7 @@ export function BrandContextFields({
 
       <CollapsibleContent className="px-4 pb-4">
         <div className="grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
-          <div className="space-y-2 min-w-0">
+          <div className="space-y-2 min-w-0 sm:col-span-2">
             <Label htmlFor={nameInputId}>Brand / company name</Label>
             <Input
               id={nameInputId}
@@ -92,6 +107,27 @@ export function BrandContextFields({
             {selectedTone && (
               <p className="text-[11px] text-muted-foreground">{selectedTone.description}</p>
             )}
+          </div>
+          <div className="space-y-2 min-w-0">
+            <Label htmlFor={languageSelectId}>Language</Label>
+            <Select
+              value={brandLanguage || DEFAULT_CAMPAIGN_LANGUAGE}
+              onValueChange={onBrandLanguageChange}
+            >
+              <SelectTrigger id={languageSelectId}>
+                <SelectValue placeholder="English" />
+              </SelectTrigger>
+              <SelectContent>
+                {CAMPAIGN_LANGUAGE_OPTIONS.map((language) => (
+                  <SelectItem key={language.id} value={language.id}>
+                    {language.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground">
+              Campaign captions and visuals use {resolvedLanguage.promptName}.
+            </p>
           </div>
         </div>
       </CollapsibleContent>

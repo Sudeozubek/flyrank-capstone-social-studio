@@ -108,13 +108,15 @@ CREATE TABLE IF NOT EXISTS public.campaigns (
   scheduled_for TIMESTAMPTZ,
   brand_name TEXT,
   brand_tone TEXT,
+  brand_language TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 -- Upgrade path for databases created from the pre-brand schema.
 ALTER TABLE public.campaigns
   ADD COLUMN IF NOT EXISTS brand_name TEXT,
-  ADD COLUMN IF NOT EXISTS brand_tone TEXT;
+  ADD COLUMN IF NOT EXISTS brand_tone TEXT,
+  ADD COLUMN IF NOT EXISTS brand_language TEXT;
 CREATE INDEX IF NOT EXISTS campaigns_user_created_idx ON public.campaigns (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS campaigns_scheduled_idx ON public.campaigns (scheduled_for);
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.campaigns TO authenticated;
