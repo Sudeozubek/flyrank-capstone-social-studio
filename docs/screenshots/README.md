@@ -1,7 +1,7 @@
 # Screenshots
 
 Reviewer-facing evidence images referenced by [`../../EVIDENCE.md`](../../EVIDENCE.md).
-Capture each one from a running instance (`bun run dev` → http://localhost:8080) and drop it
+Capture each one from a running instance (`npm run dev` → http://localhost:8080) and drop it
 here with the exact filename.
 
 | File | What to capture |

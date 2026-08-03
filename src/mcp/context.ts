@@ -7,6 +7,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { createAppContext } from "@/infrastructure/context.server";
+import { supabaseRealtimeOptions } from "@/integrations/supabase/realtime-options.server";
 import type { AppContext } from "@/domain/ports";
 import type { McpCallerContext, McpToolResult } from "./types";
 
@@ -62,6 +63,7 @@ export function supabasePublishableKey(): string {
 /** Request-scoped client carrying the caller's token, so RLS applies as them. */
 export function supabaseForUser(token: string) {
   return createClient(supabaseProjectUrl(), supabasePublishableKey(), {
+    ...supabaseRealtimeOptions(),
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
   });

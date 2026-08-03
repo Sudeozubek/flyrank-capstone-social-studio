@@ -8,8 +8,8 @@ Replace `<REPO>` with the repository URL when publishing (e.g.
 Reproduce every automated check with:
 
 ```bash
-bun install && bun run test
-# 3 files, 20 tests, all passing
+npm install && npm run test
+# 14 files, 78 tests, all passing
 ```
 
 Screenshots are captured and committed under `docs/screenshots/` (12 images, referenced per
@@ -28,7 +28,8 @@ with a per-platform idempotency key; the dashboard renders the two variants side
 - Implementation: `<REPO>src/application/campaign-usecases.ts`, `<REPO>src/domain/entities.ts`
 - Interface: server function `createCampaignWithAssets` — `<REPO>src/lib/flyrank.functions.ts`
 - MCP tool: `create_campaign` — `<REPO>src/mcp/tools/create-campaign.ts`
-- Tests: `tests/domain.test.ts › image geometry`, `tests/domain.test.ts › captions`
+- Tests: `tests/domain.test.ts › image geometry`, `tests/domain.test.ts › captions`,
+  `tests/captions.test.ts`
 - Screenshot: `docs/screenshots/01-campaign-variants.png`
 
 ## DoD 2 — Exact per-platform image dimensions with subject in the safe zone
@@ -69,7 +70,7 @@ determinism.
   `<REPO>src/config/social-prompts.config.ts`,
   `<REPO>src/infrastructure/ai/openai-caption-writer.server.ts`
 - Interface: `createCampaignWithAssets`, `regenerateCaptions`
-- Tests: `tests/domain.test.ts › captions` (4 tests)
+- Tests: `tests/domain.test.ts › captions` (4 tests), `tests/captions.test.ts`
 - Screenshot: `docs/screenshots/03-caption-comparison.png`
 
 ## DoD 4 — Unified publisher interface, fake platform only
@@ -86,7 +87,8 @@ platform. No real social endpoint exists anywhere in `src/`.
   `<REPO>src/infrastructure/publishing/fake-platform-transport.server.ts`
 - Endpoints: `POST|GET /api/public/fake-platform/$platform/posts` —
   `<REPO>src/routes/api/public/fake-platform/$platform/posts.ts`
-- Tests: `tests/security.test.ts › no real social platform is ever called`
+- Tests: `tests/security.test.ts › no real social platform is ever called`,
+  `tests/publishing-adapters.test.ts`, `tests/fake-platform-transport.test.ts`
 - Screenshot: `docs/screenshots/04-fake-platform-state.png`
 
 ## DoD 5 — Idempotency: publish twice / retry after timeout → exactly one post
@@ -104,7 +106,8 @@ platform holding one post after repeated publishes.
 - Endpoints: `publishCampaignFn`, `retryCampaignFn`;
   `GET /api/public/fake-platform/x/posts` to inspect
 - Tests: `tests/domain.test.ts › publish reliability primitives › derives a deterministic
-  idempotency key per (campaign, platform)`
+  idempotency key per (campaign, platform)`,
+  `tests/publish-usecases.test.ts`
 - Manual probe: *Publish now* ×3 → fake-platform state still lists one post per platform
 - Screenshot: `docs/screenshots/05-idempotency.png`
 
@@ -127,7 +130,8 @@ attempt with its HTTP status and retry delay.
   retry loop in `<REPO>src/application/publish-usecases.ts`; injectable 429s in the fake platform
 - Endpoints: `setPlatformRateLimit` (demo control), `publishCampaignFn`
 - Tests: `tests/domain.test.ts › publish reliability primitives › honours Retry-After above the
-  exponential floor and caps growth`
+  exponential floor and caps growth`,
+  `tests/publish-usecases.test.ts › attemptEntry`
 - Manual probe: *Force 429 ×2* → publish → attempts drawer shows two `429`s then success
 - Screenshot: `docs/screenshots/06-rate-limit-attempts.png`
 
@@ -146,7 +150,8 @@ statuses are derived purely from entries.
 - Endpoints: `scheduleCampaignFn`, `tickWorker`
 - MCP tools: `schedule_campaign`, `campaign_status`
 - Tests: `tests/domain.test.ts › publish reliability primitives › derives campaign status from
-  its entries`
+  its entries`,
+  `tests/delivery-usecases.test.ts`
 - Manual probe: schedule → tick → interrupt → tick again → one post, status resolves
 - Screenshot: `docs/screenshots/07-scheduling-timeline.png`
 
@@ -170,7 +175,8 @@ nothing.
   `<REPO>src/application/delivery-usecases.ts`
 - Endpoint: `POST /api/public/webhooks/delivery` —
   `<REPO>src/routes/api/public/webhooks/delivery.ts`
-- Tests: `tests/security.test.ts › delivery webhook signatures` (4 tests)
+- Tests: `tests/security.test.ts › delivery webhook signatures` (4 tests),
+  `tests/delivery-usecases.test.ts`
 - Manual probe: fire a forged webhook → `400`, status unchanged; fire the genuine one →
   **Published**
 - Screenshot: `docs/screenshots/08-webhook-log.png`
@@ -206,10 +212,12 @@ returns `400`, never a 500. Dependencies point inward: `interfaces → applicati
 domain layer imports no I/O module; use cases receive their adapters from a single composition
 root.
 
-- Implementation: `<REPO>supabase/migrations/`, `<REPO>src/routes/_authenticated/route.tsx`,
+- Implementation: `<REPO>supabase/migrations/`, `<REPO>src/routes/auth.tsx` (Supabase Auth),
+  `<REPO>src/routes/_authenticated/route.tsx`,
   `<REPO>src/infrastructure/context.server.ts`, `<REPO>src/domain/ports.ts`
 - Endpoints: all authenticated server functions in `<REPO>src/lib/flyrank.functions.ts`
-- Tests: layering is enforced by review + the folder boundary documented in `ports.ts`
+- Tests: layering enforced by review + `ports.ts`; `tests/supabase-mappers.test.ts`,
+  `tests/ingest-content.test.ts`
 - Screenshot: `docs/screenshots/10-auth-and-rls.png`
 
 ## DoD 11 — Documentation and submission pack
@@ -232,4 +240,5 @@ calls of its own.
 - Implementation: `<REPO>src/mcp/server.ts`, `<REPO>src/mcp/tools/*` (7 tools)
 - Endpoints: `POST /api/public/mcp`, `GET /.well-known/oauth-protected-resource`,
   consent at `/oauth/consent`
+- Tests: `tests/mcp-server.test.ts`, `tests/mcp-context.test.ts`
 - Screenshot: `docs/screenshots/11-mcp-tools.png`

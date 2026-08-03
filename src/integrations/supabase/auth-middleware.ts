@@ -3,6 +3,7 @@ import { createMiddleware } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types'
+import { supabaseRealtimeOptions } from './realtime-options.server'
 
 
 
@@ -41,7 +42,7 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
         ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
         ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
       ];
-      const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
+      const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Set them in .env (see .env.example).`;
       console.error(`[Supabase] ${message}`);
       throw new Error(message);
     }
@@ -75,6 +76,7 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
       SUPABASE_URL!,
       SUPABASE_PUBLISHABLE_KEY!,
       {
+        ...supabaseRealtimeOptions(),
         global: {
           fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY!),
           headers: {

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { signUpAccount } from "@/lib/auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,17 +60,20 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      const returnTo = next ? window.location.origin + next : window.location.origin;
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: returnTo },
-        });
-        if (error) throw error;
-        if (!data.session) {
-          toast.info("Check your email to confirm your account.");
-          return;
+        const result = await signUpAccount({ data: { email, password } });
+
+        if (!result.ok && result.needsClientSignup) {
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+          if (!data.session) {
+            throw new Error(
+              "Hesap oluşturuldu ama oturum açılamadı. Supabase Dashboard → Authentication → Sign In / Providers → Email → «Confirm email» seçeneğini kapatın, sonra tekrar kayıt olun.",
+            );
+          }
+        } else {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -85,15 +88,14 @@ function AuthPage() {
   }
 
   async function google() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: next ? window.location.origin + next : window.location.origin,
+    const returnTo = next ? window.location.origin + next : window.location.origin;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: returnTo },
     });
-    if (result.error) {
-      toast.error("Google sign-in failed");
-      return;
+    if (error) {
+      toast.error(error.message || "Google sign-in failed");
     }
-    if (result.redirected) return;
-    afterAuth();
   }
 
 

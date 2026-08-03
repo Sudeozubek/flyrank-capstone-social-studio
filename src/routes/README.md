@@ -19,3 +19,10 @@ is `src/routes/__root.tsx`.
 | `__root.tsx` | app shell — wraps every page; preserve `<Outlet />` |
 
 `routeTree.gen.ts` is auto-generated. Don't edit it by hand.
+
+## Testing routes
+
+Route files are not unit-tested directly — behaviour is covered through application use-case
+tests (`tests/publish-usecases.test.ts`, etc.) and manual dashboard probes in `EVIDENCE.md`.
+Public API routes under `api/public/**` are exercised via the fake-platform transport tests
+and the delivery webhook security suite.
