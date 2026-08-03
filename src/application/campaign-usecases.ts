@@ -118,8 +118,10 @@ export async function generateImages(
       width: spec.width,
       height: spec.height,
       title: post.title,
+      body: post.body,
       seed: `${post.id}:${entry.platform}`,
       brand: campaign.brandName?.trim() || "CampaignHub",
+      brandTone: campaign.brandTone,
       subject,
     });
 

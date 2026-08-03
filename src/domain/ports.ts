@@ -138,8 +138,10 @@ export interface ImageRenderer {
     width: number;
     height: number;
     title: string;
+    body?: string;
     seed: string;
     brand: string;
+    brandTone?: string | null;
     subject: { x: number; y: number; width: number; height: number };
   }): Promise<RenderedImage>;
 }

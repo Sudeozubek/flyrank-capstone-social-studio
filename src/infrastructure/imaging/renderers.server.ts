@@ -142,13 +142,16 @@ export const jimpRenderer: ImageRenderer = {
  * One port, two adapters: prefer sharp, fall back to Jimp on runtimes without
  * native modules. Callers never learn which one ran.
  */
-export const imageRenderer: ImageRenderer = {
-  name: "auto",
+export const svgImageRenderer: ImageRenderer = {
+  name: "svg",
   async render(spec) {
     const sharp = await loadSharp();
     return sharp ? sharpRenderer.render(spec) : jimpRenderer.render(spec);
   },
 };
+
+/** @deprecated Use svgImageRenderer — kept for tests and explicit SVG-only paths. */
+export const imageRenderer = svgImageRenderer;
 
 /** Decoded PNG header dimensions — used by tests and by the upload path. */
 export function readPngSize(bytes: Uint8Array): { width: number; height: number } {

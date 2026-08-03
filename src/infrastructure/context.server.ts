@@ -8,7 +8,8 @@ import type { AppContext, Clock } from "@/domain/ports";
 import { openAiCaptionWriter } from "@/infrastructure/ai/openai-caption-writer.server";
 import { tokenCipher } from "@/infrastructure/crypto/token-cipher.server";
 
-import { imageRenderer } from "@/infrastructure/imaging/renderers.server";
+import { createAiImageRenderer } from "@/infrastructure/imaging/ai-image-renderer.server";
+import { svgImageRenderer } from "@/infrastructure/imaging/renderers.server";
 import { documentParser } from "@/infrastructure/parsing/document-parser.server";
 import {
   createAttemptRepository,
@@ -57,7 +58,7 @@ export function createAppContext(db: Db, userId: string, options: ContextOptions
     attempts: createAttemptRepository(db, userId),
     webhooks: createWebhookEventRepository(db, userId),
     images: createImageStore(db),
-    renderer: imageRenderer,
+    renderer: createAiImageRenderer(svgImageRenderer),
     captionWriter: openAiCaptionWriter,
 
     parser: documentParser,
