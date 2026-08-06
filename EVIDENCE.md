@@ -12,7 +12,7 @@ npm install && npm run test
 # 14 files, 78 tests, all passing
 ```
 
-Screenshots are captured and committed under `docs/screenshots/` (12 images, referenced per
+Screenshots are captured and committed under `docs/screenshots/` (13 numbered images, referenced per
 requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png`).
 
 ---
@@ -30,7 +30,8 @@ with a per-platform idempotency key; the dashboard renders the two variants side
 - MCP tool: `create_campaign` — `<REPO>src/mcp/tools/create-campaign.ts`
 - Tests: `tests/domain.test.ts › image geometry`, `tests/domain.test.ts › captions`,
   `tests/captions.test.ts`
-- Screenshot: `docs/screenshots/01-campaign-variants.png`
+- Screenshot: `docs/screenshots/01-campaign-variants.png`,
+  `docs/screenshots/12-dashboard-blog-library-and-campaign-variants.png`
 
 ## DoD 2 — Exact per-platform image dimensions with subject in the safe zone
 

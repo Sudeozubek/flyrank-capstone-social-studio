@@ -17,3 +17,4 @@ here with the exact filename.
 | `09-credentials-schema.png` | `platform_credentials` row showing only ciphertext |
 | `10-auth-and-rls.png` | Sign-in screen and/or a migration excerpt with RLS policies |
 | `11-mcp-tools.png` | `tools/list` response from `POST /api/public/mcp` |
+| `12-dashboard-blog-library-and-campaign-variants.png` | Full dashboard: blog library composer, brand context, and a draft campaign with Instagram + X captions and AI image variants |
