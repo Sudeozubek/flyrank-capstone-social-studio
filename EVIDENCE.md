@@ -12,8 +12,8 @@ npm install && npm run test
 # 21 files, 117 tests, all passing
 ```
 
-Screenshots are captured and committed under `docs/screenshots/` (13 numbered images, referenced per
-requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png`).
+Screenshots are captured and committed under `docs/screenshots/` (17 numbered images, referenced per
+requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png` when present).
 
 ---
 
@@ -33,7 +33,8 @@ platform tabs.
 - Tests: `tests/domain.test.ts › image geometry`, `tests/domain.test.ts › captions`,
   `tests/captions.test.ts`
 - Screenshot: `docs/screenshots/01-campaign-variants.png`,
-  `docs/screenshots/12-dashboard-blog-library-and-campaign-variants.png`
+  `docs/screenshots/12-dashboard-blog-library-and-campaign-variants.png`,
+  `docs/screenshots/14-variant-gallery-carousel-three-platforms.png`
 
 ## DoD 2 — Exact per-platform image dimensions with subject in the safe zone
 
@@ -76,7 +77,9 @@ the source article, and determinism.
 - Interface: `createCampaignWithAssets`, `regenerateCaptions`
 - Tests: `tests/domain.test.ts › captions` (4 tests), `tests/captions.test.ts`,
   `tests/campaign-languages.test.ts`
-- Screenshot: `docs/screenshots/03-caption-comparison.png`
+- Screenshot: `docs/screenshots/03-caption-comparison.png`,
+  `docs/screenshots/15-brand-tone-selector.png`,
+  `docs/screenshots/16-campaign-language-selector.png`
 
 ## DoD 4 — Unified publisher interface, fake platform only
 
@@ -265,6 +268,7 @@ calling the API. The dashboard shows spend via `AiSpendBadge` (header) and `AiSp
 - Schema: `ai_usage_records` in `<REPO>supabase/migrations/20260807210000_add_ai_usage_records.sql`
 - Config: `AI_BUDGET_USD` in `.env.example`
 - Tests: `tests/ai-cost-meter.test.ts`, `tests/ai-spend-snapshot.test.ts`
+- Screenshot: `docs/screenshots/13-ai-spend-observability-panel.png`
 
 ## DoD 13 — Automatic background worker
 
@@ -293,3 +297,4 @@ campaign.
 - Implementation: `<REPO>src/config/platform-specs.ts`, `<REPO>src/infrastructure/publishing/adapters.server.ts`
 - Schema: `linkedin` platform enum — `<REPO>supabase/migrations/20260807200000_add_linkedin_platform.sql`
 - Tests: `tests/publishing-adapters.test.ts`, `tests/domain.test.ts › image geometry`
+- Screenshot: `docs/screenshots/14-variant-gallery-carousel-three-platforms.png`
