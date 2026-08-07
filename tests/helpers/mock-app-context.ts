@@ -11,6 +11,7 @@ import type {
   PublishResult,
   SocialPublisher,
 } from "@/domain/ports";
+import { createInMemoryAiCostMeter } from "@/infrastructure/ai/ai-cost-meter.server";
 
 let seq = 0;
 const nextId = (prefix: string) => `${prefix}-${++seq}`;
@@ -212,6 +213,7 @@ export function createMockAppContext(options: MockAppOptions = {}): {
         return [];
       },
     },
+    aiCostMeter: createInMemoryAiCostMeter(),
     images: {
       async put(path) {
         return path;
@@ -222,11 +224,11 @@ export function createMockAppContext(options: MockAppOptions = {}): {
     },
     renderer: {
       name: "mock",
-      async render() {
+      async render(spec) {
         return {
           bytes: new Uint8Array([137, 80, 78, 71]),
-          width: 1080,
-          height: 1080,
+          width: spec.width,
+          height: spec.height,
           contentType: "image/png" as const,
           renderer: "mock",
         };

@@ -1,13 +1,13 @@
 /**
  * Signed delivery webhook — the sole writer of terminal entry status.
  * Unsigned, malformed or replayed-outside-tolerance payloads are rejected
- * with 401 and recorded for the audit log.
+ * with 400 and recorded for the audit log.
  */
 
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { applyDelivery } from "@/application/delivery-usecases";
-import { isPlatform } from "@/domain/entities";
+import { isPlatform, type Platform } from "@/domain/entities";
 import {
   digest,
   SIGNATURE_HEADER,
@@ -34,11 +34,11 @@ export const Route = createFileRoute("/api/public/webhooks/delivery")({
         if (!verifySignature(raw, signature)) {
           await supabaseAdmin.from("webhook_events").insert({
             signature_valid: false,
-            http_status: 401,
+            http_status: 400,
             payload_digest: digest(raw),
             message: "invalid or missing signature",
           });
-          return Response.json({ error: "invalid signature" }, { status: 401 });
+          return Response.json({ error: "invalid signature" }, { status: 400 });
         }
 
         const parsed = payloadSchema.safeParse(JSON.parse(raw || "{}"));
@@ -76,7 +76,7 @@ export const Route = createFileRoute("/api/public/webhooks/delivery")({
         await supabaseAdmin.from("webhook_events").insert({
           user_id: entry.user_id,
           entry_id: parsed.data.entryId,
-          platform: parsed.data.platform as "instagram" | "x",
+          platform: parsed.data.platform as Platform,
           signature_valid: true,
           http_status: 200,
           payload_digest: digest(raw),

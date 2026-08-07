@@ -3,6 +3,11 @@
  */
 
 import type { Platform } from "@/domain/entities";
+import type { AiCostMeter } from "@/domain/ports";
+import {
+  getTestAiCostMeter,
+  imageGenerationEstimateUsd,
+} from "@/infrastructure/ai/ai-cost-meter.server";
 
 const ENDPOINT = "https://api.openai.com/v1/images/generations";
 const TIMEOUT_MS = 60_000;
@@ -10,15 +15,22 @@ const DEFAULT_MODEL = "gpt-image-1.5";
 const DEFAULT_QUALITY = "medium";
 
 function generationSize(platform: Platform): "1024x1024" | "1536x1024" | "1024x1536" {
-  return platform === "x" ? "1536x1024" : "1024x1024";
+  if (platform === "x" || platform === "linkedin") return "1536x1024";
+  return "1024x1024";
 }
 
 export async function generateOpenAiImage(
   prompt: string,
   platform: Platform,
+  meter: AiCostMeter = getTestAiCostMeter(),
 ): Promise<Uint8Array> {
   const apiKey = process.env["OPENAI_API_KEY"];
   if (!apiKey) throw new Error("missing OPENAI_API_KEY");
+
+  const imageEstimate = imageGenerationEstimateUsd();
+  if (!(await meter.canSpend(imageEstimate))) {
+    throw new Error("AI budget exhausted");
+  }
 
   const model = process.env["OPENAI_IMAGE_MODEL"]?.trim() || DEFAULT_MODEL;
   const quality = process.env["OPENAI_IMAGE_QUALITY"]?.trim() || DEFAULT_QUALITY;
@@ -47,6 +59,14 @@ export async function generateOpenAiImage(
       const detail = await response.text().catch(() => "");
       throw new Error(`image API HTTP ${response.status}: ${detail.slice(0, 240)}`);
     }
+
+    await meter.record({
+      feature: `image:${platform}`,
+      model,
+      inputTokens: 0,
+      outputTokens: 0,
+      estimatedUsd: imageEstimate,
+    });
 
     const json = (await response.json()) as {
       data?: Array<{ b64_json?: string; url?: string }>;

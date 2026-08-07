@@ -5,7 +5,8 @@
 
 import type { Platform } from "@/domain/entities";
 import type { AppContext, Clock } from "@/domain/ports";
-import { openAiCaptionWriter } from "@/infrastructure/ai/openai-caption-writer.server";
+import { createDbAiCostMeter } from "@/infrastructure/ai/ai-cost-meter-db.server";
+import { createOpenAiCaptionWriter } from "@/infrastructure/ai/openai-caption-writer.server";
 import { tokenCipher } from "@/infrastructure/crypto/token-cipher.server";
 
 import { createAiImageRenderer } from "@/infrastructure/imaging/ai-image-renderer.server";
@@ -47,6 +48,7 @@ export function createAppContext(db: Db, userId: string, options: ContextOptions
   const transport = createFakePlatformTransport(resolveFakePlatformBaseUrl(options.requestUrl));
   const credentials = createCredentialRepository(db, userId);
   const cipherCache = new Map<Platform, string>();
+  const aiCostMeter = createDbAiCostMeter(db, userId);
 
   return {
     userId,
@@ -57,9 +59,10 @@ export function createAppContext(db: Db, userId: string, options: ContextOptions
     credentials,
     attempts: createAttemptRepository(db, userId),
     webhooks: createWebhookEventRepository(db, userId),
+    aiCostMeter,
     images: createImageStore(db),
-    renderer: createAiImageRenderer(svgImageRenderer),
-    captionWriter: openAiCaptionWriter,
+    renderer: createAiImageRenderer(svgImageRenderer, aiCostMeter),
+    captionWriter: createOpenAiCaptionWriter(aiCostMeter),
 
     parser: documentParser,
     publisherFor(platform) {

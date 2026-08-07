@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
 const FEATURES = [
   {
     title: "Platform-native assets",
-    body: "One post fans out into a 1080×1080 Instagram variant and a 1600×900 X variant, each with its own voice, length and hashtag budget.",
+    body: "One post fans out into Instagram (1080×1080), X (1600×900) and LinkedIn (1200×627) variants — each with its own voice, length and hashtag budget.",
   },
   {
     title: "Idempotent publishing",

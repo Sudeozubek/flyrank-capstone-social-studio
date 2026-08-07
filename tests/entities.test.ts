@@ -9,12 +9,12 @@ describe("platform type guard", () => {
   });
 
   it("rejects unknown strings", () => {
-    expect(isPlatform("linkedin")).toBe(false);
+    expect(isPlatform("tiktok")).toBe(false);
     expect(isPlatform("")).toBe(false);
     expect(isPlatform("Instagram")).toBe(false);
   });
 
-  it("lists exactly instagram and x", () => {
-    expect([...PLATFORMS].sort()).toEqual(["instagram", "x"]);
+  it("lists instagram, x and linkedin", () => {
+    expect([...PLATFORMS].sort()).toEqual(["instagram", "linkedin", "x"]);
   });
 });

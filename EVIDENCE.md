@@ -9,7 +9,7 @@ Reproduce every automated check with:
 
 ```bash
 npm install && npm run test
-# 14 files, 78 tests, all passing
+# 20 files, 109 tests, all passing
 ```
 
 Screenshots are captured and committed under `docs/screenshots/` (13 numbered images, referenced per
@@ -243,3 +243,34 @@ calls of its own.
   consent at `/oauth/consent`
 - Tests: `tests/mcp-server.test.ts`, `tests/mcp-context.test.ts`
 - Screenshot: `docs/screenshots/11-mcp-tools.png`
+
+## DoD 12 — AI cost tracking and budget guard
+
+**Explanation.** Every OpenAI call (captions, art director, image generation) records an
+estimated USD cost attributed to a feature name. Before each call, `canSpendAi()` checks
+cumulative spend against `AI_BUDGET_USD`; when the budget is exhausted, the app falls back
+to the deterministic caption composer / SVG renderer without calling the API.
+
+- Implementation: `<REPO>src/infrastructure/ai/ai-cost-meter.server.ts`, wired into
+  `openai-caption-writer.server.ts`, `openai-art-director.server.ts`,
+  `openai-image-generator.server.ts`
+- Config: `AI_BUDGET_USD` in `.env.example`
+- Tests: `tests/ai-cost-meter.test.ts`
+
+## DoD 13 — Automatic background worker
+
+**Explanation.** On server boot, a background loop polls Postgres every
+`WORKER_POLL_INTERVAL_MS` (default 10s) via `claim_due_entries` (service role) and
+publishes due entries — scheduled posts fire without a manual dashboard tick.
+
+- Implementation: `<REPO>src/infrastructure/worker/background-worker.server.ts`,
+  `runGlobalWorkerTick` in `<REPO>src/application/worker.ts`, started from `<REPO>src/server.ts`
+- Config: `WORKER_ENABLED`, `WORKER_POLL_INTERVAL_MS` in `.env.example`
+- Tests: `tests/reliability-probes.test.ts` (crash-resume + idempotency probes)
+
+## DoD 14 — Capstone acceptance probes (automated)
+
+**Explanation.** PDF §12 probes 1–4 are covered deterministically (no live DB/network).
+
+- Tests: `tests/reliability-probes.test.ts`
+- Forged webhook HTTP status: `400` — `<REPO>src/routes/api/public/webhooks/delivery.ts`

@@ -24,8 +24,10 @@ import {
   scheduleCampaign,
 } from "@/application/publish-usecases";
 import { runWorkerTick } from "@/application/worker";
+import { PLATFORMS } from "@/domain/entities";
 import { createAppContext } from "@/infrastructure/context.server";
 import type { CampaignSnapshot } from "@/domain/entities";
+import type { AiSpendSnapshot } from "@/domain/ai-spend";
 
 const uuid = z.string().uuid();
 const brandTone = brandToneInputSchema;
@@ -196,6 +198,7 @@ export interface DashboardData {
   campaigns: Array<CampaignSnapshot & { images: Record<string, string | null> }>;
   posts: Awaited<ReturnType<typeof listPosts>>;
   webhooks: Awaited<ReturnType<ReturnType<typeof createAppContext>["webhooks"]["listRecent"]>>;
+  aiSpend: AiSpendSnapshot;
 }
 
 export const loadDashboard = createServerFn({ method: "GET" })
@@ -224,7 +227,7 @@ export const loadDashboard = createServerFn({ method: "GET" })
       }),
     );
 
-    return { posts, campaigns: snapshots.filter((s) => s.post), webhooks };
+    return { posts, campaigns: snapshots.filter((s) => s.post), webhooks, aiSpend: await app.aiCostMeter.getSnapshot() };
   });
 
 export const tickWorker = createServerFn({ method: "POST" })
@@ -236,7 +239,7 @@ export const tickWorker = createServerFn({ method: "POST" })
 export const setPlatformRateLimit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ platform: z.enum(["instagram", "x"]), failures: z.number().int().min(0).max(10) }).parse(input),
+    z.object({ platform: z.enum(PLATFORMS), failures: z.number().int().min(0).max(10) }).parse(input),
   )
   .handler(async ({ data }) => {
     const { setRateLimit } = await import("@/routes/api/public/fake-platform/$platform/posts");

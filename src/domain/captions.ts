@@ -1,6 +1,6 @@
 /**
  * Caption composer — pure. (post, platform) -> tailored caption assembled from
- * shared brand voice + platform overrides. X and Instagram diverge in
+ * shared brand voice + platform overrides. X, Instagram and LinkedIn diverge in
  * structure, tone, length and hashtag count; neither is a truncation of the other.
  */
 
@@ -201,7 +201,7 @@ export function composeCaption(
 
   const filled = voice.template
     .replace("{hook}", withBrand(pick(hooks, seed)))
-    .replace("{title}", platform === "x" ? post.title : post.title.toUpperCase())
+    .replace("{title}", platform === "instagram" ? post.title.toUpperCase() : post.title)
     .replace("{summary}", summary)
     .replace("{value}", pick(valueProps, seed))
     .replace("{cta}", pick(ctas, seed))

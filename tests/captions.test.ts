@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
+import { PLATFORMS } from "@/domain/entities";
 import {
   clamp,
   composeCaption,
@@ -73,7 +74,7 @@ describe("composeCaption brand substitution", () => {
   });
 
   it("respects platform length limits after brand substitution", () => {
-    for (const platform of ["instagram", "x"] as const) {
+    for (const platform of PLATFORMS) {
       const caption = composeCaption(post, platform, { name: "Very Long Brand Name International" });
       expect(caption.length).toBeLessThanOrEqual(PLATFORM_SPECS[platform].maxCaptionLength);
     }

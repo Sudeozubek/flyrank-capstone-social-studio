@@ -48,6 +48,17 @@ export const PLATFORM_SPECS: Record<Platform, PlatformSpec> = {
     maxHashtags: 2,
     brandCorner: "bottom-right",
   },
+  linkedin: {
+    id: "linkedin",
+    label: "LinkedIn",
+    width: 1200,
+    height: 627,
+    aspectLabel: "1.91:1",
+    safeZone: { top: 0.07, right: 0.07, bottom: 0.12, left: 0.07 },
+    maxCaptionLength: 3000,
+    maxHashtags: 5,
+    brandCorner: "bottom-left",
+  },
 };
 
 export const platformSpecList = PLATFORMS.map((p) => PLATFORM_SPECS[p]);

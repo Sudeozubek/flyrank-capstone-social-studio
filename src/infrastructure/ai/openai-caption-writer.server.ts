@@ -17,7 +17,12 @@ import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
 import { clamp, composeCaption, captionLimit, fitCaptionToLimit, summarize, type CaptionSource } from "@/domain/captions";
 import type { BrandContext, Platform } from "@/domain/entities";
-import type { CaptionWriter } from "@/domain/ports";
+import type { AiCostMeter, CaptionWriter } from "@/domain/ports";
+import {
+  CHAT_PREFLIGHT_USD,
+  estimateChatCost,
+  getTestAiCostMeter,
+} from "@/infrastructure/ai/ai-cost-meter.server";
 
 const MODEL = "gpt-4o-mini";
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
@@ -70,7 +75,13 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
           '- Never use "…" or an ellipsis. If tight on space, shorten — do not trail off.',
           "- Keep the title short; put the insight in one full sentence.",
         ]
-      : []),
+      : platform === "linkedin"
+        ? [
+            "- LinkedIn format: professional opener, 2–3 short paragraphs, one clear takeaway, link on its own line.",
+            "- No consumer-social slang; write for practitioners and decision-makers.",
+            "- Hashtags sparingly — only when they add discoverability.",
+          ]
+        : []),
     "",
     ...(tone
       ? [
@@ -143,11 +154,15 @@ function fallbackCaption(
   });
 }
 
-export const openAiCaptionWriter: CaptionWriter = {
-  name: "openai",
-  async write(post, platform, brand) {
-    const apiKey = process.env["OPENAI_API_KEY"];
-    if (!apiKey) return fallbackCaption(post, platform, "missing OPENAI_API_KEY", brand);
+export function createOpenAiCaptionWriter(meter: AiCostMeter): CaptionWriter {
+  return {
+    name: "openai",
+    async write(post, platform, brand) {
+      const apiKey = process.env["OPENAI_API_KEY"];
+      if (!apiKey) return fallbackCaption(post, platform, "missing OPENAI_API_KEY", brand);
+      if (!(await meter.canSpend(CHAT_PREFLIGHT_USD))) {
+        return fallbackCaption(post, platform, "AI budget exhausted", brand);
+      }
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -184,7 +199,22 @@ export const openAiCaptionWriter: CaptionWriter = {
 
       const json = (await response.json()) as {
         choices?: Array<{ message?: { content?: string } }>;
+        usage?: { prompt_tokens?: number; completion_tokens?: number };
       };
+      const usage = json.usage;
+      if (usage) {
+        await meter.record({
+          feature: `caption:${platform}`,
+          model: MODEL,
+          inputTokens: usage.prompt_tokens ?? 0,
+          outputTokens: usage.completion_tokens ?? 0,
+          estimatedUsd: estimateChatCost(
+            MODEL,
+            usage.prompt_tokens ?? 0,
+            usage.completion_tokens ?? 0,
+          ),
+        });
+      }
       const content = json.choices?.[0]?.message?.content?.trim();
       if (!content) return fallbackCaption(post, platform, "empty completion", brand);
 
@@ -202,6 +232,10 @@ export const openAiCaptionWriter: CaptionWriter = {
     } finally {
       clearTimeout(timer);
     }
-  },
-};
+    },
+  };
+}
+
+/** Default export for tests — uses the in-memory meter. */
+export const openAiCaptionWriter = createOpenAiCaptionWriter(getTestAiCostMeter());
 

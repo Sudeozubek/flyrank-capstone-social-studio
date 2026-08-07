@@ -8,6 +8,12 @@ import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { summarize } from "@/domain/captions";
 import type { Platform } from "@/domain/entities";
+import type { AiCostMeter } from "@/domain/ports";
+import {
+  CHAT_PREFLIGHT_USD,
+  estimateChatCost,
+  getTestAiCostMeter,
+} from "@/infrastructure/ai/ai-cost-meter.server";
 
 const MODEL = "gpt-4o-mini";
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
@@ -42,9 +48,16 @@ export function buildFallbackImagePrompt(input: ArtDirectionInput): string {
   ].join(" ");
 }
 
-export async function craftImagePrompt(input: ArtDirectionInput): Promise<string> {
+export async function craftImagePrompt(
+  input: ArtDirectionInput,
+  meter: AiCostMeter = getTestAiCostMeter(),
+): Promise<string> {
   const apiKey = process.env["OPENAI_API_KEY"];
   if (!apiKey) return buildFallbackImagePrompt(input);
+  if (!(await meter.canSpend(CHAT_PREFLIGHT_USD))) {
+    console.warn("[images] art director skipped: AI budget exhausted");
+    return buildFallbackImagePrompt(input);
+  }
 
   const spec = PLATFORM_SPECS[input.platform]!;
   const tone = resolveBrandTone(input.brandTone);
@@ -102,7 +115,22 @@ export async function craftImagePrompt(input: ArtDirectionInput): Promise<string
 
     const json = (await response.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
     };
+    const usage = json.usage;
+    if (usage) {
+      await meter.record({
+        feature: `art-director:${input.platform}`,
+        model: MODEL,
+        inputTokens: usage.prompt_tokens ?? 0,
+        outputTokens: usage.completion_tokens ?? 0,
+        estimatedUsd: estimateChatCost(
+          MODEL,
+          usage.prompt_tokens ?? 0,
+          usage.completion_tokens ?? 0,
+        ),
+      });
+    }
     const content = json.choices?.[0]?.message?.content?.trim();
     if (!content) return buildFallbackImagePrompt(input);
 

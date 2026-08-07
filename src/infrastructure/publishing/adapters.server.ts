@@ -1,12 +1,12 @@
 /**
- * SocialPublisher adapters. One class per platform, both speaking the same
+ * SocialPublisher adapters. One class per platform, all speaking the same
  * interface so the application layer never branches on platform identity.
  *
  * Shared behaviour (auth header, idempotency key, response mapping) lives in
  * the base class; platform differences live in the payload shaping.
  */
 
-import type { Platform } from "@/domain/entities";
+import { PLATFORMS, type Platform } from "@/domain/entities";
 import type { PublishInput, PublishResult, SocialPublisher, TokenCipher } from "@/domain/ports";
 import type { FakePlatformTransport } from "./fake-platform-transport.server";
 
@@ -76,6 +76,28 @@ export class XFakeAdapter extends BaseFakeAdapter {
   }
 }
 
+export class LinkedInFakeAdapter extends BaseFakeAdapter {
+  readonly platform: Platform = "linkedin";
+  protected payload(input: PublishInput) {
+    return {
+      commentary: input.caption,
+      content: {
+        media: { ref: input.imageRef },
+      },
+      client_ref: input.entryId,
+    };
+  }
+}
+
+const PUBLISHER_REGISTRY: Record<Platform, new (deps: AdapterDeps) => SocialPublisher> = {
+  instagram: InstagramFakeAdapter,
+  x: XFakeAdapter,
+  linkedin: LinkedInFakeAdapter,
+};
+
 export function createPublisher(platform: Platform, deps: AdapterDeps): SocialPublisher {
-  return platform === "instagram" ? new InstagramFakeAdapter(deps) : new XFakeAdapter(deps);
+  if (!PLATFORMS.includes(platform)) {
+    throw new Error(`unsupported platform: ${platform}`);
+  }
+  return new PUBLISHER_REGISTRY[platform](deps);
 }

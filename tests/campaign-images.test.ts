@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCampaign, generateImages } from "@/application/campaign-usecases";
+import { PLATFORM_SPECS } from "@/config/platform-specs";
+import { PLATFORMS } from "@/domain/entities";
 import { createMockAppContext } from "./helpers/mock-app-context";
 
 describe("campaign image generation", () => {
@@ -14,11 +16,12 @@ describe("campaign image generation", () => {
     const snapshot = await createCampaign(context, { postId: post.id });
     const entries = await generateImages(context, snapshot.campaign.id);
 
-    expect(entries).toHaveLength(2);
+    expect(entries).toHaveLength(PLATFORMS.length);
     for (const entry of entries) {
+      const spec = PLATFORM_SPECS[entry.platform];
       expect(entry.imagePath).toBeTruthy();
-      expect(entry.imageWidth).toBeGreaterThan(0);
-      expect(entry.imageHeight).toBeGreaterThan(0);
+      expect(entry.imageWidth).toBe(spec.width);
+      expect(entry.imageHeight).toBe(spec.height);
     }
   });
 });

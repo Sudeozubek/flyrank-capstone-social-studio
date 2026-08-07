@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   createPublisher,
   InstagramFakeAdapter,
+  LinkedInFakeAdapter,
   XFakeAdapter,
 } from "@/infrastructure/publishing/adapters.server";
 import type { FakePlatformTransport } from "@/infrastructure/publishing/fake-platform-transport.server";
@@ -82,5 +83,27 @@ describe("fake platform adapters", () => {
     const result = await adapter.publish(baseInput, "key");
     expect(result.outcome).toBe("failed");
     expect(result.error).toContain("bad request");
+  });
+
+  it("shapes LinkedIn payloads with commentary + media ref", async () => {
+    const transport = makeTransport({ status: 201, body: { id: "li-remote-1" } });
+    const adapter = new LinkedInFakeAdapter({
+      transport,
+      cipher,
+      accessTokenCiphertext: cipher.encrypt("token-li"),
+    });
+    const result = await adapter.publish(
+      { ...baseInput, platform: "linkedin", caption: "Insight for leaders" },
+      "flyrank:c1:linkedin",
+    );
+    expect(result.outcome).toBe("accepted");
+    expect(transport.post).toHaveBeenCalledWith(
+      "linkedin",
+      expect.objectContaining({
+        commentary: "Insight for leaders",
+        content: { media: { ref: baseInput.imageRef } },
+      }),
+      expect.objectContaining({ "idempotency-key": "flyrank:c1:linkedin" }),
+    );
   });
 });

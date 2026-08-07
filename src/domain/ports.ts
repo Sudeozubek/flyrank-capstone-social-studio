@@ -15,6 +15,7 @@ import type {
   SocialPostEntry,
   WebhookEvent,
 } from "./entities";
+import type { AiSpendSnapshot } from "./ai-spend";
 
 export interface Clock {
   now(): Date;
@@ -86,7 +87,21 @@ export interface AttemptRepository {
   listByEntry(entryId: string): Promise<PublishAttempt[]>;
 }
 
-export interface WebhookEventRepository {
+export interface AiUsageRecord {
+  feature: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedUsd: number;
+  at: string;
+}
+
+/** Tracks cumulative OpenAI spend for budget guards and the dashboard. */
+export interface AiCostMeter {
+  canSpend(estimateUsd: number): Promise<boolean>;
+  record(record: Omit<AiUsageRecord, "at"> & { at?: string }): Promise<void>;
+  getSnapshot(): Promise<AiSpendSnapshot>;
+}
   record(input: {
     entryId?: string | null;
     platform?: Platform | null;
@@ -189,6 +204,7 @@ export interface AppContext {
   credentials: CredentialRepository;
   attempts: AttemptRepository;
   webhooks: WebhookEventRepository;
+  aiCostMeter: AiCostMeter;
   images: ImageStore;
   renderer: ImageRenderer;
   captionWriter: CaptionWriter;

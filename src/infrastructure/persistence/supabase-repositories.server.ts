@@ -17,6 +17,7 @@ import type {
 } from "@/domain/entities";
 import type {
   AttemptRepository,
+  AiUsageRecord,
   CampaignRepository,
   CredentialRepository,
   EntryPatch,
@@ -33,6 +34,7 @@ type EntryRow = Database["public"]["Tables"]["social_post_entries"]["Row"];
 type CredentialRow = Database["public"]["Tables"]["platform_credentials"]["Row"];
 type AttemptRow = Database["public"]["Tables"]["publish_attempts"]["Row"];
 type WebhookRow = Database["public"]["Tables"]["webhook_events"]["Row"];
+type AiUsageRow = Database["public"]["Tables"]["ai_usage_records"]["Row"];
 
 function fail(context: string, error: { message: string } | null): never {
   throw new Error(`${context}: ${error?.message ?? "unknown database error"}`);
@@ -308,6 +310,63 @@ export function createAttemptRepository(db: Db, userId: string): AttemptReposito
           createdAt: row.created_at,
         }),
       );
+    },
+  };
+}
+
+const toAiUsageRecord = (row: AiUsageRow): AiUsageRecord => ({
+  feature: row.feature,
+  model: row.model,
+  inputTokens: row.input_tokens,
+  outputTokens: row.output_tokens,
+  estimatedUsd: Number(row.estimated_usd),
+  at: row.created_at,
+});
+
+export function createAiUsageRepository(db: Db, userId: string) {
+  return {
+    async insert(record: Omit<AiUsageRecord, "at"> & { at?: string }) {
+      const { data, error } = await db
+        .from("ai_usage_records")
+        .insert({
+          user_id: userId,
+          feature: record.feature,
+          model: record.model,
+          input_tokens: record.inputTokens,
+          output_tokens: record.outputTokens,
+          estimated_usd: record.estimatedUsd,
+          ...(record.at ? { created_at: record.at } : {}),
+        })
+        .select()
+        .single();
+      if (error) fail("insertAiUsage", error);
+      return toAiUsageRecord(data as AiUsageRow);
+    },
+    async sumEstimatedUsd() {
+      const { data, error } = await db
+        .from("ai_usage_records")
+        .select("estimated_usd")
+        .eq("user_id", userId);
+      if (error) fail("sumAiUsage", error);
+      return (data ?? []).reduce((sum, row) => sum + Number(row.estimated_usd), 0);
+    },
+    async count() {
+      const { count, error } = await db
+        .from("ai_usage_records")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId);
+      if (error) fail("countAiUsage", error);
+      return count ?? 0;
+    },
+    async listRecent(limit = 8) {
+      const { data, error } = await db
+        .from("ai_usage_records")
+        .select()
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      if (error) fail("listAiUsage", error);
+      return (data ?? []).map((row) => toAiUsageRecord(row as AiUsageRow));
     },
   };
 }
