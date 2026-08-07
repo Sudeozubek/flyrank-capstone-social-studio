@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DEFAULT_CAMPAIGN_LANGUAGE } from "@/config/campaign-languages.config";
+import type { AiSpendSnapshot } from "@/domain/ai-spend";
 import { BrandContextFields } from "@/components/campaign/BrandContextFields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,11 +76,13 @@ export function CampaignComposer({
   busy,
   library,
   libraryLoading,
+  aiSpend,
 }: {
   onSubmit: (input: ComposerSubmit) => Promise<void> | void;
   busy: boolean;
   library: LibraryGroup[];
   libraryLoading: boolean;
+  aiSpend?: AiSpendSnapshot | null;
 }) {
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<string>(ALL_SOURCES);
@@ -178,6 +181,35 @@ export function CampaignComposer({
         onBrandToneChange={setBrandTone}
         onBrandLanguageChange={setBrandLanguage}
       />
+
+      {aiSpend?.status === "exhausted" ? (
+        <div
+          role="status"
+          className="mb-5 flex gap-3 rounded-xl border border-status-failed/30 bg-status-failed/8 px-4 py-3 text-sm text-foreground"
+        >
+          <span className="mt-0.5 text-status-failed" aria-hidden>
+            ●
+          </span>
+          <p>
+            <span className="font-medium">AI budget exhausted.</span> This campaign will use the
+            deterministic caption composer and SVG image renderer — still fully functional, just
+            without OpenAI.
+          </p>
+        </div>
+      ) : aiSpend?.status === "critical" ? (
+        <div
+          role="status"
+          className="mb-5 flex gap-3 rounded-xl border border-status-publishing/30 bg-status-publishing/8 px-4 py-3 text-sm text-foreground"
+        >
+          <span className="mt-0.5 text-status-publishing" aria-hidden>
+            ●
+          </span>
+          <p>
+            <span className="font-medium">AI budget almost full.</span> The next generation may fall
+            back to free composers if the session cap is reached.
+          </p>
+        </div>
+      ) : null}
 
       <Tabs defaultValue="library">
         <TabsList className="mb-4">

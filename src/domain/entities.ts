@@ -2,7 +2,7 @@
  * Domain entities — pure data shapes. No I/O, no framework, no SDK types.
  */
 
-export const PLATFORMS = ["instagram", "x"] as const;
+export const PLATFORMS = ["instagram", "x", "linkedin"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
 export function isPlatform(value: string): value is Platform {

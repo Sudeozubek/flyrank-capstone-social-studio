@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage_records: {
+        Row: {
+          created_at: string
+          estimated_usd: number
+          feature: string
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_usd: number
+          feature: string
+          id?: string
+          input_tokens?: number
+          model: string
+          output_tokens?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          estimated_usd?: number
+          feature?: string
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           body: string
@@ -354,7 +387,7 @@ export type Database = {
         | "completed"
         | "failed"
       entry_status: "queued" | "publishing" | "published" | "failed"
-      platform: "instagram" | "x"
+      platform: "instagram" | "x" | "linkedin"
       post_source: "paste" | "markdown" | "pdf" | "docx" | "seed"
     }
     CompositeTypes: {
@@ -491,7 +524,7 @@ export const Constants = {
         "failed",
       ],
       entry_status: ["queued", "publishing", "published", "failed"],
-      platform: ["instagram", "x"],
+      platform: ["instagram", "x", "linkedin"],
       post_source: ["paste", "markdown", "pdf", "docx", "seed"],
     },
   },

@@ -25,10 +25,10 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     label: "English",
     promptName: "English",
     hooks: [
-      "We shipped something worth reading.",
-      "Fresh off the {brand} blog.",
-      "New write-up, straight from the build log.",
-      "Here's what we learned this week.",
+      "A focused take from our latest article.",
+      "Key insight from the {brand} blog.",
+      "What practitioners should know about this topic.",
+      "Lessons from production, in plain language.",
     ],
     valueProps: [
       "Practical notes from a production pipeline, not theory.",
@@ -39,6 +39,7 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     ctas: {
       x: ["Full write-up:", "Read it:", "Details:"],
       instagram: ["Swipe then read the full post", "Tap through for the whole story", "Read the whole story"],
+      linkedin: ["Read the full article", "Continue reading", "Explore the insights"],
     },
   },
   {
@@ -46,10 +47,10 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     label: "Türkçe",
     promptName: "Turkish",
     hooks: [
-      "Okumaya değer yeni bir yazı yayınladık.",
-      "{brand} blogundan taze bir paylaşım.",
-      "Bu hafta öğrendiklerimizi yazdık.",
-      "Kısa süre ayırırsanız faydalı olacak.",
+      "Makaleden öne çıkan bir bakış açısı.",
+      "{brand} blogunda bu konuyu derinlemesine ele aldık.",
+      "Pratik ekipler için net bir özet.",
+      "Üretimden gelen dersler — kısa ve öz.",
     ],
     valueProps: [
       "Teoriden çok, üretimden gelen pratik notlar.",
@@ -60,6 +61,7 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     ctas: {
       x: ["Yazının tamamı:", "Oku:", "Detaylar:"],
       instagram: ["Tam yazı için kaydırın", "Hikâyenin tamamı için dokunun", "Tüm yazıyı okuyun"],
+      linkedin: ["Makalenin tamamı", "Devamını okuyun", "Detaylı analiz için"],
     },
   },
   {
@@ -81,6 +83,7 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     ctas: {
       x: ["Ganzer Artikel:", "Lesen:", "Details:"],
       instagram: ["Für den ganzen Beitrag wischen", "Tippen für die ganze Story", "Jetzt vollständig lesen"],
+      linkedin: ["Ganzen Artikel lesen", "Weiterlesen", "Zur vollständigen Analyse"],
     },
   },
   {
@@ -102,6 +105,7 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     ctas: {
       x: ["Cijeli tekst:", "Pročitaj:", "Detalji:"],
       instagram: ["Prevucite za cijeli tekst", "Dodirnite za cijelu priču", "Pročitajte cijeli članak"],
+      linkedin: ["Pročitajte cijeli članak", "Nastavite čitanje", "Pogledajte analizu"],
     },
   },
   {
@@ -123,6 +127,7 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     ctas: {
       x: ["Article complet :", "À lire :", "Détails :"],
       instagram: ["Faites défiler pour lire l'article", "Touchez pour toute l'histoire", "Lire l'article complet"],
+      linkedin: ["Lire l'article complet", "Continuer la lecture", "Voir l'analyse complète"],
     },
   },
   {
@@ -144,6 +149,7 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     ctas: {
       x: ["المقال كاملاً:", "اقرأ:", "التفاصيل:"],
       instagram: ["مرّر لقراءة المقال كاملاً", "اضغط لقراءة القصة كاملة", "اقرأ المقال كاملاً"],
+      linkedin: ["اقرأ المقال كاملاً", "تابع القراءة", "اكتشف التحليل الكامل"],
     },
   },
 ] as const;

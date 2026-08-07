@@ -1,5 +1,10 @@
 # capstone.yaml — FlyRank capstone submission metadata
 
+run: npm run dev
+seed: npm run seed
+test: npm run test
+base_url: http://localhost:8080
+
 capstone:
   name: FlyRank
   track: Multi-Platform Social Campaign Engine
@@ -16,14 +21,14 @@ project:
     429 Retry-After, stores OAuth tokens encrypted at rest, and only marks work terminal on a
     signature-verified delivery webhook. A durable lease-based worker makes scheduling
     crash-safe. No real social platform API is ever called.
-  repository: "<REPO_URL>"
+  repository: "https://github.com/Sudeozubek/flyrank-capstone-social-studio"
   license: MIT
   demo_url: ""
 
 author:
-  name: "<YOUR NAME>"
+  name: "Sude Özübek"
   email: "<YOUR EMAIL>"
-  github: "<YOUR GITHUB HANDLE>"
+  github: "Sudeozubek"
 
 stack:
   language: TypeScript
@@ -57,6 +62,9 @@ platforms:
   - id: x
     image: { width: 1600, height: 900, aspect: "16:9" }
     caption: { max_length: 280, max_hashtags: 2 }
+  - id: linkedin
+    image: { width: 1200, height: 627, aspect: "1.91:1" }
+    caption: { max_length: 3000, max_hashtags: 5 }
 
 features:
   - Content ingestion: paste, markdown, PDF, DOCX, curated published-article library
@@ -66,8 +74,13 @@ features:
   - Deterministic idempotency keys enforced by a unique database constraint
   - 429 Retry-After handling with exponential backoff and a persisted attempt log
   - Durable lease-based scheduling that resumes after a crash without duplicates
+  - Automatic background worker (polls Postgres; no manual tick required)
   - HMAC-SHA256 signed delivery webhooks as the only writer of terminal status
   - AES-256-GCM encrypted OAuth tokens with a fresh IV per write
+  - AI cost meter with per-call attribution, per-user DB persistence, and AI_BUDGET_USD guard
+  - AI spend dashboard (badge + sidebar panel)
+  - Campaign output languages (EN, TR, DE, BS, FR, AR) and brand tone presets
+  - Variant gallery carousel (one platform slide at a time)
   - Multi-tenant auth (email/password + Google) with per-user RLS
   - Standalone Model Context Protocol server exposing the campaign lifecycle
 
@@ -105,6 +118,18 @@ definition_of_done:
   - id: DOD-11
     name: Documentation and submission pack
     evidence: EVIDENCE.md#dod-11--documentation-and-submission-pack
+  - id: DOD-12
+    name: AI cost tracking with per-user DB persistence
+    evidence: EVIDENCE.md#dod-12--ai-cost-tracking-and-budget-guard
+  - id: DOD-13
+    name: Automatic background worker
+    evidence: EVIDENCE.md#dod-13--automatic-background-worker
+  - id: DOD-14
+    name: Capstone acceptance probes (automated)
+    evidence: EVIDENCE.md#dod-14--capstone-acceptance-probes-automated
+  - id: DOD-15
+    name: LinkedIn platform (third adapter)
+    evidence: EVIDENCE.md#dod-15--linkedin-platform-third-adapter
 
 api:
   server_functions: src/lib/flyrank.functions.ts
@@ -143,7 +168,7 @@ mcp:
     - No caption generation, no blog generation, no direct model calls
 
 testing:
-  command: bun run test
+  command: npm run test
   framework: vitest
   suites:
     - path: tests/domain.test.ts
@@ -152,17 +177,26 @@ testing:
       covers: [real PNG output at exact platform dimensions]
     - path: tests/security.test.ts
       covers: [token encryption, webhook signatures, no real platform endpoints]
+    - path: tests/reliability-probes.test.ts
+      covers: [capstone acceptance probes 1-4, idempotency, 429, crash-resume, webhook trust]
+    - path: tests/ai-cost-meter.test.ts
+      covers: [AI spend tracking, budget guard, caption fallback when budget exhausted]
+    - path: tests/ai-spend-snapshot.test.ts
+      covers: [AI spend snapshot shape for dashboard]
+    - path: tests/campaign-languages.test.ts
+      covers: [multi-language caption fragments]
   totals:
-    files: 3
-    tests: 20
+    files: 21
+    tests: 117
 
 setup:
-  install: bun install
+  install: npm install
   env: cp .env.example .env
-  database: apply supabase/migrations/*.sql in order
-  dev: bun run dev   # http://localhost:8080
-  test: bun run test
-  build: bun run build
+  database: apply supabase/flyrank-full-schema.sql in Supabase SQL editor
+  dev: npm run dev   # http://localhost:8080 — background worker starts automatically
+  seed: npm run seed
+  test: npm run test
+  build: npm run build
 
 documentation:
   readme: README.md

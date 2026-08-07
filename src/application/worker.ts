@@ -53,3 +53,44 @@ export async function runWorkerTick(
 
   return { claimed: claimed.length, processed };
 }
+
+/**
+ * Service-role worker tick — claims due entries across all tenants.
+ * Used by the background scheduler so scheduled posts publish without a
+ * manual dashboard click.
+ */
+export async function runGlobalWorkerTick(
+  db: SupabaseClient<Database>,
+  options: { requestUrl?: string; limit?: number } = {},
+): Promise<TickResult> {
+  const { data, error } = await db.rpc("claim_due_entries", {
+    p_limit: options.limit ?? 10,
+    p_lease_seconds: LEASE_SECONDS,
+  });
+  if (error) throw new Error(`claim_due_entries: ${error.message}`);
+
+  const claimed = (data ?? []).map(toEntry);
+  const processed: TickResult["processed"] = [];
+  const touchedCampaigns = new Set<string>();
+
+  for (const entry of claimed) {
+    const context = createAppContext(db, entry.userId, {
+      ...(options.requestUrl ? { requestUrl: options.requestUrl } : {}),
+    });
+    const result = await attemptEntry(context, { ...entry, leaseUntil: null });
+    processed.push({ entryId: result.id, platform: result.platform, status: result.status });
+    touchedCampaigns.add(result.campaignId);
+  }
+
+  for (const campaignId of touchedCampaigns) {
+    const first = claimed.find((e) => e.campaignId === campaignId);
+    if (!first) continue;
+    const context = createAppContext(db, first.userId, {
+      ...(options.requestUrl ? { requestUrl: options.requestUrl } : {}),
+    });
+    const entries = await context.entries.listByCampaign(campaignId);
+    await context.campaigns.update(campaignId, { status: deriveCampaignStatus(entries) });
+  }
+
+  return { claimed: claimed.length, processed };
+}

@@ -17,7 +17,12 @@ import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
 import { clamp, composeCaption, captionLimit, fitCaptionToLimit, summarize, type CaptionSource } from "@/domain/captions";
 import type { BrandContext, Platform } from "@/domain/entities";
-import type { CaptionWriter } from "@/domain/ports";
+import type { AiCostMeter, CaptionWriter } from "@/domain/ports";
+import {
+  CHAT_PREFLIGHT_USD,
+  estimateChatCost,
+  getTestAiCostMeter,
+} from "@/infrastructure/ai/ai-cost-meter.server";
 
 const MODEL = "gpt-4o-mini";
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
@@ -30,56 +35,67 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
   const tone = resolveBrandTone(brand?.tone);
   const language = resolveCampaignLanguage(brand?.language);
   const legacyTone = !tone ? brand?.tone?.trim() : null;
-  const langFragments =
-    language.id === "en"
-      ? {
-          hooks: SHARED_VOICE.hooks,
-          valueProps: SHARED_VOICE.valueProps,
-          signOff: SHARED_VOICE.signOff,
-        }
-      : {
-          hooks: language.hooks,
-          valueProps: language.valueProps,
-          signOff: language.signOff,
-        };
+
+  const hooks =
+    tone?.hooks ??
+    (language.id === "en" ? SHARED_VOICE.hooks : language.hooks);
+  const valueProps =
+    tone?.valueProps ??
+    (language.id === "en" ? SHARED_VOICE.valueProps : language.valueProps);
+  const signOff = tone?.signOff ?? (language.id === "en" ? SHARED_VOICE.signOff : language.signOff);
+  const ctas = tone?.ctas[platform] ?? language.ctas[platform] ?? voice.ctas;
 
   return [
     `You are the social copywriter for ${brandName}.`,
     `You write a single ${spec.label} caption promoting a published blog post.`,
     `Write the entire caption in ${language.promptName}. Do not mix languages.`,
     "",
-    "Brand voice fragments (use them as raw material, do not list them verbatim):",
-    `- hooks: ${langFragments.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
-    `- value props: ${langFragments.valueProps.join(" | ")}`,
-    `- sign-off: ${langFragments.signOff.replaceAll("{brand}", brandName)}`,
+    "Content-first rules (critical):",
+    "- Lead with a specific insight, problem, or takeaway from the article — not a generic announcement.",
+    '- Never open with clichés like "we published a new post", "worth reading", "yayınladık", or "okumaya değer".',
+    "- Reference concrete ideas, outcomes, or lessons from the excerpt — the reader should know what the article is about.",
+    "- Vary structure across platforms; do not reuse the same opener pattern every time.",
+    "- Use the hook fragments below only as tonal inspiration — do not copy them verbatim.",
+    "",
+    "Voice fragments (inspiration only — adapt to the article):",
+    `- hooks: ${hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
+    `- value angles: ${valueProps.join(" | ")}`,
+    `- sign-off: ${signOff.replaceAll("{brand}", brandName)}`,
     `- base hashtags: ${SHARED_VOICE.baseHashtags.join(", ")}`,
     "",
     `${spec.label} rules:`,
     `- tone: ${voice.tone}`,
     `- structure to follow: ${JSON.stringify(voice.template)}`,
-    `- calls to action to choose from: ${voice.ctas.join(" | ")}`,
+    `- calls to action to choose from: ${ctas.join(" | ")}`,
     `- platform hashtags to draw from: ${voice.hashtags.join(", ")}`,
     `- at most ${spec.maxHashtags} hashtags total`,
     `- aim for ~${voice.targetLength} characters, hard limit ${captionLimit(platform)}`,
     `- summary length: about ${voice.summarySentences} sentence(s)`,
-    `- emoji: ${voice.emoji ? "a little, tasteful" : "none"}`,
+    `- emoji: ${voice.emoji ? "a little, tasteful — not on every line" : "none"}`,
     `- line breaks: ${voice.lineBreaks ? "use them for scannability" : "single paragraph, no line breaks"}`,
     ...(platform === "x"
       ? [
-          "- X format: one complete hook + one crisp sentence + link. Never end mid-sentence.",
+          "- X format: 3–4 short lines (hook, insight, takeaway) separated by line breaks — use most of the character budget.",
           '- Never use "…" or an ellipsis. If tight on space, shorten — do not trail off.',
-          "- Keep the title short; put the insight in one full sentence.",
+          "- Aim for ~260–280 characters when the article has enough substance.",
         ]
-      : []),
+      : platform === "linkedin"
+        ? [
+            "- LinkedIn format: professional opener, 2–3 short paragraphs, one clear takeaway, link on its own line.",
+            "- No consumer-social slang; write for practitioners and decision-makers.",
+            "- Hashtags sparingly — only when they add discoverability.",
+          ]
+        : []),
     "",
     ...(tone
       ? [
           "",
           `Required brand tone: ${tone.label}.`,
           tone.description,
-          "The tone must be obvious in word choice, rhythm, and energy — not just mentioned once.",
+          "The tone must shape word choice, rhythm, and energy throughout — opener, body, and CTA.",
+          `Tone-appropriate CTAs: ${tone.ctas[platform].join(" | ")}`,
           ...(tone.hooks.length
-            ? [`Tone-appropriate hooks to draw from: ${tone.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`]
+            ? [`Tone-appropriate angles: ${tone.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`]
             : []),
         ]
       : legacyTone
@@ -92,12 +108,16 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
 
 export function buildUserPrompt(post: CaptionSource, platform: Platform): string {
   const voice = PLATFORM_VOICE[platform]!;
+  const excerpt =
+    summarize(post.body, Math.max(voice.summarySentences + 5, 8)) || post.body.slice(0, 2000);
   return [
     `Title: ${post.title}`,
     post.url ? `URL: ${post.url}` : "URL: (none — do not invent one)",
     "",
-    "Post excerpt:",
-    summarize(post.body, Math.max(voice.summarySentences + 3, 5)) || post.body.slice(0, 1200),
+    "Article excerpt (base the caption on these specifics):",
+    excerpt,
+    "",
+    "Write a caption that would only make sense for this article — not a generic blog promo.",
   ].join("\n");
 }
 
@@ -143,11 +163,15 @@ function fallbackCaption(
   });
 }
 
-export const openAiCaptionWriter: CaptionWriter = {
-  name: "openai",
-  async write(post, platform, brand) {
-    const apiKey = process.env["OPENAI_API_KEY"];
-    if (!apiKey) return fallbackCaption(post, platform, "missing OPENAI_API_KEY", brand);
+export function createOpenAiCaptionWriter(meter: AiCostMeter): CaptionWriter {
+  return {
+    name: "openai",
+    async write(post, platform, brand) {
+      const apiKey = process.env["OPENAI_API_KEY"];
+      if (!apiKey) return fallbackCaption(post, platform, "missing OPENAI_API_KEY", brand);
+      if (!(await meter.canSpend(CHAT_PREFLIGHT_USD))) {
+        return fallbackCaption(post, platform, "AI budget exhausted", brand);
+      }
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -162,7 +186,7 @@ export const openAiCaptionWriter: CaptionWriter = {
         },
         body: JSON.stringify({
           model: MODEL,
-          temperature: 0.8,
+          temperature: 0.72,
           max_tokens: 600,
           messages: [
             { role: "system", content: buildSystemPrompt(platform, brand) },
@@ -184,7 +208,22 @@ export const openAiCaptionWriter: CaptionWriter = {
 
       const json = (await response.json()) as {
         choices?: Array<{ message?: { content?: string } }>;
+        usage?: { prompt_tokens?: number; completion_tokens?: number };
       };
+      const usage = json.usage;
+      if (usage) {
+        await meter.record({
+          feature: `caption:${platform}`,
+          model: MODEL,
+          inputTokens: usage.prompt_tokens ?? 0,
+          outputTokens: usage.completion_tokens ?? 0,
+          estimatedUsd: estimateChatCost(
+            MODEL,
+            usage.prompt_tokens ?? 0,
+            usage.completion_tokens ?? 0,
+          ),
+        });
+      }
       const content = json.choices?.[0]?.message?.content?.trim();
       if (!content) return fallbackCaption(post, platform, "empty completion", brand);
 
@@ -202,6 +241,10 @@ export const openAiCaptionWriter: CaptionWriter = {
     } finally {
       clearTimeout(timer);
     }
-  },
-};
+    },
+  };
+}
+
+/** Default export for tests — uses the in-memory meter. */
+export const openAiCaptionWriter = createOpenAiCaptionWriter(getTestAiCostMeter());
 

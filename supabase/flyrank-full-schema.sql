@@ -10,7 +10,8 @@
 --   1. helper function      set_updated_at()
 --   2. enums                platform, post_source, campaign_status, entry_status
 --   3. tables + RLS         profiles, blog_posts, campaigns, social_post_entries,
---                           platform_credentials, publish_attempts, webhook_events
+--                           platform_credentials, publish_attempts, webhook_events,
+--                           ai_usage_records
 --   4. auth trigger         handle_new_user() → profiles row per sign-up
 --   5. storage              private bucket `campaign-images` + owner-scoped policies
 --   6. worker RPC           claim_due_entries() — lease/claim with SKIP LOCKED
@@ -25,7 +26,7 @@ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;
 
 -- ============ 2. enums (create-if-missing) ============
 DO $$ BEGIN
-  CREATE TYPE public.platform AS ENUM ('instagram','x');
+  CREATE TYPE public.platform AS ENUM ('instagram','x','linkedin');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -254,6 +255,32 @@ CREATE POLICY "no client updates" ON public.webhook_events
 DROP POLICY IF EXISTS "no client deletes" ON public.webhook_events;
 CREATE POLICY "no client deletes" ON public.webhook_events
   FOR DELETE TO authenticated, anon USING (false);
+
+
+-- ============ 3h. ai_usage_records (per-user AI spend ledger) ============
+CREATE TABLE IF NOT EXISTS public.ai_usage_records (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  feature TEXT NOT NULL,
+  model TEXT NOT NULL,
+  input_tokens INTEGER NOT NULL DEFAULT 0,
+  output_tokens INTEGER NOT NULL DEFAULT 0,
+  estimated_usd NUMERIC(14, 8) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ai_usage_records_user_created_idx
+  ON public.ai_usage_records (user_id, created_at DESC);
+GRANT SELECT, INSERT ON public.ai_usage_records TO authenticated;
+GRANT ALL ON public.ai_usage_records TO service_role;
+ALTER TABLE public.ai_usage_records ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "own ai usage read" ON public.ai_usage_records;
+CREATE POLICY "own ai usage read" ON public.ai_usage_records
+  FOR SELECT TO authenticated
+  USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "own ai usage insert" ON public.ai_usage_records;
+CREATE POLICY "own ai usage insert" ON public.ai_usage_records
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = user_id);
 
 
 -- ============ 5. storage: private bucket for rendered PNG variants ============

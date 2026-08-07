@@ -1,6 +1,6 @@
 /**
  * Caption composer — pure. (post, platform) -> tailored caption assembled from
- * shared brand voice + platform overrides. X and Instagram diverge in
+ * shared brand voice + platform overrides. X, Instagram and LinkedIn diverge in
  * structure, tone, length and hashtag count; neither is a truncation of the other.
  */
 
@@ -29,6 +29,98 @@ export function stableHash(input: string): number {
 
 function pick<T>(items: readonly T[], seed: string): T {
   return items[stableHash(seed) % items.length]!;
+}
+
+interface VoiceFragments {
+  hooks: readonly string[];
+  valueProps: readonly string[];
+  ctas: readonly string[];
+  signOff: string;
+}
+
+/** Merge brand tone (style) with campaign language (locale) for any language. */
+function resolveVoiceFragments(
+  brand: BrandContext | undefined,
+  platform: Platform,
+): VoiceFragments {
+  const tone = resolveBrandTone(brand?.tone);
+  const language = resolveCampaignLanguage(brand?.language);
+  const voice = PLATFORM_VOICE[platform]!;
+
+  return {
+    hooks: tone?.hooks ?? (language.id === "en" ? SHARED_VOICE.hooks : language.hooks),
+    valueProps:
+      tone?.valueProps ?? (language.id === "en" ? SHARED_VOICE.valueProps : language.valueProps),
+    ctas: tone?.ctas[platform] ?? language.ctas[platform] ?? voice.ctas,
+    signOff: tone?.signOff ?? (language.id === "en" ? SHARED_VOICE.signOff : language.signOff),
+  };
+}
+
+function selectSentence(sentences: readonly string[], seed: string): string | null {
+  if (sentences.length === 0) return null;
+  return pick(sentences, seed);
+}
+
+function shortenLead(sentence: string, maxLen: number): string {
+  const cleaned = sentence.replace(/\s+/g, " ").trim();
+  if (cleaned.length <= maxLen) return cleaned;
+  return fitCaptionToLimit(cleaned, maxLen, { allowEllipsis: false });
+}
+
+/**
+ * Opener priority: article sentence (55%) → title angle (25%) → tone/language hook (20%).
+ * Keeps captions tied to the source post instead of a generic "we published" line.
+ */
+export function buildHook(
+  post: CaptionSource,
+  platform: Platform,
+  seed: string,
+  hooks: readonly string[],
+  brandName: string,
+): string {
+  const withBrand = (text: string) => text.replaceAll("{brand}", brandName);
+  const sentences = splitSentences(post.body);
+  const strategy = stableHash(`${seed}:hook-strategy`) % 100;
+  const leadMax = platform === "x" ? 100 : 140;
+
+  if (strategy < 55) {
+    const sentence = selectSentence(sentences, `${seed}:hook-sent`);
+    if (sentence) {
+      const lead = shortenLead(sentence, leadMax);
+      if (lead.length >= 20) return lead;
+    }
+  }
+
+  if (strategy < 80) {
+    const title = post.title.trim();
+    if (title.length >= 12) {
+      return title.length <= leadMax ? title : shortenLead(title, leadMax);
+    }
+  }
+
+  return withBrand(pick(hooks, `${seed}:template-hook`));
+}
+
+/** Pull a takeaway from the article body; fall back to tone/language value props. */
+export function buildTakeaway(
+  post: CaptionSource,
+  seed: string,
+  valueProps: readonly string[],
+): string {
+  const sentences = splitSentences(post.body);
+  if (sentences.length >= 2) {
+    const start = stableHash(`${seed}:takeaway`) % sentences.length;
+    for (let offset = 0; offset < sentences.length; offset++) {
+      const candidate = sentences[(start + offset) % sentences.length]!;
+      if (candidate.length >= 24 && candidate.length <= 200) return candidate;
+    }
+  }
+  return pick(valueProps, `${seed}:value-fallback`);
+}
+
+function maybeEmojiSuffix(hook: string, seed: string, enabled: boolean): string {
+  if (!enabled || stableHash(`${seed}:emoji`) % 3 !== 0) return hook;
+  return hook.endsWith("✨") ? hook : `${hook} ✨`;
 }
 
 export function splitSentences(body: string): string[] {
@@ -138,35 +230,67 @@ export function shortenTitleForX(title: string, max: number): string {
   return fitCaptionToLimit(trimmed, max, { allowEllipsis: false });
 }
 
+function compressForX(text: string, limit: number): string {
+  if (text.length <= limit) return text;
+
+  const parts = text.split("\n\n").filter(Boolean);
+  if (parts.length <= 1) {
+    return fitCaptionToLimit(text, limit, { allowEllipsis: false, preserveLineBreaks: true });
+  }
+
+  const tail = parts[parts.length - 1]!;
+  let bodyParts = parts.slice(0, -1);
+
+  while (bodyParts.join("\n\n").length + 2 + tail.length > limit && bodyParts.length > 1) {
+    const last = bodyParts.pop()!;
+    if (last.length > 48) {
+      bodyParts.push(fitCaptionToLimit(last, Math.max(32, last.length - 24), { allowEllipsis: false }));
+    }
+  }
+
+  let result = [...bodyParts, tail].join("\n\n");
+  return fitCaptionToLimit(result, limit, { allowEllipsis: false, preserveLineBreaks: true });
+}
+
+/** Use spare X character budget for an extra article sentence when possible. */
+function fillXCaption(post: CaptionSource, caption: string, limit: number): string {
+  if (caption.length >= limit - 18) return caption;
+
+  const parts = caption.split("\n\n");
+  if (parts.length < 3) return caption;
+
+  const summaryIdx = 1;
+  let summary = parts[summaryIdx] ?? "";
+  for (const sentence of splitSentences(post.body)) {
+    if (summary.includes(sentence)) continue;
+    const next = summary ? `${summary} ${sentence}` : sentence;
+    const trial = [...parts];
+    trial[summaryIdx] = next;
+    const joined = trial.join("\n\n");
+    if (joined.length > limit) break;
+    summary = next;
+    parts[summaryIdx] = summary;
+  }
+
+  return parts.join("\n\n");
+}
+
 function composeXCaption(
   post: CaptionSource,
   seed: string,
   hashtags: string,
   ctas: readonly string[],
+  hook: string,
+  summary: string,
+  takeaway: string,
   limit: number,
 ): string {
   const cta = pick(ctas, seed);
   const url = post.url ?? "";
   const tail = [cta, url, hashtags].filter(Boolean).join(" ");
-  const tailBudget = tail.length > 0 ? tail.length + 1 : 0;
-  const bodyBudget = Math.max(48, limit - tailBudget);
-
-  const titleMax = Math.min(80, Math.floor(bodyBudget * 0.45));
-  const title = shortenTitleForX(post.title, titleMax);
-  const summaryMax = Math.max(32, bodyBudget - title.length - 1);
-  const summary = summarizeToLength(post.body, summaryMax);
-
-  let core = `${title} ${summary}`.replace(/\s+/g, " ").trim();
-  if (core.length + tailBudget > limit) {
-    const tighterSummary = summarizeToLength(
-      post.body,
-      Math.max(24, summaryMax - (core.length + tailBudget - limit)),
-    );
-    core = `${title} ${tighterSummary}`.replace(/\s+/g, " ").trim();
-  }
-
-  const caption = tail ? `${core} ${tail}` : core;
-  return fitCaptionToLimit(caption.replace(/\s+/g, " ").trim(), limit, { allowEllipsis: false });
+  const filled = [hook, summary, takeaway, tail].filter(Boolean).join("\n\n");
+  const expanded = fillXCaption(post, filled, limit);
+  return compressForX(expanded, limit);
 }
 
 export function composeCaption(
@@ -179,13 +303,7 @@ export function composeCaption(
   const seed = `${post.id}:${platform}`;
   const brandName = brand?.name?.trim() || SHARED_VOICE.brandName;
   const withBrand = (text: string) => text.replaceAll("{brand}", brandName);
-  const tone = resolveBrandTone(brand?.tone);
-  const language = resolveCampaignLanguage(brand?.language);
-  const useToneFragments = tone && language.id === "en";
-  const hooks = (useToneFragments ? tone.hooks : language.hooks) ?? SHARED_VOICE.hooks;
-  const valueProps = (useToneFragments ? tone.valueProps : language.valueProps) ?? SHARED_VOICE.valueProps;
-  const ctas = (useToneFragments ? tone.ctas[platform] : language.ctas[platform]) ?? voice.ctas;
-  const signOff = (useToneFragments ? tone.signOff : language.signOff) ?? SHARED_VOICE.signOff;
+  const fragments = resolveVoiceFragments(brand, platform);
 
   const hashtags = formatHashtags(
     [...SHARED_VOICE.baseHashtags, ...voice.hashtags],
@@ -195,25 +313,41 @@ export function composeCaption(
   let summary = summarize(post.body, voice.summarySentences);
   if (!voice.emoji) summary = summary.replace(/\p{Extended_Pictographic}/gu, "").trim();
 
+  const hook = maybeEmojiSuffix(
+    buildHook(post, platform, seed, fragments.hooks, brandName),
+    seed,
+    voice.emoji,
+  );
+  const takeaway = buildTakeaway(post, seed, fragments.valueProps);
+
   if (platform === "x") {
-    return composeXCaption(post, seed, hashtags, ctas, captionLimit(platform));
+    return composeXCaption(
+      post,
+      seed,
+      hashtags,
+      fragments.ctas,
+      hook,
+      summary,
+      takeaway,
+      captionLimit(platform),
+    );
   }
 
   const filled = voice.template
-    .replace("{hook}", withBrand(pick(hooks, seed)))
-    .replace("{title}", platform === "x" ? post.title : post.title.toUpperCase())
+    .replace("{hook}", hook)
+    .replace("{title}", platform === "instagram" ? post.title.toUpperCase() : post.title)
     .replace("{summary}", summary)
-    .replace("{value}", pick(valueProps, seed))
-    .replace("{cta}", pick(ctas, seed))
+    .replace("{value}", takeaway)
+    .replace("{cta}", pick(fragments.ctas, seed))
     .replace("{url}", post.url ?? "")
-    .replace("{signOff}", withBrand(signOff))
+    .replace("{signOff}", withBrand(fragments.signOff))
     .replace("{hashtags}", hashtags)
     .replace(/[ \t]+\n/g, "\n")
     .trim();
 
   const normalized = voice.lineBreaks ? filled : filled.replace(/\s*\n+\s*/g, " ");
   return fitCaptionToLimit(normalized, captionLimit(platform), {
-    allowEllipsis: true,
+    allowEllipsis: platform !== "x",
     preserveLineBreaks: voice.lineBreaks,
   });
 }

@@ -17,3 +17,8 @@ here with the exact filename.
 | `09-credentials-schema.png` | `platform_credentials` row showing only ciphertext |
 | `10-auth-and-rls.png` | Sign-in screen and/or a migration excerpt with RLS policies |
 | `11-mcp-tools.png` | `tools/list` response from `POST /api/public/mcp` |
+| `12-dashboard-blog-library-and-campaign-variants.png` | Full dashboard: blog library composer, brand context, and a draft campaign with Instagram + X captions and AI image variants |
+| `13-ai-spend-observability-panel.png` | Sidebar AI spend panel: session budget, progress bar, recent OpenAI calls (caption / art direction / image) |
+| `14-variant-gallery-carousel-three-platforms.png` | Campaign variant carousel: Instagram slide with image + Turkish caption; platform tabs for Instagram, X, LinkedIn |
+| `15-brand-tone-selector.png` | New campaign composer — brand tone dropdown (Friendly, Professional, Playful, …) |
+| `16-campaign-language-selector.png` | New campaign composer — output language dropdown (English, Türkçe, Deutsch, Bosanski, Français, العربية) |

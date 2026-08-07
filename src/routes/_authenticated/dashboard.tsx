@@ -6,13 +6,17 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { CampaignComposer, type ComposerSubmit } from "@/components/campaign/CampaignComposer";
 import { CampaignEditDialog, type CampaignEdit } from "@/components/campaign/CampaignEditDialog";
+import { AiSpendBadge } from "@/components/campaign/AiSpendBadge";
+import { AiSpendPanel } from "@/components/campaign/AiSpendPanel";
 import { StatusChip } from "@/components/campaign/StatusChip";
 import { ThemeToggle } from "@/components/campaign/ThemeToggle";
-import { VariantCard } from "@/components/campaign/VariantCard";
+import { VariantGallery } from "@/components/campaign/VariantGallery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { PLATFORMS } from "@/domain/entities";
+import { PLATFORM_SPECS } from "@/config/platform-specs";
 import {
   createCampaignWithAssets,
   createCampaignFromLibrary,
@@ -207,6 +211,7 @@ function Dashboard() {
   const allCampaigns = dashboard.data?.campaigns ?? [];
   const campaigns = allCampaigns.filter((c) => !pendingDelete[c.campaign.id]);
   const webhooks = dashboard.data?.webhooks ?? [];
+  const aiSpend = dashboard.data?.aiSpend;
   const totals = campaigns.reduce(
     (acc, c) => {
       for (const entry of c.entries) acc[entry.status] = (acc[entry.status] ?? 0) + 1;
@@ -218,18 +223,19 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+        <div className="mx-auto flex max-w-[88rem] items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-baseline gap-3">
             <span className="font-display text-lg text-foreground">CampaignHub</span>
             <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
               studio
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="hidden font-mono text-[11px] text-muted-foreground sm:inline">
+          <div className="flex items-center gap-3">
+            <span className="hidden font-mono text-[11px] text-muted-foreground lg:inline">
               queued {totals["queued"] ?? 0} · publishing {totals["publishing"] ?? 0} · published{" "}
               {totals["published"] ?? 0} · failed {totals["failed"] ?? 0}
             </span>
+            {aiSpend ? <AiSpendBadge spend={aiSpend} /> : null}
             <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={signOut}>
               Sign out
@@ -238,19 +244,22 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+      <main className="mx-auto max-w-[88rem] space-y-8 px-4 py-8 sm:px-6">
         {/* Full width so the blog-library previews get a real three-up grid. */}
         <CampaignComposer
           library={library.data ?? []}
           libraryLoading={library.isLoading}
           busy={compose.isPending}
+          aiSpend={aiSpend ?? null}
           onSubmit={async (input) => {
             await compose.mutateAsync(input);
           }}
         />
 
-        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-          <div className="space-y-6">
+        <div className="flex flex-col gap-8 xl:flex-row xl:items-start">
+          <aside className="w-full shrink-0 space-y-6 xl:w-[300px] xl:sticky xl:top-[4.25rem]">
+            {aiSpend ? <AiSpendPanel spend={aiSpend} /> : null}
+
             <section className="rounded-2xl border border-border bg-surface p-5">
 
             <h2 className="font-display text-lg text-foreground">Operations</h2>
@@ -276,30 +285,21 @@ function Dashboard() {
                 >
                   Run worker tick
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={busy}
-                  onClick={() =>
-                    run("X will rate-limit the next 2 attempts", () =>
-                      fns.rateLimit({ data: { platform: "x", failures: 2 } }),
-                    )
-                  }
-                >
-                  Force 429 on X
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={busy}
-                  onClick={() =>
-                    run("Instagram will rate-limit the next 2 attempts", () =>
-                      fns.rateLimit({ data: { platform: "instagram", failures: 2 } }),
-                    )
-                  }
-                >
-                  Force 429 on Instagram
-                </Button>
+                {PLATFORMS.map((platform) => (
+                  <Button
+                    key={platform}
+                    size="sm"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={() =>
+                      run(`${PLATFORM_SPECS[platform].label} will rate-limit the next 2 attempts`, () =>
+                        fns.rateLimit({ data: { platform, failures: 2 } }),
+                      )
+                    }
+                  >
+                    Force 429 on {PLATFORM_SPECS[platform].label}
+                  </Button>
+                ))}
               </div>
             </div>
           </section>
@@ -329,9 +329,9 @@ function Dashboard() {
               ))}
             </ul>
           </section>
-        </div>
+          </aside>
 
-        <div className="space-y-6">
+          <section className="min-w-0 flex-1 space-y-6">
           {campaigns.length === 0 ? (
             <section className="rounded-2xl border border-dashed border-border p-12 text-center">
               <h2 className="font-display text-xl text-foreground">No campaigns yet</h2>
@@ -345,14 +345,14 @@ function Dashboard() {
           {campaigns.map((snapshot) => (
             <section
               key={snapshot.campaign.id}
-              className="rounded-2xl border border-border bg-surface"
+              className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
             >
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
                 <div className="min-w-0">
-                  <h2 className="truncate font-display text-lg text-foreground">
+                  <h2 className="truncate font-display text-base text-foreground">
                     {snapshot.campaign.name}
                   </h2>
-                  <p className="truncate font-mono text-[11px] text-muted-foreground">
+                  <p className="truncate font-mono text-[10px] text-muted-foreground">
                     {snapshot.post.url ?? `source: ${snapshot.post.source}`} ·{" "}
                     {new Date(snapshot.campaign.createdAt).toLocaleString()}
                   </p>
@@ -360,7 +360,7 @@ function Dashboard() {
                 <StatusChip status={snapshot.campaign.status} kind="campaign" />
               </header>
 
-              <div className="flex flex-wrap gap-2 border-b border-border px-5 py-3">
+              <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">
                 <Button
                   size="sm"
                   variant="ghost"
@@ -452,23 +452,17 @@ function Dashboard() {
                 onSave={saveEdit}
               />
 
-              <div className="grid gap-4 p-5 md:grid-cols-2">
-                {snapshot.entries.map((entry) => (
-                  <VariantCard
-                    key={entry.id}
-                    entry={entry}
-                    imageUrl={snapshot.images[entry.platform] ?? null}
-                  />
-                ))}
+              <div className="border-t border-border bg-surface-raised/20 px-3 py-3">
+                <VariantGallery entries={snapshot.entries} images={snapshot.images} />
               </div>
             </section>
           ))}
-          </div>
+          </section>
         </div>
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-6 py-6 font-mono text-[11px] text-muted-foreground">
+        <div className="mx-auto max-w-[88rem] px-4 sm:px-6 py-6 font-mono text-[11px] text-muted-foreground">
           © CampaignHub
         </div>
       </footer>

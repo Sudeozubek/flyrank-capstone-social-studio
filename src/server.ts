@@ -3,6 +3,12 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
+void import("@/infrastructure/worker/background-worker.server")
+  .then((m) => m.startBackgroundWorker())
+  .catch(() => {
+    // Worker is optional when Supabase env is not configured (e.g. unit tests).
+  });
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };

@@ -158,6 +158,24 @@ sharp implementation rather than the prototype.
   - shared `tests/helpers/mock-app-context.ts` for in-memory `AppContext` fakes
 - Ran `npm install` to sync `node_modules` from `package-lock.json`.
 
+## Phase 11 — PDF hardening + product polish
+
+- **LinkedIn** added as a third platform end-to-end: enum migration, `LinkedInFakeAdapter`,
+  `1200×627` image spec, voice fragments, and UI carousel support.
+- **AI spend persistence** — `ai_usage_records` table (per-user RLS); `createDbAiCostMeter`
+  writes every OpenAI call to Postgres; dashboard loads spend via `loadDashboard`; graceful
+  fallback if the migration is not yet applied.
+- **Background worker** — `background-worker.server.ts` polls `claim_due_entries` on server
+  boot; `WORKER_ENABLED` / `WORKER_POLL_INTERVAL_MS` env toggles.
+- **Capstone probes** — `tests/reliability-probes.test.ts` automates PDF §12 acceptance probes
+  (idempotency, 429, crash-resume, forged webhook → `400`).
+- **Caption quality** — content-first deterministic composer; brand tone applies to all output
+  languages; X captions use multi-paragraph structure within the 280-char limit.
+- **UI** — `VariantGallery` carousel (one card visible, platform tabs, arrow navigation);
+  `AiSpendBadge` + `AiSpendPanel`; compact campaign cards with fixed-height variant slides.
+- **Seed script** — `npm run seed` (`scripts/seed.mjs`) for demo data.
+- Test suite expanded to **21 files / 117 tests**, all deterministic.
+
 ## Final notes
 
 **What the architecture bought.** Swapping the store (file → Postgres) and the renderer
@@ -166,8 +184,8 @@ required zero new business logic.
 
 **Known trade-offs, stated plainly.** The fake platform's memory is process-local by design.
 The image composition is generated artwork, not a photo pipeline. PDF extraction is text-only.
-Blog-library previews depend on third-party sites staying reachable. Only Instagram and X are
-implemented.
+Blog-library previews depend on third-party sites staying reachable. Instagram, X and LinkedIn
+are implemented; adding more platforms follows the same adapter pattern.
 
 **Stretch goals not started, by design:** real-platform integration, brand templating, A/B
 captions, analytics loopback, approval workflow.

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildFallbackImagePrompt } from "@/infrastructure/ai/openai-art-director.server";
+import { createInMemoryAiCostMeter } from "@/infrastructure/ai/ai-cost-meter.server";
 import { createAiImageRenderer } from "@/infrastructure/imaging/ai-image-renderer.server";
 import { svgImageRenderer } from "@/infrastructure/imaging/renderers.server";
 
@@ -37,7 +38,7 @@ describe("createAiImageRenderer", () => {
     delete process.env["OPENAI_API_KEY"];
 
     try {
-      const renderer = createAiImageRenderer(svgImageRenderer);
+      const renderer = createAiImageRenderer(svgImageRenderer, createInMemoryAiCostMeter());
       const out = await renderer.render({
         platform: "instagram",
         width: 1080,

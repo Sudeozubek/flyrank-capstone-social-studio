@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { PLATFORM_SPECS } from "@/config/platform-specs";
+import { PLATFORMS } from "@/domain/entities";
 import { svgImageRenderer } from "@/infrastructure/imaging/renderers.server";
 
 /** Reads width/height straight out of the PNG IHDR chunk — no library trust. */
@@ -12,14 +14,12 @@ function pngSize(bytes: Uint8Array): { width: number; height: number } {
 describe("image renderer emits real PNG artifacts", () => {
   it("renders exact platform dimensions", async () => {
     const renderer = svgImageRenderer;
-    for (const [platform, expected] of [
-      ["instagram", { width: 1080, height: 1080 }],
-      ["x", { width: 1600, height: 900 }],
-    ] as const) {
+    for (const platform of PLATFORMS) {
+      const spec = PLATFORM_SPECS[platform];
       const out = await renderer.render({
         platform,
-        width: expected.width,
-        height: expected.height,
+        width: spec.width,
+        height: spec.height,
         title: "Durable scheduling for social publishing",
         body: "Retries must not duplicate posts. Leases make a crashed worker safe.",
         seed: `seed-${platform}`,
@@ -27,7 +27,7 @@ describe("image renderer emits real PNG artifacts", () => {
         subject: { x: 120, y: 120, width: 840, height: 840 },
       });
       expect(out.contentType).toBe("image/png");
-      expect(pngSize(out.bytes)).toEqual(expected);
+      expect(pngSize(out.bytes)).toEqual({ width: spec.width, height: spec.height });
     }
   });
 });

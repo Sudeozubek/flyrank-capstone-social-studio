@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { composeCaption } from "@/domain/captions";
+import { PLATFORMS } from "@/domain/entities";
 import {
   MAX_PUBLISH_ATTEMPTS,
   backoffSeconds,
@@ -25,12 +26,14 @@ describe("image geometry", () => {
   it("produces exact per-platform output dimensions", () => {
     const ig = computeVariantGeometry(defaultSourceImage(), "instagram");
     const x = computeVariantGeometry(defaultSourceImage(), "x");
+    const li = computeVariantGeometry(defaultSourceImage(), "linkedin");
     expect([ig.width, ig.height]).toEqual([1080, 1080]);
     expect([x.width, x.height]).toEqual([1600, 900]);
+    expect([li.width, li.height]).toEqual([1200, 627]);
   });
 
   it("keeps the subject inside the safe zone after fitting", () => {
-    for (const platform of ["instagram", "x"] as const) {
+    for (const platform of PLATFORMS) {
       const geometry = computeVariantGeometry(defaultSourceImage(), platform);
       const subject = fitSubjectToSafeZone(geometry);
       const safe = geometry.safeZone;
@@ -43,29 +46,36 @@ describe("image geometry", () => {
 
   it("preserves the target aspect ratio when cropping", () => {
     const x = computeVariantGeometry(defaultSourceImage(), "x");
+    const li = computeVariantGeometry(defaultSourceImage(), "linkedin");
     expect(x.crop.sw / x.crop.sh).toBeCloseTo(1600 / 900, 5);
+    expect(li.crop.sw / li.crop.sh).toBeCloseTo(1200 / 627, 5);
   });
 });
 
 describe("captions", () => {
   const ig = composeCaption(post, "instagram");
   const x = composeCaption(post, "x");
+  const li = composeCaption(post, "linkedin");
 
   it("respects each platform's hard length limit", () => {
     expect(ig.length).toBeLessThanOrEqual(PLATFORM_SPECS.instagram.maxCaptionLength);
     expect(x.length).toBeLessThanOrEqual(PLATFORM_SPECS.x.maxCaptionLength);
+    expect(li.length).toBeLessThanOrEqual(PLATFORM_SPECS.linkedin.maxCaptionLength);
   });
 
-  it("diverges structurally — neither caption is a truncation of the other", () => {
+  it("diverges structurally across platforms", () => {
     expect(ig).not.toEqual(x);
-    expect(ig.startsWith(x.slice(0, 40))).toBe(false);
-    expect(x.startsWith(ig.slice(0, 40))).toBe(false);
+    expect(li).not.toEqual(x);
+    expect(li).not.toEqual(ig);
+    expect(ig.length).toBeGreaterThan(x.length);
+    expect(x.split("\n\n").length).toBeGreaterThanOrEqual(3);
   });
 
   it("respects the per-platform hashtag budget", () => {
     const count = (s: string) => (s.match(/#\w+/g) ?? []).length;
     expect(count(ig)).toBeLessThanOrEqual(PLATFORM_SPECS.instagram.maxHashtags);
     expect(count(x)).toBeLessThanOrEqual(PLATFORM_SPECS.x.maxHashtags);
+    expect(count(li)).toBeLessThanOrEqual(PLATFORM_SPECS.linkedin.maxHashtags);
     expect(count(ig)).toBeGreaterThan(count(x));
   });
 

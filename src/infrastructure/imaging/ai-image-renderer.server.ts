@@ -5,9 +5,9 @@
 import { craftImagePrompt } from "@/infrastructure/ai/openai-art-director.server";
 import { generateOpenAiImage } from "@/infrastructure/ai/openai-image-generator.server";
 import { resizePngCover } from "@/infrastructure/imaging/image-resize.server";
-import type { ImageRenderer } from "@/domain/ports";
+import type { ImageRenderer, AiCostMeter } from "@/domain/ports";
 
-export function createAiImageRenderer(fallback: ImageRenderer): ImageRenderer {
+export function createAiImageRenderer(fallback: ImageRenderer, meter: AiCostMeter): ImageRenderer {
   return {
     name: "openai",
     async render(spec) {
@@ -16,16 +16,19 @@ export function createAiImageRenderer(fallback: ImageRenderer): ImageRenderer {
       }
 
       try {
-        const prompt = await craftImagePrompt({
-          title: spec.title,
-          body: spec.body ?? spec.title,
-          platform: spec.platform,
-          brand: spec.brand,
-          brandTone: spec.brandTone ?? null,
-          language: spec.brandLanguage ?? null,
-        });
+        const prompt = await craftImagePrompt(
+          {
+            title: spec.title,
+            body: spec.body ?? spec.title,
+            platform: spec.platform,
+            brand: spec.brand,
+            brandTone: spec.brandTone ?? null,
+            language: spec.brandLanguage ?? null,
+          },
+          meter,
+        );
 
-        const raw = await generateOpenAiImage(prompt, spec.platform);
+        const raw = await generateOpenAiImage(prompt, spec.platform, meter);
         const bytes = await resizePngCover(raw, spec.width, spec.height);
 
         return {
