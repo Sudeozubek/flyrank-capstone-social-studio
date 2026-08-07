@@ -26,8 +26,9 @@ describe("campaignLanguageInputSchema", () => {
 describe("composeCaption language", () => {
   it("uses Turkish fragments when Turkish is selected", () => {
     const caption = composeCaption(post, "instagram", { language: "tr" });
-    expect(caption).toContain("yayınladık");
     expect(caption).toContain("ekibi");
+    expect(caption.toLowerCase()).not.toContain("yayınladık");
+    expect(caption).toMatch(/retry|lease|idempotency|duplicate/i);
   });
 
   it("falls back to English for unknown language codes", () => {

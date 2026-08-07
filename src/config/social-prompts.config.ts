@@ -28,10 +28,10 @@ export interface PlatformVoice {
 export const SHARED_VOICE: SharedVoice = {
   brandName: "CampaignHub",
   hooks: [
-    "We shipped something worth reading.",
-    "Fresh off the {brand} blog.",
-    "New write-up, straight from the build log.",
-    "Here's what we learned this week.",
+    "A focused take from our latest article.",
+    "Key insight from the {brand} blog.",
+    "What practitioners should know about this topic.",
+    "Lessons from production, in plain language.",
   ],
   valueProps: [
     "Practical notes from a production pipeline, not theory.",
@@ -44,19 +44,19 @@ export const SHARED_VOICE: SharedVoice = {
 
 export const PLATFORM_VOICE: Record<Platform, PlatformVoice> = {
   x: {
-    tone: "terse, punchy, one complete idea — never trail off",
-    template: "{title} {summary} {cta} {url} {hashtags}",
-    ctas: ["→", "Oku:", "Read:"],
+    tone: "punchy and substantive — short paragraphs, 2–3 crisp ideas, never a single cramped line",
+    template: "{hook}\n\n{summary}\n\n{value}\n\n{cta} {url}\n{hashtags}",
+    ctas: ["Read:", "Full post:", "→"],
     hashtags: ["BuildInPublic"],
-    targetLength: 275,
-    summarySentences: 1,
+    targetLength: 280,
+    summarySentences: 2,
     emoji: false,
-    lineBreaks: false,
+    lineBreaks: true,
   },
   instagram: {
     tone: "warm, narrative, scannable with line breaks and light emoji",
     template:
-      "{hook} ✨\n\n{title}\n\n{summary}\n\n{value}\n\n{cta} (link in bio)\n{url}\n\n{signOff}\n\n{hashtags}",
+      "{hook}\n\n{title}\n\n{summary}\n\n{value}\n\n{cta} (link in bio)\n{url}\n\n{signOff}\n\n{hashtags}",
     ctas: ["Swipe then read the full post", "Tap through for the whole story"],
     hashtags: [
       "MarketingAutomation",

@@ -25,10 +25,10 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     label: "English",
     promptName: "English",
     hooks: [
-      "We shipped something worth reading.",
-      "Fresh off the {brand} blog.",
-      "New write-up, straight from the build log.",
-      "Here's what we learned this week.",
+      "A focused take from our latest article.",
+      "Key insight from the {brand} blog.",
+      "What practitioners should know about this topic.",
+      "Lessons from production, in plain language.",
     ],
     valueProps: [
       "Practical notes from a production pipeline, not theory.",
@@ -47,10 +47,10 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     label: "Türkçe",
     promptName: "Turkish",
     hooks: [
-      "Okumaya değer yeni bir yazı yayınladık.",
-      "{brand} blogundan taze bir paylaşım.",
-      "Bu hafta öğrendiklerimizi yazdık.",
-      "Kısa süre ayırırsanız faydalı olacak.",
+      "Makaleden öne çıkan bir bakış açısı.",
+      "{brand} blogunda bu konuyu derinlemesine ele aldık.",
+      "Pratik ekipler için net bir özet.",
+      "Üretimden gelen dersler — kısa ve öz.",
     ],
     valueProps: [
       "Teoriden çok, üretimden gelen pratik notlar.",

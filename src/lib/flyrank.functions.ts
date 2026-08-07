@@ -28,6 +28,7 @@ import { PLATFORMS } from "@/domain/entities";
 import { createAppContext } from "@/infrastructure/context.server";
 import type { CampaignSnapshot } from "@/domain/entities";
 import type { AiSpendSnapshot } from "@/domain/ai-spend";
+import { emptyAiSpendSnapshot } from "@/infrastructure/ai/ai-cost-meter.server";
 
 const uuid = z.string().uuid();
 const brandTone = brandToneInputSchema;
@@ -227,7 +228,15 @@ export const loadDashboard = createServerFn({ method: "GET" })
       }),
     );
 
-    return { posts, campaigns: snapshots.filter((s) => s.post), webhooks, aiSpend: await app.aiCostMeter.getSnapshot() };
+    let aiSpend: AiSpendSnapshot;
+    try {
+      aiSpend = await app.aiCostMeter.getSnapshot();
+    } catch (error) {
+      console.error("[dashboard] loadDashboard aiSpend failed:", error);
+      aiSpend = emptyAiSpendSnapshot();
+    }
+
+    return { posts, campaigns: snapshots.filter((s) => s.post), webhooks, aiSpend };
   });
 
 export const tickWorker = createServerFn({ method: "POST" })

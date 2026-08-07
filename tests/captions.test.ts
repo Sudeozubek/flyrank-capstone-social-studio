@@ -57,6 +57,13 @@ describe("composeCaption X length", () => {
     expect(caption).not.toContain("…");
     expect(caption.length).toBeLessThanOrEqual(PLATFORM_SPECS.x.maxCaptionLength);
   });
+
+  it("uses multi-paragraph structure and fills more of the X character budget", () => {
+    const caption = composeCaption(post, "x");
+    expect(caption.split("\n\n").length).toBeGreaterThanOrEqual(3);
+    expect(caption.length).toBeGreaterThan(160);
+    expect(caption.length).toBeLessThanOrEqual(PLATFORM_SPECS.x.maxCaptionLength);
+  });
 });
 
 describe("composeCaption Instagram layout", () => {
@@ -98,5 +105,35 @@ describe("composeCaption brand tone", () => {
 
     expect(playful).toContain("— Acme (yes, we write too)");
     expect(professional).toContain("— the Acme team");
+  });
+
+  it("applies brand tone with non-English languages", () => {
+    const neutral = composeCaption(post, "linkedin", { language: "tr" });
+    const professional = composeCaption(post, "linkedin", {
+      language: "tr",
+      tone: "professional",
+      name: "Acme",
+    });
+
+    expect(professional).not.toEqual(neutral);
+    expect(professional).toContain("Acme");
+  });
+
+  it("anchors captions to article content instead of generic promos", () => {
+    const caption = composeCaption(post, "instagram");
+    expect(caption.toLowerCase()).toMatch(/retry|lease|idempotency|duplicate/);
+    expect(caption.toLowerCase()).not.toContain("we shipped something worth reading");
+  });
+
+  it("varies openers across different posts", () => {
+    const otherPost = {
+      ...post,
+      id: "post-99",
+      title: "Observability for async workers",
+      body: "Metrics should explain queue depth, not just CPU. Dashboards need actionable signals when leases expire.",
+    };
+    const a = composeCaption(post, "instagram");
+    const b = composeCaption(otherPost, "instagram");
+    expect(a.split("\n\n")[0]).not.toEqual(b.split("\n\n")[0]);
   });
 });

@@ -88,6 +88,11 @@ export function buildAiSpendSnapshot(
   };
 }
 
+/** Safe fallback when DB persistence is unavailable (e.g. migration not applied yet). */
+export function emptyAiSpendSnapshot(): AiSpendSnapshot {
+  return buildAiSpendSnapshot([], 0);
+}
+
 export function createInMemoryAiCostMeter(): AiCostMeter & { reset(): void } {
   let spendUsd = 0;
   const records: AiUsageRecord[] = [];

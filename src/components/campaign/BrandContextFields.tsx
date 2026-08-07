@@ -93,10 +93,10 @@ export function BrandContextFields({
               onValueChange={(value) => onBrandToneChange(value === DEFAULT_TONE ? "" : value)}
             >
               <SelectTrigger id={toneSelectId}>
-                <SelectValue placeholder="Default voice" />
+                <SelectValue placeholder="Default tone" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={DEFAULT_TONE}>Default voice</SelectItem>
+                <SelectItem value={DEFAULT_TONE}>Default tone</SelectItem>
                 {BRAND_TONE_OPTIONS.map((tone) => (
                   <SelectItem key={tone.id} value={tone.id}>
                     {tone.label}
