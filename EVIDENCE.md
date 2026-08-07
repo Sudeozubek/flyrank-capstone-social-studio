@@ -9,7 +9,7 @@ Reproduce every automated check with:
 
 ```bash
 npm install && npm run test
-# 20 files, 109 tests, all passing
+# 21 files, 117 tests, all passing
 ```
 
 Screenshots are captured and committed under `docs/screenshots/` (13 numbered images, referenced per
@@ -20,10 +20,12 @@ requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png`).
 ## DoD 1 — One post in, per-platform variants out
 
 **Explanation.** Given a published post (title + body + URL), the engine produces one
-`SocialPostEntry` per platform, each with its own image variant and its own caption.
+`SocialPostEntry` per platform (Instagram, X, LinkedIn), each with its own image variant and
+its own caption.
 
 **Evidence.** Creating a campaign fans out to `PLATFORMS` and upserts one entry per platform
-with a per-platform idempotency key; the dashboard renders the two variants side by side.
+with a per-platform idempotency key; the dashboard renders variants in a carousel with
+platform tabs.
 
 - Implementation: `<REPO>src/application/campaign-usecases.ts`, `<REPO>src/domain/entities.ts`
 - Interface: server function `createCampaignWithAssets` — `<REPO>src/lib/flyrank.functions.ts`
@@ -35,8 +37,9 @@ with a per-platform idempotency key; the dashboard renders the two variants side
 
 ## DoD 2 — Exact per-platform image dimensions with subject in the safe zone
 
-**Explanation.** Instagram `1080×1080`, X `1600×900`. Crop is aspect-preserving and centred on
-the subject; the subject is then scaled/recentred so it provably sits inside the safe zone.
+**Explanation.** Instagram `1080×1080`, X `1600×900`, LinkedIn `1200×627`. Crop is
+aspect-preserving and centred on the subject; the subject is then scaled/recentred so it
+provably sits inside the safe zone.
 
 **Evidence.** Output PNG width/height are read straight from the PNG IHDR chunk — no library is
 trusted — and the geometry assertions check safe-zone containment and aspect ratio.
@@ -58,20 +61,21 @@ trusted — and the geometry assertions check safe-zone containment and aspect r
 
 ## DoD 3 — Platform-tailored captions (not truncations of each other)
 
-**Explanation.** Captions are composed from shared brand voice + per-platform fragments and
-differ in structure, tone, length and hashtag budget. I built the caption pipeline — prompt
-composition, platform constraints, validation and post-processing — and it drives an LLM as the
-writing step; the deterministic composer is the fallback and the tested reference implementation.
+**Explanation.** Captions are composed from shared brand voice + per-platform fragments,
+optional brand tone and output language, and article-derived hooks/takeaways — not generic
+"we published a post" boilerplate. The LLM path uses the same fragment architecture; the
+deterministic composer is the fallback and the tested reference implementation.
 
-**Evidence.** Assertions prove divergence (neither caption prefixes the other), per-platform
-length limits (X ≤ 280, Instagram ≤ 2200), hashtag budgets (X ≤ 2, Instagram ≤ 8) and
-determinism.
+**Evidence.** Assertions prove divergence across platforms, per-platform length limits,
+hashtag budgets, brand-tone differentiation, multi-language fragments, content anchoring to
+the source article, and determinism.
 
 - Implementation: `<REPO>src/domain/captions.ts`,
   `<REPO>src/config/social-prompts.config.ts`,
   `<REPO>src/infrastructure/ai/openai-caption-writer.server.ts`
 - Interface: `createCampaignWithAssets`, `regenerateCaptions`
-- Tests: `tests/domain.test.ts › captions` (4 tests), `tests/captions.test.ts`
+- Tests: `tests/domain.test.ts › captions` (4 tests), `tests/captions.test.ts`,
+  `tests/campaign-languages.test.ts`
 - Screenshot: `docs/screenshots/03-caption-comparison.png`
 
 ## DoD 4 — Unified publisher interface, fake platform only
@@ -247,15 +251,20 @@ calls of its own.
 ## DoD 12 — AI cost tracking and budget guard
 
 **Explanation.** Every OpenAI call (captions, art director, image generation) records an
-estimated USD cost attributed to a feature name. Before each call, `canSpendAi()` checks
-cumulative spend against `AI_BUDGET_USD`; when the budget is exhausted, the app falls back
-to the deterministic caption composer / SVG renderer without calling the API.
+estimated USD cost attributed to a feature name. Spend is **persisted per user** in
+`ai_usage_records` (Postgres + RLS) so totals survive page refresh and re-login. Before each
+call, `canSpendAi()` checks cumulative spend against `AI_BUDGET_USD`; when the budget is
+exhausted, the app falls back to the deterministic caption composer / SVG renderer without
+calling the API. The dashboard shows spend via `AiSpendBadge` (header) and `AiSpendPanel`
+(sidebar).
 
-- Implementation: `<REPO>src/infrastructure/ai/ai-cost-meter.server.ts`, wired into
+- Implementation: `<REPO>src/infrastructure/ai/ai-cost-meter.server.ts`,
+  `<REPO>src/infrastructure/ai/ai-cost-meter-db.server.ts`, wired into
   `openai-caption-writer.server.ts`, `openai-art-director.server.ts`,
   `openai-image-generator.server.ts`
+- Schema: `ai_usage_records` in `<REPO>supabase/migrations/20260807210000_add_ai_usage_records.sql`
 - Config: `AI_BUDGET_USD` in `.env.example`
-- Tests: `tests/ai-cost-meter.test.ts`
+- Tests: `tests/ai-cost-meter.test.ts`, `tests/ai-spend-snapshot.test.ts`
 
 ## DoD 13 — Automatic background worker
 
@@ -274,3 +283,13 @@ publishes due entries — scheduled posts fire without a manual dashboard tick.
 
 - Tests: `tests/reliability-probes.test.ts`
 - Forged webhook HTTP status: `400` — `<REPO>src/routes/api/public/webhooks/delivery.ts`
+
+## DoD 15 — LinkedIn platform (third adapter)
+
+**Explanation.** LinkedIn follows the same adapter pattern as Instagram and X: platform spec
+(`1200×627`), voice fragments, fake adapter, DB enum value, and one `SocialPostEntry` per
+campaign.
+
+- Implementation: `<REPO>src/config/platform-specs.ts`, `<REPO>src/infrastructure/publishing/adapters.server.ts`
+- Schema: `linkedin` platform enum — `<REPO>supabase/migrations/20260807200000_add_linkedin_platform.sql`
+- Tests: `tests/publishing-adapters.test.ts`, `tests/domain.test.ts › image geometry`

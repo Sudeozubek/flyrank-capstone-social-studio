@@ -94,3 +94,21 @@ clients at `https://<ref>.supabase.co/auth/v1`.
 Real-platform integration, brand templating, A/B captions, analytics loopback and the approval
 workflow are untouched by design. The MCP interface and document import were included because
 both are thin layers over existing use cases and are sanctioned by the brief.
+
+## D15 — AI spend persisted per user, not in-process only
+Session-only spend counters reset on server restart and could not survive a dashboard refresh.
+`ai_usage_records` stores one row per OpenAI call (feature, model, tokens, estimated USD) under
+RLS; `createDbAiCostMeter` is wired at the composition root. If the table is missing, the meter
+falls back to an empty in-memory ledger so `loadDashboard` never 500s — apply
+`supabase/migrations/20260807210000_add_ai_usage_records.sql` for full persistence.
+
+## D16 — Background worker on server boot
+The capstone requires durable scheduling; a manual dashboard tick is insufficient for demos.
+`runGlobalWorkerTick` runs on an interval from `src/server.ts` using the service-role client,
+claiming due rows across tenants. Disable with `WORKER_ENABLED=false` for tests or manual-only
+runs.
+
+## D17 — LinkedIn as a third fake adapter
+LinkedIn was added using the same port/adapter/registry pattern as Instagram and X — one spec
+entry, one voice block, one `LinkedInFakeAdapter`, one enum migration. No application use case
+imports LinkedIn-specific types.

@@ -13,7 +13,7 @@
 
 - **Database:** standalone Supabase (see `.env.example` and `README.md` § Environment setup).
   Do not rely on Lovable Cloud DB credentials in `.env`.
-- **Tests:** `npm run test` — 14 Vitest files, 78 tests, no network/DB required. Use-case tests
+- **Tests:** `npm run test` — 21 Vitest files, 117 tests, no network/DB required. Use-case tests
   use `tests/helpers/mock-app-context.ts`.
 - **Auth:** Google sign-in goes through Supabase Auth (`src/routes/auth.tsx`), not
   `@lovable.dev/cloud-auth-js`.

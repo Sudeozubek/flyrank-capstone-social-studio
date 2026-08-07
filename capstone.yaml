@@ -77,7 +77,10 @@ features:
   - Automatic background worker (polls Postgres; no manual tick required)
   - HMAC-SHA256 signed delivery webhooks as the only writer of terminal status
   - AES-256-GCM encrypted OAuth tokens with a fresh IV per write
-  - AI cost meter with per-call attribution and AI_BUDGET_USD guard
+  - AI cost meter with per-call attribution, per-user DB persistence, and AI_BUDGET_USD guard
+  - AI spend dashboard (badge + sidebar panel)
+  - Campaign output languages (EN, TR, DE, BS, FR, AR) and brand tone presets
+  - Variant gallery carousel (one platform slide at a time)
   - Multi-tenant auth (email/password + Google) with per-user RLS
   - Standalone Model Context Protocol server exposing the campaign lifecycle
 
@@ -115,6 +118,18 @@ definition_of_done:
   - id: DOD-11
     name: Documentation and submission pack
     evidence: EVIDENCE.md#dod-11--documentation-and-submission-pack
+  - id: DOD-12
+    name: AI cost tracking with per-user DB persistence
+    evidence: EVIDENCE.md#dod-12--ai-cost-tracking-and-budget-guard
+  - id: DOD-13
+    name: Automatic background worker
+    evidence: EVIDENCE.md#dod-13--automatic-background-worker
+  - id: DOD-14
+    name: Capstone acceptance probes (automated)
+    evidence: EVIDENCE.md#dod-14--capstone-acceptance-probes-automated
+  - id: DOD-15
+    name: LinkedIn platform (third adapter)
+    evidence: EVIDENCE.md#dod-15--linkedin-platform-third-adapter
 
 api:
   server_functions: src/lib/flyrank.functions.ts
@@ -166,9 +181,13 @@ testing:
       covers: [capstone acceptance probes 1-4, idempotency, 429, crash-resume, webhook trust]
     - path: tests/ai-cost-meter.test.ts
       covers: [AI spend tracking, budget guard, caption fallback when budget exhausted]
+    - path: tests/ai-spend-snapshot.test.ts
+      covers: [AI spend snapshot shape for dashboard]
+    - path: tests/campaign-languages.test.ts
+      covers: [multi-language caption fragments]
   totals:
-    files: 20
-    tests: 113
+    files: 21
+    tests: 117
 
 setup:
   install: npm install
