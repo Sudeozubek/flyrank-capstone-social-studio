@@ -108,6 +108,14 @@ The capstone requires durable scheduling; a manual dashboard tick is insufficien
 claiming due rows across tenants. Disable with `WORKER_ENABLED=false` for tests or manual-only
 runs.
 
+## D18 — Unified public shell palette (landing, auth, dashboard)
+Marketing landing and auth wrap content in `landing-page` / `landing-dark` with coral-forward
+OKLCH tokens. Dashboard `:root` and `html.light` were aligned to the same token block so
+`bg-primary`, `bg-surface` and borders match without per-screen hardcoded colours. Theme
+persistence still uses two keys (`campaignhub-landing-theme` on `/` and `/auth`,
+`campaignhub-theme` on the dashboard toggle) — colours match; preference is not yet synced
+across routes.
+
 ## D17 — LinkedIn as a third fake adapter
 LinkedIn was added using the same port/adapter/registry pattern as Instagram and X — one spec
 entry, one voice block, one `LinkedInFakeAdapter`, one enum migration. No application use case

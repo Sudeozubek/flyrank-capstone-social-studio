@@ -130,8 +130,11 @@ Adding a fourth platform = one platform spec + one voice block + one adapter cla
   back to deterministic captions / SVG images when the budget is exhausted.
 - **Automatic background worker** — polls Postgres on server boot (`WORKER_ENABLED`,
   `WORKER_POLL_INTERVAL_MS`); scheduled posts publish without a manual dashboard tick.
-- **Multi-tenant auth** — email/password + Google, every row scoped by `user_id` under RLS.
-- **Campaign management UI** — dark/light dashboard, variant carousel (one platform at a time),
+- **Multi-tenant auth** — email/password sign-in (`/auth`), every row scoped by `user_id` under RLS.
+- **Public landing** — marketing page at `/` with EN/TR i18n, hero visuals, scroll animations,
+  and MCP positioning aligned with `POST /api/public/mcp`.
+- **Campaign management UI** — dashboard with unified coral OKLCH palette (light/dark toggle),
+  variant carousel (one platform at a time),
   live status timeline, manual caption editing, optimistic delete with a 10-second undo toast,
   demo control rail.
 - **Standalone MCP server** — vendor-neutral JSON-RPC MCP interface over the same use cases.
@@ -216,7 +219,8 @@ fallbacks are derived so local development boots without secrets. `.env` is git-
    redirect URL (`http://localhost:8080` for local dev).
 5. Paste the values into `.env` and start the app.
 
-Google OAuth uses Supabase Auth directly (`supabase.auth.signInWithOAuth`), not Lovable Cloud.
+Google OAuth can be enabled in Supabase Auth when needed; the auth UI currently exposes
+email/password only. Supabase Auth is used directly (not `@lovable.dev/cloud-auth-js`).
 
 **Sign-up without email confirmation:** new accounts are created server-side via
 `signUpAccount` (`src/lib/auth.functions.ts`) using the service-role key with
@@ -235,7 +239,7 @@ npm run lint
 npm run build
 ```
 
-Sign up on `/auth`, then land on `/dashboard`.
+Sign up on `/auth`, then land on `/dashboard`. The public marketing page is at `/`.
 
 ## API overview
 

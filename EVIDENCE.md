@@ -12,8 +12,8 @@ npm install && npm run test
 # 21 files, 117 tests, all passing
 ```
 
-Screenshots are captured and committed under `docs/screenshots/` (17 numbered images, referenced per
-requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png` when present).
+Screenshots are captured and committed under `docs/screenshots/` (20 numbered images,
+referenced per requirement below; `10b-rls-policies.png` accompanies `10-auth-and-rls.png` when present).
 
 ---
 
@@ -212,7 +212,7 @@ helper wraps anything token-shaped before logging.
 
 ## DoD 10 — Tenant isolation, validation and clean architecture
 
-**Explanation.** Email/password + Google auth; every table is `user_id`-scoped with explicit
+**Explanation.** Email/password sign-in; every table is `user_id`-scoped with explicit
 `GRANT`s, RLS policies and indexes. Every input is zod-validated at the boundary — bad input
 returns `400`, never a 500. Dependencies point inward: `interfaces → application → domain`.
 
@@ -226,7 +226,8 @@ root.
 - Endpoints: all authenticated server functions in `<REPO>src/lib/flyrank.functions.ts`
 - Tests: layering enforced by review + `ports.ts`; `tests/supabase-mappers.test.ts`,
   `tests/ingest-content.test.ts`
-- Screenshot: `docs/screenshots/10-auth-and-rls.png`
+- Screenshot: `docs/screenshots/10-auth-and-rls.png`,
+  `docs/screenshots/v2-19-auth-split-panel-fanned-cards.png`
 
 ## DoD 11 — Documentation and submission pack
 
@@ -250,6 +251,23 @@ calls of its own.
   consent at `/oauth/consent`
 - Tests: `tests/mcp-server.test.ts`, `tests/mcp-context.test.ts`
 - Screenshot: `docs/screenshots/11-mcp-tools.png`
+
+## Enhancement — Public landing page and auth (product polish)
+
+**Explanation.** `/` is a marketing landing page with EN/TR i18n, scroll animations, hero
+generation visuals and an AI Studio preview. `/auth` is a split layout: marketing panel with
+fanned Instagram / X / LinkedIn preview cards and an email/password form (no Google button until
+OAuth is enabled in Supabase). Landing, auth and dashboard share the same coral-forward OKLCH
+token set in `src/styles.css`.
+
+- Implementation: `<REPO>src/routes/index.tsx`, `<REPO>src/routes/auth.tsx`,
+  `<REPO>src/components/landing/*`, `<REPO>src/components/auth/AuthPanelFan.tsx`,
+  `<REPO>src/i18n/**`
+- Screenshots:
+  `docs/screenshots/v2-17-landing-hero-generation-visual.png`,
+  `docs/screenshots/v2-18-landing-ai-studio-preview-and-stats.png`,
+  `docs/screenshots/v2-19-auth-split-panel-fanned-cards.png`,
+  `docs/screenshots/v2-20-locale-toggle-en-tr.png`
 
 ## DoD 12 — AI cost tracking and budget guard
 
