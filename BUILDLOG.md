@@ -176,6 +176,28 @@ sharp implementation rather than the prototype.
 - **Seed script** — `npm run seed` (`scripts/seed.mjs`) for demo data.
 - Test suite expanded to **21 files / 117 tests**, all deterministic.
 
+## Phase 12 — Public landing, auth experience and unified palette
+
+- **Marketing landing** (`src/routes/index.tsx`, `src/components/landing/*`) — scroll-reveal
+  sections, sky/cloud hero, `HeroGeneration` + `HeroVisual` studio preview, fixed navbar with
+  hide-on-scroll-down / show-on-scroll-up, Campaign/Hub wordmark (no icon), footer attribution
+  and MCP note aligned with the in-repo MCP server (`POST /api/public/mcp`).
+- **i18n (EN/TR)** — `src/i18n/` with locale files, shared `LocaleToggle`, `LandingI18nProvider`
+  and `AuthI18nProvider`; locale persisted in `campaignhub-landing-locale`. Document meta
+  updates via `src/i18n/document-meta.ts`.
+- **Auth split layout** (`src/routes/auth.tsx`) — 50/50 panel: centered marketing copy, fanned
+  three-platform post preview (`AuthPanelFan`), email/password only (Google button removed until
+  OAuth is wired for production). Theme toggle shares the landing OKLCH palette via
+  `campaignhub-landing-theme`.
+- **Favicon / meta** — CampaignHub monogram (`public/favicon.svg`, etc.); root meta no longer
+  references Lovable.
+- **Design tokens** — `:root` / `html.light` and `.landing-page` share one coral-forward OKLCH
+  palette so dashboard, landing and auth look like one product (`src/styles.css`). Dashboard
+  `ThemeToggle` still uses `campaignhub-theme` + `html.light`; landing/auth use
+  `campaignhub-landing-theme` on the page wrapper.
+- **Evidence** — `v2-17-landing-hero-generation-visual.png` through
+  `v2-20-locale-toggle-en-tr.png` in `docs/screenshots/`.
+
 ## Final notes
 
 **What the architecture bought.** Swapping the store (file → Postgres) and the renderer

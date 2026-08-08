@@ -127,17 +127,6 @@ function AuthPageContent({
     }
   }
 
-  async function google() {
-    const returnTo = next ? window.location.origin + next : window.location.origin;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: returnTo },
-    });
-    if (error) {
-      toast.error(error.message || t.errors.googleFailed);
-    }
-  }
-
   const isSignIn = mode === "signin";
 
   return (
@@ -217,21 +206,6 @@ function AuthPageContent({
                   {isSignIn ? t.form.signInSubtitle : t.form.signUpSubtitle}
                 </p>
               </header>
-
-              <Button
-                variant="outline"
-                className="w-full border-border bg-background text-foreground shadow-sm hover:bg-background/90"
-                onClick={google}
-                type="button"
-              >
-                {t.form.google}
-              </Button>
-
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="h-px flex-1 bg-border" />
-                {t.form.or}
-                <span className="h-px flex-1 bg-border" />
-              </div>
 
               <form className="space-y-4" onSubmit={submit}>
                 <div className="space-y-2">

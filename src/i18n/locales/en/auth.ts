@@ -47,8 +47,6 @@ export const authEn: AuthMessages = {
     signUpTitle: "Start your first campaign",
     signInSubtitle: "Sign in to pick up where you left off.",
     signUpSubtitle: "Create a workspace and turn your next article into a campaign in minutes.",
-    google: "Continue with Google",
-    or: "or",
     email: "Email",
     password: "Password",
     signInSubmit: "Sign in",
@@ -59,7 +57,6 @@ export const authEn: AuthMessages = {
   },
   errors: {
     authFailed: "Authentication failed",
-    googleFailed: "Google sign-in failed",
     confirmEmail:
       "Account created but no session. Disable email confirmation in Supabase Auth settings, then try again.",
   },

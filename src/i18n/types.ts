@@ -149,8 +149,6 @@ export type AuthMessages = {
     signUpTitle: string;
     signInSubtitle: string;
     signUpSubtitle: string;
-    google: string;
-    or: string;
     email: string;
     password: string;
     signInSubmit: string;
@@ -161,7 +159,6 @@ export type AuthMessages = {
   };
   errors: {
     authFailed: string;
-    googleFailed: string;
     confirmEmail: string;
   };
 };

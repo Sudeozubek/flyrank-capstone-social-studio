@@ -22,3 +22,7 @@ here with the exact filename.
 | `14-variant-gallery-carousel-three-platforms.png` | Campaign variant carousel: Instagram slide with image + Turkish caption; platform tabs for Instagram, X, LinkedIn |
 | `15-brand-tone-selector.png` | New campaign composer — brand tone dropdown (Friendly, Professional, Playful, …) |
 | `16-campaign-language-selector.png` | New campaign composer — output language dropdown (English, Türkçe, Deutsch, Bosanski, Français, العربية) |
+| `v2-17-landing-hero-generation-visual.png` | Landing hero: headline, CTAs, `HeroGeneration` beam + three platform cards |
+| `v2-18-landing-ai-studio-preview-and-stats.png` | `HeroVisual` AI Studio preview + stats row (3 platforms, tones, languages, workflow) |
+| `v2-19-auth-split-panel-fanned-cards.png` | Auth 50/50: centered left panel with fanned Instagram / X / LinkedIn cards; email/password form on the right |
+| `v2-20-locale-toggle-en-tr.png` | EN/TR locale toggle + theme icon (navbar or auth header) |

@@ -47,8 +47,6 @@ export const authTr: AuthMessages = {
     signUpTitle: "İlk kampanyanızı başlatın",
     signInSubtitle: "Kampanyalarınıza devam etmek için giriş yapın.",
     signUpSubtitle: "Çalışma alanı oluşturun; bir sonraki makalenizi dakikalar içinde kampanyaya dönüştürün.",
-    google: "Google ile devam et",
-    or: "veya",
     email: "E-posta",
     password: "Şifre",
     signInSubmit: "Giriş yap",
@@ -59,7 +57,6 @@ export const authTr: AuthMessages = {
   },
   errors: {
     authFailed: "Kimlik doğrulama başarısız",
-    googleFailed: "Google ile giriş başarısız",
     confirmEmail:
       "Hesap oluşturuldu ancak oturum açılamadı. Supabase Auth ayarlarında e-posta onayını kapatıp tekrar deneyin.",
   },
