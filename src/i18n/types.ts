@@ -106,6 +106,66 @@ export type LandingMessages = {
   };
 };
 
+export type AuthMessages = {
+  meta: {
+    signInTitle: string;
+    signUpTitle: string;
+    signInDescription: string;
+    signUpDescription: string;
+  };
+  chooseLanguage: string;
+  switchToLight: string;
+  switchToDark: string;
+  panel: {
+    title: string;
+    titleAccent: string;
+    body: string;
+    posts: {
+      instagram: {
+        platform: string;
+        meta: string;
+        status: string;
+        visual: string;
+        caption: string;
+      };
+      x: {
+        platform: string;
+        meta: string;
+        status: string;
+        caption: string;
+        visual: string;
+      };
+      linkedin: {
+        platform: string;
+        meta: string;
+        status: string;
+        caption: string;
+        engagement: string;
+      };
+    };
+  };
+  form: {
+    signInTitle: string;
+    signUpTitle: string;
+    signInSubtitle: string;
+    signUpSubtitle: string;
+    google: string;
+    or: string;
+    email: string;
+    password: string;
+    signInSubmit: string;
+    signUpSubmit: string;
+    busy: string;
+    switchToSignUp: string;
+    switchToSignIn: string;
+  };
+  errors: {
+    authFailed: string;
+    googleFailed: string;
+    confirmEmail: string;
+  };
+};
+
 export const LANDING_LOCALE_OPTIONS: Record<
   LandingLocale,
   { code: LandingLocale; short: string; label: string }

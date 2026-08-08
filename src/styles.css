@@ -439,6 +439,40 @@
   animation-delay: 0.85s, 6.1s;
 }
 
+/* Auth panel — stacked fan of post preview cards */
+
+.auth-fan-stack {
+  position: relative;
+  height: min(400px, 44vh);
+  width: 100%;
+  max-width: 380px;
+  margin-top: 0.25rem;
+  margin-inline: auto;
+}
+
+.auth-fan-card {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(280px, 78%);
+  transform-origin: 50% 100%;
+}
+
+.auth-fan-instagram {
+  z-index: 1;
+  transform: translateX(calc(-50% - 52px)) rotate(-30deg) translateY(-72px) scale(0.86);
+}
+
+.auth-fan-x {
+  z-index: 2;
+  transform: translateX(-50%) rotate(-8deg) translateY(-36px) scale(0.92);
+}
+
+.auth-fan-linkedin {
+  z-index: 3;
+  transform: translateX(calc(-50% + 52px)) rotate(26deg) translateY(-6px) scale(0.96);
+}
+
 .gen-beam {
   animation: beam-dash 3.2s linear infinite;
 }

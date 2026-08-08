@@ -9,8 +9,8 @@ import {
 import {
   applyDocumentLocale,
   landingMessages,
+  persistLocale,
   readStoredLocale,
-  STORAGE_KEY,
 } from "@/i18n/landing/catalog";
 import type { LandingLocale, LandingMessages } from "@/i18n/types";
 
@@ -27,7 +27,7 @@ export function LandingI18nProvider({ children }: { children: ReactNode }) {
 
   const setLocale = (next: LandingLocale) => {
     setLocaleState(next);
-    localStorage.setItem(STORAGE_KEY, next);
+    persistLocale(next);
   };
 
   const t = landingMessages[locale];
