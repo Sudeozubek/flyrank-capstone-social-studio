@@ -15,7 +15,9 @@ function FanCard({ platform, meta, status, caption, visual, icon }: FanCardProps
   return (
     <div className="gen-card rounded-2xl p-3.5">
       <div className="flex flex-col items-center gap-1.5 border-b border-slate-100 pb-2.5 text-center">
-        <span className="flex size-11 items-center justify-center rounded-xl shadow-sm">{icon}</span>
+        <span className="flex size-11 items-center justify-center rounded-xl shadow-sm">
+          {icon}
+        </span>
         <p className="text-sm font-semibold text-slate-800">{platform}</p>
         <p className="text-[10px] text-muted-foreground">{meta}</p>
         <p className="text-[10px] font-medium text-emerald-600">{status}</p>

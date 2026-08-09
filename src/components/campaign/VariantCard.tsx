@@ -47,10 +47,7 @@ export function VariantCard({
       </header>
 
       <div
-        className={cn(
-          "min-h-0 flex-1",
-          wide ? "grid grid-cols-1 lg:grid-cols-2" : "flex flex-col",
-        )}
+        className={cn("min-h-0 flex-1", wide ? "grid grid-cols-1 lg:grid-cols-2" : "flex flex-col")}
       >
         {/* Image frame — fixed height, image scales inside without resizing the card */}
         <div
@@ -75,10 +72,7 @@ export function VariantCard({
 
         {/* Caption column — same height as image column, scroll inside */}
         <div
-          className={cn(
-            "flex min-h-0 min-w-0 flex-col p-3",
-            wide ? "h-full" : "min-h-0 flex-1",
-          )}
+          className={cn("flex min-h-0 min-w-0 flex-col p-3", wide ? "h-full" : "min-h-0 flex-1")}
         >
           <p className="min-h-0 flex-1 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
             {entry.caption}

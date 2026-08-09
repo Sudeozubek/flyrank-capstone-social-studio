@@ -34,7 +34,11 @@ function statusPillClass(status: AiSpendSnapshot["status"]): string {
 function formatTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 function tokenSummary(input: number, output: number): string | null {
@@ -107,7 +111,10 @@ export function AiSpendPanel({ spend }: { spend: AiSpendSnapshot }) {
             <>
               <span className="font-medium text-foreground">Budget exhausted.</span> New campaigns
               will use free fallbacks until the server restarts or you raise{" "}
-              <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">AI_BUDGET_USD</code>.
+              <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">
+                AI_BUDGET_USD
+              </code>
+              .
             </>
           ) : (
             <>
@@ -142,7 +149,9 @@ export function AiSpendPanel({ spend }: { spend: AiSpendSnapshot }) {
                   className="flex items-center gap-2 rounded-lg border border-border/80 bg-background/40 px-3 py-2"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium text-foreground">{row.featureLabel}</p>
+                    <p className="truncate text-xs font-medium text-foreground">
+                      {row.featureLabel}
+                    </p>
                     <p className="truncate font-mono text-[10px] text-muted-foreground">
                       {row.model}
                       {tokens ? ` · ${tokens}` : " · flat rate"}
@@ -152,7 +161,9 @@ export function AiSpendPanel({ spend }: { spend: AiSpendSnapshot }) {
                     <p className="font-mono text-[11px] tabular-nums text-foreground">
                       {formatAiUsd(row.estimatedUsd)}
                     </p>
-                    <p className="font-mono text-[10px] text-muted-foreground">{formatTime(row.at)}</p>
+                    <p className="font-mono text-[10px] text-muted-foreground">
+                      {formatTime(row.at)}
+                    </p>
                   </div>
                 </li>
               );

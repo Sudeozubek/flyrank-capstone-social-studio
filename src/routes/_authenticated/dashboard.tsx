@@ -68,7 +68,9 @@ function Dashboard() {
   const [busy, setBusy] = useState(false);
   const [scheduleAt, setScheduleAt] = useState(localIsoInMinutes(2));
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<Record<string, ReturnType<typeof setTimeout>>>({});
+  const [pendingDelete, setPendingDelete] = useState<Record<string, ReturnType<typeof setTimeout>>>(
+    {},
+  );
 
   const dashboard = useQuery({
     queryKey: ["dashboard"],
@@ -261,202 +263,206 @@ function Dashboard() {
             {aiSpend ? <AiSpendPanel spend={aiSpend} /> : null}
 
             <section className="rounded-2xl border border-border bg-surface p-5">
-
-            <h2 className="font-display text-lg text-foreground">Operations</h2>
-            <p className="mb-4 text-sm text-muted-foreground">
-              Drive the durable worker and simulate platform rate limits.
-            </p>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="schedule-at">Schedule time</Label>
-                <Input
-                  id="schedule-at"
-                  type="datetime-local"
-                  value={scheduleAt}
-                  onChange={(e) => setScheduleAt(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={busy}
-                  onClick={() => run("Worker tick complete", () => fns.tick({}))}
-                >
-                  Run worker tick
-                </Button>
-                {PLATFORMS.map((platform) => (
+              <h2 className="font-display text-lg text-foreground">Operations</h2>
+              <p className="mb-4 text-sm text-muted-foreground">
+                Drive the durable worker and simulate platform rate limits.
+              </p>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-at">Schedule time</Label>
+                  <Input
+                    id="schedule-at"
+                    type="datetime-local"
+                    value={scheduleAt}
+                    onChange={(e) => setScheduleAt(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
                   <Button
-                    key={platform}
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() => run("Worker tick complete", () => fns.tick({}))}
+                  >
+                    Run worker tick
+                  </Button>
+                  {PLATFORMS.map((platform) => (
+                    <Button
+                      key={platform}
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() =>
+                        run(
+                          `${PLATFORM_SPECS[platform].label} will rate-limit the next 2 attempts`,
+                          () => fns.rateLimit({ data: { platform, failures: 2 } }),
+                        )
+                      }
+                    >
+                      Force 429 on {PLATFORM_SPECS[platform].label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-border bg-surface p-5">
+              <h2 className="font-display text-lg text-foreground">Delivery webhooks</h2>
+              <p className="mb-3 text-sm text-muted-foreground">
+                Signature-verified callbacks — the only writer of terminal status.
+              </p>
+              <ul className="space-y-2">
+                {webhooks.length === 0 ? (
+                  <li className="text-xs text-muted-foreground">No webhook traffic yet.</li>
+                ) : null}
+                {webhooks.map((event) => (
+                  <li
+                    key={event.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 font-mono text-[11px]"
+                  >
+                    <span
+                      className={
+                        event.signatureValid ? "text-status-published" : "text-status-failed"
+                      }
+                    >
+                      {event.signatureValid ? "signed" : "rejected"} · {event.httpStatus}
+                    </span>
+                    <span className="truncate text-muted-foreground">{event.message ?? "—"}</span>
+                    <span className="text-muted-foreground">
+                      {new Date(event.receivedAt).toLocaleTimeString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </aside>
+
+          <section className="min-w-0 flex-1 space-y-6">
+            {campaigns.length === 0 ? (
+              <section className="rounded-2xl border border-dashed border-border p-12 text-center">
+                <h2 className="font-display text-xl text-foreground">No campaigns yet</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Paste a blog post or upload a document to generate your first set of
+                  platform-native variants.
+                </p>
+              </section>
+            ) : null}
+
+            {campaigns.map((snapshot) => (
+              <section
+                key={snapshot.campaign.id}
+                className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
+              >
+                <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate font-display text-base text-foreground">
+                      {snapshot.campaign.name}
+                    </h2>
+                    <p className="truncate font-mono text-[10px] text-muted-foreground">
+                      {snapshot.post.url ?? `source: ${snapshot.post.source}`} ·{" "}
+                      {new Date(snapshot.campaign.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <StatusChip status={snapshot.campaign.status} kind="campaign" />
+                </header>
+
+                <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() =>
+                      run("Captions regenerated", () =>
+                        fns.captions({ data: { campaignId: snapshot.campaign.id } }),
+                      )
+                    }
+                  >
+                    Regenerate captions
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() =>
+                      run("Image variants regenerated", () =>
+                        fns.images({ data: { campaignId: snapshot.campaign.id } }),
+                      )
+                    }
+                  >
+                    Regenerate images
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={busy}
+                    onClick={() =>
+                      run("Campaign scheduled", () =>
+                        fns.schedule({
+                          data: {
+                            campaignId: snapshot.campaign.id,
+                            scheduledFor: new Date(scheduleAt).toISOString(),
+                          },
+                        }),
+                      )
+                    }
+                  >
+                    Schedule
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={busy}
+                    onClick={() =>
+                      run("Publish attempted", () =>
+                        fns.publish({ data: { campaignId: snapshot.campaign.id } }),
+                      )
+                    }
+                  >
+                    Publish now
+                  </Button>
+                  <Button
                     size="sm"
                     variant="outline"
                     disabled={busy}
                     onClick={() =>
-                      run(`${PLATFORM_SPECS[platform].label} will rate-limit the next 2 attempts`, () =>
-                        fns.rateLimit({ data: { platform, failures: 2 } }),
+                      run("Retry queued", () =>
+                        fns.retry({ data: { campaignId: snapshot.campaign.id } }),
                       )
                     }
                   >
-                    Force 429 on {PLATFORM_SPECS[platform].label}
+                    Retry failed
                   </Button>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-border bg-surface p-5">
-            <h2 className="font-display text-lg text-foreground">Delivery webhooks</h2>
-            <p className="mb-3 text-sm text-muted-foreground">
-              Signature-verified callbacks — the only writer of terminal status.
-            </p>
-            <ul className="space-y-2">
-              {webhooks.length === 0 ? (
-                <li className="text-xs text-muted-foreground">No webhook traffic yet.</li>
-              ) : null}
-              {webhooks.map((event) => (
-                <li
-                  key={event.id}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 font-mono text-[11px]"
-                >
-                  <span className={event.signatureValid ? "text-status-published" : "text-status-failed"}>
-                    {event.signatureValid ? "signed" : "rejected"} · {event.httpStatus}
-                  </span>
-                  <span className="truncate text-muted-foreground">{event.message ?? "—"}</span>
-                  <span className="text-muted-foreground">
-                    {new Date(event.receivedAt).toLocaleTimeString()}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-          </aside>
-
-          <section className="min-w-0 flex-1 space-y-6">
-          {campaigns.length === 0 ? (
-            <section className="rounded-2xl border border-dashed border-border p-12 text-center">
-              <h2 className="font-display text-xl text-foreground">No campaigns yet</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Paste a blog post or upload a document to generate your first set of
-                platform-native variants.
-              </p>
-            </section>
-          ) : null}
-
-          {campaigns.map((snapshot) => (
-            <section
-              key={snapshot.campaign.id}
-              className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
-            >
-              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
-                <div className="min-w-0">
-                  <h2 className="truncate font-display text-base text-foreground">
-                    {snapshot.campaign.name}
-                  </h2>
-                  <p className="truncate font-mono text-[10px] text-muted-foreground">
-                    {snapshot.post.url ?? `source: ${snapshot.post.source}`} ·{" "}
-                    {new Date(snapshot.campaign.createdAt).toLocaleString()}
-                  </p>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    onClick={() => setEditingId(snapshot.campaign.id)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={busy}
+                    className="text-status-failed hover:text-status-failed"
+                    onClick={() => requestDelete(snapshot.campaign.id, snapshot.campaign.name)}
+                  >
+                    Delete
+                  </Button>
                 </div>
-                <StatusChip status={snapshot.campaign.status} kind="campaign" />
-              </header>
 
-              <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={busy}
-                  onClick={() =>
-                    run("Captions regenerated", () =>
-                      fns.captions({ data: { campaignId: snapshot.campaign.id } }),
-                    )
-                  }
-                >
-                  Regenerate captions
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={busy}
-                  onClick={() =>
-                    run("Image variants regenerated", () =>
-                      fns.images({ data: { campaignId: snapshot.campaign.id } }),
-                    )
-                  }
-                >
-                  Regenerate images
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={busy}
-                  onClick={() =>
-                    run("Campaign scheduled", () =>
-                      fns.schedule({
-                        data: {
-                          campaignId: snapshot.campaign.id,
-                          scheduledFor: new Date(scheduleAt).toISOString(),
-                        },
-                      }),
-                    )
-                  }
-                >
-                  Schedule
-                </Button>
-                <Button
-                  size="sm"
-                  disabled={busy}
-                  onClick={() =>
-                    run("Publish attempted", () =>
-                      fns.publish({ data: { campaignId: snapshot.campaign.id } }),
-                    )
-                  }
-                >
-                  Publish now
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={busy}
-                  onClick={() =>
-                    run("Retry queued", () =>
-                      fns.retry({ data: { campaignId: snapshot.campaign.id } }),
-                    )
-                  }
-                >
-                  Retry failed
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={busy}
-                  onClick={() => setEditingId(snapshot.campaign.id)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={busy}
-                  className="text-status-failed hover:text-status-failed"
-                  onClick={() => requestDelete(snapshot.campaign.id, snapshot.campaign.name)}
-                >
-                  Delete
-                </Button>
-              </div>
+                <CampaignEditDialog
+                  snapshot={snapshot}
+                  open={editingId === snapshot.campaign.id}
+                  busy={busy}
+                  onOpenChange={(open) => setEditingId(open ? snapshot.campaign.id : null)}
+                  onSave={saveEdit}
+                />
 
-              <CampaignEditDialog
-                snapshot={snapshot}
-                open={editingId === snapshot.campaign.id}
-                busy={busy}
-                onOpenChange={(open) => setEditingId(open ? snapshot.campaign.id : null)}
-                onSave={saveEdit}
-              />
-
-              <div className="border-t border-border bg-surface-raised/20 px-3 py-3">
-                <VariantGallery entries={snapshot.entries} images={snapshot.images} />
-              </div>
-            </section>
-          ))}
+                <div className="border-t border-border bg-surface-raised/20 px-3 py-3">
+                  <VariantGallery entries={snapshot.entries} images={snapshot.images} />
+                </div>
+              </section>
+            ))}
           </section>
         </div>
       </main>
@@ -469,4 +475,3 @@ function Dashboard() {
     </div>
   );
 }
-

@@ -19,9 +19,7 @@ export interface VariantGalleryProps {
 }
 
 function sortByPlatformOrder(entries: SocialPostEntry[]): SocialPostEntry[] {
-  return [...entries].sort(
-    (a, b) => PLATFORMS.indexOf(a.platform) - PLATFORMS.indexOf(b.platform),
-  );
+  return [...entries].sort((a, b) => PLATFORMS.indexOf(a.platform) - PLATFORMS.indexOf(b.platform));
 }
 
 const arrowClass =
@@ -50,7 +48,9 @@ export function VariantGallery({ entries, images, className }: VariantGalleryPro
 
   if (sorted.length === 0) {
     return (
-      <div className={cn("rounded-lg border border-dashed border-border p-6 text-center", className)}>
+      <div
+        className={cn("rounded-lg border border-dashed border-border p-6 text-center", className)}
+      >
         <p className="text-xs text-muted-foreground">No platform variants yet.</p>
       </div>
     );

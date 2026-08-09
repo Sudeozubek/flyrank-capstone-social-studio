@@ -89,7 +89,7 @@ export function CampaignComposer({
   const [campaignName, setCampaignName] = useState("");
   const [brandName, setBrandName] = useState("");
   const [brandTone, setBrandTone] = useState("");
-  const [brandLanguage, setBrandLanguage] = useState(DEFAULT_CAMPAIGN_LANGUAGE);
+  const [brandLanguage, setBrandLanguage] = useState<string>(DEFAULT_CAMPAIGN_LANGUAGE);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
@@ -97,14 +97,12 @@ export function CampaignComposer({
   const fileInput = useRef<HTMLInputElement>(null);
 
   const visibleGroups = useMemo(
-    () => (sourceFilter === ALL_SOURCES ? library : library.filter((g) => g.source.id === sourceFilter)),
+    () =>
+      sourceFilter === ALL_SOURCES ? library : library.filter((g) => g.source.id === sourceFilter),
     [library, sourceFilter],
   );
   const posts = useMemo(() => visibleGroups.flatMap((group) => group.items), [visibleGroups]);
-  const feedErrors = useMemo(
-    () => visibleGroups.filter((group) => group.error),
-    [visibleGroups],
-  );
+  const feedErrors = useMemo(() => visibleGroups.filter((group) => group.error), [visibleGroups]);
 
   const brand = () => ({
     brandName: brandName.trim() || undefined,

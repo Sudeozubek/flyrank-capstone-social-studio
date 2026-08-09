@@ -40,7 +40,11 @@ export function resetFakePlatform() {
   rateLimitBudget.clear();
 }
 
-async function fireDeliveryWebhook(origin: string, payload: Record<string, unknown>, delayMs: number) {
+async function fireDeliveryWebhook(
+  origin: string,
+  payload: Record<string, unknown>,
+  delayMs: number,
+) {
   const body = JSON.stringify(payload);
   const send = async () => {
     try {
@@ -86,7 +90,7 @@ export const Route = createFileRoute("/api/public/fake-platform/$platform/posts"
           );
         }
 
-        const payload = (await request.json().catch(() => ({}))) as Record<string, any>;
+        const payload = (await request.json().catch(() => ({}))) as Record<string, unknown>;
         const caption = String(
           payload["caption"] ?? payload["text"] ?? payload["commentary"] ?? "",
         );
@@ -96,12 +100,16 @@ export const Route = createFileRoute("/api/public/fake-platform/$platform/posts"
         const existing = posts.get(idempotencyKey);
         if (existing) {
           // Replay: same remote id, no second post, webhook re-sent.
-          await fireDeliveryWebhook(origin, {
-            entryId: clientRef,
-            platform,
-            remoteId: existing.id,
-            status: "delivered",
-          }, 0);
+          await fireDeliveryWebhook(
+            origin,
+            {
+              entryId: clientRef,
+              platform,
+              remoteId: existing.id,
+              status: "delivered",
+            },
+            0,
+          );
           return Response.json({ id: existing.id, duplicate: true }, { status: 200 });
         }
 

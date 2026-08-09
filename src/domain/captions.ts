@@ -167,7 +167,10 @@ export function fitCaptionToLimit(
   options: { allowEllipsis?: boolean; preserveLineBreaks?: boolean } = {},
 ): string {
   const normalized = options.preserveLineBreaks
-    ? text.replace(/[ \t]+\n/g, "\n").replace(/[^\S\n]{2,}/g, " ").trim()
+    ? text
+        .replace(/[ \t]+\n/g, "\n")
+        .replace(/[^\S\n]{2,}/g, " ")
+        .trim()
     : text.replace(/\s+/g, " ").trim();
 
   if (normalized.length <= limit) return normalized;
@@ -239,16 +242,18 @@ function compressForX(text: string, limit: number): string {
   }
 
   const tail = parts[parts.length - 1]!;
-  let bodyParts = parts.slice(0, -1);
+  const bodyParts = parts.slice(0, -1);
 
   while (bodyParts.join("\n\n").length + 2 + tail.length > limit && bodyParts.length > 1) {
     const last = bodyParts.pop()!;
     if (last.length > 48) {
-      bodyParts.push(fitCaptionToLimit(last, Math.max(32, last.length - 24), { allowEllipsis: false }));
+      bodyParts.push(
+        fitCaptionToLimit(last, Math.max(32, last.length - 24), { allowEllipsis: false }),
+      );
     }
   }
 
-  let result = [...bodyParts, tail].join("\n\n");
+  const result = [...bodyParts, tail].join("\n\n");
   return fitCaptionToLimit(result, limit, { allowEllipsis: false, preserveLineBreaks: true });
 }
 
@@ -347,7 +352,7 @@ export function composeCaption(
 
   const normalized = voice.lineBreaks ? filled : filled.replace(/\s*\n+\s*/g, " ");
   return fitCaptionToLimit(normalized, captionLimit(platform), {
-    allowEllipsis: platform !== "x",
+    allowEllipsis: true,
     preserveLineBreaks: voice.lineBreaks,
   });
 }

@@ -7,12 +7,15 @@
 import type { DocumentParser, ParsedDocument } from "@/domain/ports";
 
 function cleanup(text: string): string {
-  return text
-    .replace(/\r\n/g, "\n")
-    .replace(/\u0000/g, "")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  return (
+    text
+      .replace(/\r\n/g, "\n")
+      // eslint-disable-next-line no-control-regex -- NUL bytes are real in PDF/DOCX extraction
+      .replace(/\u{0000}/gu, "")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+  );
 }
 
 function titleFromFilename(filename: string): string {
@@ -28,7 +31,8 @@ function titleFromFilename(filename: string): string {
 export function parseMarkdown(raw: string, filename = "post.md"): ParsedDocument {
   const text = cleanup(raw);
   const headingMatch = text.match(/^#\s+(.+)$/m);
-  const title = headingMatch?.[1]?.trim() || text.split("\n")[0]?.slice(0, 120) || titleFromFilename(filename);
+  const title =
+    headingMatch?.[1]?.trim() || text.split("\n")[0]?.slice(0, 120) || titleFromFilename(filename);
 
   const body = cleanup(
     text
@@ -77,7 +81,8 @@ export const documentParser: DocumentParser = {
 
 export function kindFromFilename(filename: string): "markdown" | "pdf" | "docx" | null {
   const lower = filename.toLowerCase();
-  if (lower.endsWith(".md") || lower.endsWith(".markdown") || lower.endsWith(".txt")) return "markdown";
+  if (lower.endsWith(".md") || lower.endsWith(".markdown") || lower.endsWith(".txt"))
+    return "markdown";
   if (lower.endsWith(".pdf")) return "pdf";
   if (lower.endsWith(".docx")) return "docx";
   return null;

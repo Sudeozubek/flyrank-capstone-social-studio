@@ -40,7 +40,12 @@ export interface CampaignRepository {
   findById(id: string): Promise<Campaign | null>;
   update(
     id: string,
-    patch: Partial<Pick<Campaign, "status" | "scheduledFor" | "name" | "brandName" | "brandTone" | "brandLanguage">>,
+    patch: Partial<
+      Pick<
+        Campaign,
+        "status" | "scheduledFor" | "name" | "brandName" | "brandTone" | "brandLanguage"
+      >
+    >,
   ): Promise<Campaign>;
   delete(id: string): Promise<void>;
 }
@@ -102,6 +107,9 @@ export interface AiCostMeter {
   record(record: Omit<AiUsageRecord, "at"> & { at?: string }): Promise<void>;
   getSnapshot(): Promise<AiSpendSnapshot>;
 }
+
+/** Audit trail of every delivery webhook received, valid or forged. */
+export interface WebhookEventRepository {
   record(input: {
     entryId?: string | null;
     platform?: Platform | null;
@@ -183,10 +191,13 @@ export interface ParsedDocument {
   body: string;
 }
 
-
 export interface DocumentParser {
   /** @param kind mime-ish hint: markdown | pdf | docx */
-  parse(kind: "markdown" | "pdf" | "docx", data: Uint8Array, filename: string): Promise<ParsedDocument>;
+  parse(
+    kind: "markdown" | "pdf" | "docx",
+    data: Uint8Array,
+    filename: string,
+  ): Promise<ParsedDocument>;
 }
 
 export interface TokenCipher {

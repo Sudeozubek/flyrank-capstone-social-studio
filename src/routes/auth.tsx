@@ -16,15 +16,18 @@ const THEME_KEY = "campaignhub-landing-theme";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>) => ({
-    mode: search["mode"] === "signup" ? ("signup" as const) : ("signin" as const),
-    next:
-      typeof search["next"] === "string" &&
-      search["next"].startsWith("/") &&
-      !search["next"].startsWith("//")
-        ? search["next"]
-        : undefined,
-  }),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { mode: "signin" | "signup"; next?: string } => {
+    const raw = search["next"];
+    // Same-origin paths only — "//host" would navigate off-site after sign-in.
+    const next =
+      typeof raw === "string" && raw.startsWith("/") && !raw.startsWith("//") ? raw : undefined;
+    return {
+      mode: search["mode"] === "signup" ? "signup" : "signin",
+      ...(next ? { next } : {}),
+    };
+  },
 
   head: () => ({
     meta: [
@@ -56,7 +59,7 @@ function AuthPage() {
 
   return (
     <AuthI18nProvider mode={mode}>
-      <AuthPageContent mode={mode} onModeChange={setMode} next={next} />
+      <AuthPageContent mode={mode} onModeChange={setMode} {...(next ? { next } : {})} />
     </AuthI18nProvider>
   );
 }
@@ -132,18 +135,12 @@ function AuthPageContent({
   return (
     <div className={cn("landing-page min-h-screen bg-background", dark && "landing-dark")}>
       <div className="grid min-h-screen lg:grid-cols-2">
-        <section
-          className="relative hidden flex-col justify-between overflow-x-hidden overflow-y-visible border-r border-border bg-surface/50 p-10 xl:p-12 lg:flex"
-        >
+        <section className="relative hidden flex-col justify-between overflow-x-hidden overflow-y-visible border-r border-border bg-surface/50 p-10 xl:p-12 lg:flex">
           <div className="pointer-events-none absolute inset-0" aria-hidden>
             <div className="social-orb social-orb-coral absolute -left-20 top-12 size-72 rounded-full blur-3xl opacity-40" />
             <div className="social-orb social-orb-violet absolute -right-12 top-1/3 size-64 rounded-full blur-3xl opacity-35" />
-            <div
-              className="absolute bottom-0 left-1/4 size-56 rounded-full bg-primary/20 blur-3xl opacity-30"
-            />
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-transparent"
-            />
+            <div className="absolute bottom-0 left-1/4 size-56 rounded-full bg-primary/20 blur-3xl opacity-30" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-transparent" />
           </div>
 
           <div className="relative z-10 flex h-full min-h-0 flex-col items-center justify-center px-4 py-8 text-center">
@@ -232,11 +229,7 @@ function AuthPageContent({
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={busy}>
-                  {busy
-                    ? t.form.busy
-                    : isSignIn
-                      ? t.form.signInSubmit
-                      : t.form.signUpSubmit}
+                  {busy ? t.form.busy : isSignIn ? t.form.signInSubmit : t.form.signUpSubmit}
                 </Button>
               </form>
 
@@ -248,7 +241,7 @@ function AuthPageContent({
                   onModeChange(nextMode);
                   void navigate({
                     to: "/auth",
-                    search: { mode: nextMode, next },
+                    search: { mode: nextMode, ...(next ? { next } : {}) },
                     replace: true,
                   });
                 }}

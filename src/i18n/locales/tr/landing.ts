@@ -23,15 +23,10 @@ export const landingTr: LandingMessages = {
     badge: "Yapay zeka destekli sosyal medya kampanya stüdyosu",
     title: "En iyi içeriğiniz,",
     titleAccent: "Her platforma hazır.",
-    body:
-      "Tek bir makaleyi, platforma özel, özenle hazırlanmış kampanyalara dönüştürün. CampaignHub, her gönderiyi tek bir odaklanmış çalışma alanından yazar, tasarlar, planlar ve güvenilir bir şekilde yayınlar.",
+    body: "Tek bir makaleyi, platforma özel, özenle hazırlanmış kampanyalara dönüştürün. CampaignHub, her gönderiyi tek bir odaklanmış çalışma alanından yazar, tasarlar, planlar ve güvenilir bir şekilde yayınlar.",
     ctaPrimary: "İlk kampanyanızı oluşturun",
     ctaSecondary: "Nasıl çalıştığını görün",
-    trustItems: [
-      "Yinelenen gönderi yok",
-      "Bütçeyi dikkate alan yapay zeka",
-      "İmzalı teslimat",
-    ],
+    trustItems: ["Yinelenen gönderi yok", "Bütçeyi dikkate alan yapay zeka", "İmzalı teslimat"],
   },
   stats: [
     { value: "3 platform", label: "Instagram, X ve LinkedIn" },
@@ -42,18 +37,15 @@ export const landingTr: LandingMessages = {
   benefits: {
     eyebrow: "Bir kez üretin, her yere uyarlayın",
     title: "Aynı kampanyayı üç kez yeniden oluşturmaktan vazgeçin.",
-    body:
-      "CampaignHub, tekrarlayan yeniden yazma ve boyutlandırma işlemlerini ortadan kaldırırken, şirketinizin kendine özgü sesini koruyan unsurları muhafaza eder.",
+    body: "CampaignHub, tekrarlayan yeniden yazma ve boyutlandırma işlemlerini ortadan kaldırırken, şirketinizin kendine özgü sesini koruyan unsurları muhafaza eder.",
     items: [
       {
         title: "Makaleden kampanyaya hızlı geçin",
-        body:
-          "Her paylaşım için brief yazmak, metni baştan yazmak ve görseli yeniden boyutlandırmak yerine hazır metin ve görselleri birlikte üretin.",
+        body: "Her paylaşım için brief yazmak, metni baştan yazmak ve görseli yeniden boyutlandırmak yerine hazır metin ve görselleri birlikte üretin.",
       },
       {
         title: "Her paylaşımda markanızı koruyun",
-        body:
-          "Şirket adınızı ekleyin; profesyonel, samimi veya eğlenceli gibi 10 farklı tondan birini seçin.",
+        body: "Şirket adınızı ekleyin; profesyonel, samimi veya eğlenceli gibi 10 farklı tondan birini seçin.",
       },
       {
         title: "Kitlenizin dilinde konuşun",
@@ -86,32 +78,27 @@ export const landingTr: LandingMessages = {
   features: {
     eyebrow: "Gerçek yayın ihtiyaçları için",
     title: "Kullanımı kolay arayüz, arkada sağlam altyapı.",
-    body:
-      "CampaignHub karmaşık yayın süreçlerini sade gösterir; kampanyanızın her adımını takip edebilirsiniz.",
+    body: "CampaignHub karmaşık yayın süreçlerini sade gösterir; kampanyanızın her adımını takip edebilirsiniz.",
     deliveryNote: "Her paylaşım durumu imzalı bildirimle doğrulanır.",
     items: [
       {
         title: "Her platforma uygun içerik",
-        body:
-          "Tek içerik Instagram, X ve LinkedIn için ayrı ayrı hazırlanır — her birinin dili, uzunluğu ve görsel formatı farklıdır.",
+        body: "Tek içerik Instagram, X ve LinkedIn için ayrı ayrı hazırlanır — her birinin dili, uzunluğu ve görsel formatı farklıdır.",
         detail: "1080×1080 · 1600×900 · 1200×627",
       },
       {
         title: "Güvenli yeniden deneme",
-        body:
-          "Aynı paylaşım iki kez gitmez; sistem çökse bile tekrar denemelerde mükerrer gönderi oluşmaz.",
+        body: "Aynı paylaşım iki kez gitmez; sistem çökse bile tekrar denemelerde mükerrer gönderi oluşmaz.",
         detail: "Güvenli tekrar · mükerrer yok",
       },
       {
         title: "Sağlam zamanlama",
-        body:
-          "Planlanan paylaşımlar kesintilerde kaybolmaz; kuyruktan düşmeden güvenle devam eder.",
+        body: "Planlanan paylaşımlar kesintilerde kaybolmaz; kuyruktan düşmeden güvenle devam eder.",
         detail: "Kesinti sonrası otomatik devam",
       },
       {
         title: "Doğrulanmış teslimat",
-        body:
-          "İmzalı bildirimler paylaşımın gerçekten yapıldığını doğrular; tüm süreç kayıtlarda görünür kalır.",
+        body: "İmzalı bildirimler paylaşımın gerçekten yapıldığını doğrular; tüm süreç kayıtlarda görünür kalır.",
         detail: "İmzalı webhook bildirimleri",
       },
     ],
@@ -179,10 +166,6 @@ export const landingTr: LandingMessages = {
       "Uzun içerikleri markanıza uygun sosyal kampanyaya dönüştüren ekiplerin yöntemi.",
     ],
     imageOverlay: "Daha geniş kitleye ulaşan fikirler.",
-    flowSteps: [
-      "Tek kaynak makale",
-      "Marka, ton ve dil uygulandı",
-      "3 görsel + 3 özel metin",
-    ],
+    flowSteps: ["Tek kaynak makale", "Marka, ton ve dil uygulandı", "3 görsel + 3 özel metin"],
   },
 };

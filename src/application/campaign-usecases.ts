@@ -14,13 +14,23 @@ import {
   type Platform,
   type SocialPostEntry,
 } from "@/domain/entities";
-import { computeVariantGeometry, defaultSourceImage, fitSubjectToSafeZone } from "@/domain/image-composition";
+import {
+  computeVariantGeometry,
+  defaultSourceImage,
+  fitSubjectToSafeZone,
+} from "@/domain/image-composition";
 import type { AppContext } from "@/domain/ports";
 import { imagePath } from "@/infrastructure/storage/image-store.server";
 
 export async function createCampaign(
   context: AppContext,
-  input: { postId: string; name?: string; brandName?: string | null; brandTone?: string | null; brandLanguage?: string | null },
+  input: {
+    postId: string;
+    name?: string;
+    brandName?: string | null;
+    brandTone?: string | null;
+    brandLanguage?: string | null;
+  },
 ): Promise<CampaignSnapshot> {
   const post = await context.posts.findById(input.postId);
   if (!post) throw new Error("Blog post not found");
@@ -46,7 +56,11 @@ export async function generateCaptions(
   const post = await context.posts.findById(campaign.postId);
   if (!post) throw new Error("Blog post not found");
 
-  const brand = { name: campaign.brandName, tone: campaign.brandTone, language: campaign.brandLanguage };
+  const brand = {
+    name: campaign.brandName,
+    tone: campaign.brandTone,
+    language: campaign.brandLanguage,
+  };
 
   const captions = await Promise.all(
     PLATFORMS.map(async (platform) => ({
@@ -100,7 +114,6 @@ export async function deleteCampaign(context: AppContext, campaignId: string): P
   await requireCampaign(context, campaignId);
   await context.campaigns.delete(campaignId);
 }
-
 
 /** Renders + stores one real PNG per platform, sized to the platform spec. */
 export async function generateImages(

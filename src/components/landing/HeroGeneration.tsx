@@ -20,7 +20,10 @@ export function HeroGeneration() {
   const instagramVisualLines = g.instagramVisual.split("\n");
 
   return (
-    <div className="relative mx-auto h-[520px] w-full max-w-[560px] select-none sm:h-[560px]" aria-hidden>
+    <div
+      className="relative mx-auto h-[520px] w-full max-w-[560px] select-none sm:h-[560px]"
+      aria-hidden
+    >
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox="0 0 560 560"

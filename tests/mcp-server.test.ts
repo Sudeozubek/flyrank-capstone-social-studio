@@ -22,11 +22,22 @@ describe("MCP JSON-RPC server", () => {
     expect(response).toBeNull();
   });
 
-  it("lists all seven tools", async () => {
+  it("lists every registered tool with a JSON Schema", async () => {
     const response = await handleRpc({ jsonrpc: "2.0", id: 2, method: "tools/list" }, caller);
-    const listed = (response?.result as { tools: Array<{ name: string }> }).tools;
-    expect(listed).toHaveLength(7);
+    const listed = (
+      response?.result as {
+        tools: Array<{ name: string; inputSchema: { type: string } }>;
+      }
+    ).tools;
+    expect(listed).toHaveLength(tools.length);
     expect(listed.map((t) => t.name).sort()).toEqual(tools.map((t) => t.name).sort());
+    expect(listed.every((t) => t.inputSchema.type === "object")).toBe(true);
+  });
+
+  it("exposes a post-discovery tool so create_campaign is reachable", async () => {
+    // create_campaign needs a postId; without a listing tool an MCP client has
+    // no way to obtain one.
+    expect(tools.map((t) => t.name)).toContain("list_posts");
   });
 
   it("returns an error for unknown tools", async () => {
@@ -57,11 +68,45 @@ describe("MCP JSON-RPC server", () => {
     expect(result.content[0]?.text).toContain("Invalid arguments");
   });
 
-  it("returns method not found for unknown methods", async () => {
+  it("rejects a non-ISO scheduledFor at the schema boundary", async () => {
     const response = await handleRpc(
-      { jsonrpc: "2.0", id: 5, method: "unknown/method" },
+      {
+        jsonrpc: "2.0",
+        id: 6,
+        method: "tools/call",
+        params: {
+          name: "schedule_campaign",
+          arguments: {
+            campaignId: "00000000-0000-4000-8000-000000000000",
+            scheduledFor: "next tuesday",
+          },
+        },
+      },
       caller,
     );
+    const result = response?.result as { isError?: boolean; content: Array<{ text: string }> };
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("Invalid arguments");
+  });
+
+  it("echoes a protocol version it supports and falls back otherwise", async () => {
+    const older = await handleRpc(
+      { jsonrpc: "2.0", id: 7, method: "initialize", params: { protocolVersion: "2024-11-05" } },
+      caller,
+    );
+    expect((older?.result as { protocolVersion: string }).protocolVersion).toBe("2024-11-05");
+
+    const unknown = await handleRpc(
+      { jsonrpc: "2.0", id: 8, method: "initialize", params: { protocolVersion: "1999-01-01" } },
+      caller,
+    );
+    expect((unknown?.result as { protocolVersion: string }).protocolVersion).toBe(
+      MCP_PROTOCOL_VERSION,
+    );
+  });
+
+  it("returns method not found for unknown methods", async () => {
+    const response = await handleRpc({ jsonrpc: "2.0", id: 5, method: "unknown/method" }, caller);
     expect(response?.error?.message).toContain("Method not found");
   });
 });

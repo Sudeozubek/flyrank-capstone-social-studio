@@ -16,7 +16,9 @@ type OAuthDetails = {
 };
 
 type OAuthApi = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
+  getAuthorizationDetails: (
+    id: string,
+  ) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
   approveAuthorization: (id: string) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
   denyAuthorization: (id: string) => Promise<{ data: OAuthDetails | null; error: Error | null }>;
 };
@@ -28,7 +30,8 @@ function oauthApi(): OAuthApi {
 export const Route = createFileRoute("/oauth/consent")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>) => ({
-    authorization_id: typeof search['authorization_id'] === "string" ? search['authorization_id'] : "",
+    authorization_id:
+      typeof search["authorization_id"] === "string" ? search["authorization_id"] : "",
   }),
   beforeLoad: async ({ search, location }) => {
     if (!search.authorization_id) throw new Error("Missing authorization_id");
@@ -68,9 +71,7 @@ export const Route = createFileRoute("/oauth/consent")({
   errorComponent: ({ error }) => (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-3 p-8">
       <h1 className="font-display text-xl text-foreground">Authorization unavailable</h1>
-      <p className="text-sm text-muted-foreground">
-        {String((error as Error)?.message ?? error)}
-      </p>
+      <p className="text-sm text-muted-foreground">{String((error as Error)?.message ?? error)}</p>
     </main>
   ),
 });

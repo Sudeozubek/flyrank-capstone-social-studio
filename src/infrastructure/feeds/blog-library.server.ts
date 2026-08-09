@@ -122,9 +122,7 @@ function parseRss(xml: string, source: BlogSource): LibraryItem[] {
   return blocks
     .map((block) => {
       const link =
-        tag(block, "link") ||
-        /<link[^>]*href="([^"]+)"/i.exec(block)?.[1] ||
-        tag(block, "guid");
+        tag(block, "link") || /<link[^>]*href="([^"]+)"/i.exec(block)?.[1] || tag(block, "guid");
       const summaryHtml = tag(block, "description") || tag(block, "summary") || "";
       const published = tag(block, "pubDate") || tag(block, "updated") || tag(block, "published");
       return {
@@ -180,7 +178,9 @@ async function fetchMeta(url: string): Promise<Partial<LibraryItem>> {
     const html = await get(url);
     const image = meta(html, "og:image") ?? meta(html, "twitter:image");
     const description =
-      meta(html, "og:description") ?? meta(html, "description") ?? meta(html, "twitter:description");
+      meta(html, "og:description") ??
+      meta(html, "description") ??
+      meta(html, "twitter:description");
     const title = meta(html, "og:title");
     const published =
       meta(html, "article:published_time") ?? meta(html, "publishdate") ?? meta(html, "date");
@@ -246,20 +246,18 @@ export async function listSourcePosts(sourceId: string, limit = 12): Promise<Lib
   if (cached && cached.expires > Date.now()) return cached.value.slice(0, limit);
 
   const raw = await get(source.feed);
-  const parsed = (source.kind === "rss" ? parseRss(raw, source) : parseAnthropicListing(raw, source)).slice(
-    0,
-    24,
-  );
+  const parsed = (
+    source.kind === "rss" ? parseRss(raw, source) : parseAnthropicListing(raw, source)
+  ).slice(0, 24);
   const items = await enrich(parsed.slice(0, 12));
   listCache.set(sourceId, { value: items, expires: Date.now() + LIST_TTL_MS });
   return items.slice(0, limit);
 }
 
-
 /** Every catalogued source, fetched in parallel; a failing source is skipped. */
-export async function listLibrary(perSource = 8): Promise<
-  { source: Omit<BlogSource, "feed" | "kind">; items: LibraryItem[]; error?: string }[]
-> {
+export async function listLibrary(
+  perSource = 8,
+): Promise<{ source: Omit<BlogSource, "feed" | "kind">; items: LibraryItem[]; error?: string }[]> {
   return Promise.all(
     BLOG_SOURCES.map(async ({ feed: _feed, kind: _kind, ...source }) => {
       try {
@@ -295,7 +293,10 @@ export async function fetchArticle(url: string): Promise<{ title: string; body: 
   const body = stripHtml(main);
   if (body.length < 200) throw new Error("Could not extract the article body from this post");
 
-  const article = { title: title.split("\\")[0]!.trim().slice(0, 200), body: body.slice(0, 40_000) };
+  const article = {
+    title: title.split("\\")[0]!.trim().slice(0, 200),
+    body: body.slice(0, 40_000),
+  };
   articleCache.set(url, { value: article, expires: Date.now() + ARTICLE_TTL_MS });
   return article;
 }

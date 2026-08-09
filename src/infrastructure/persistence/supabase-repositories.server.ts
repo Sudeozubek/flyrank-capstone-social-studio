@@ -298,18 +298,16 @@ export function createAttemptRepository(db: Db, userId: string): AttemptReposito
         .eq("entry_id", entryId)
         .order("created_at", { ascending: false });
       if (error) fail("listAttempts", error);
-      return (data ?? []).map(
-        (row: AttemptRow): PublishAttempt => ({
-          id: row.id,
-          entryId: row.entry_id,
-          attemptNo: row.attempt_no,
-          httpStatus: row.http_status,
-          retryAfterSec: row.retry_after_sec,
-          outcome: row.outcome,
-          detail: row.detail,
-          createdAt: row.created_at,
-        }),
-      );
+      return (data ?? []).map((row: AttemptRow): PublishAttempt => ({
+        id: row.id,
+        entryId: row.entry_id,
+        attemptNo: row.attempt_no,
+        httpStatus: row.http_status,
+        retryAfterSec: row.retry_after_sec,
+        outcome: row.outcome,
+        detail: row.detail,
+        createdAt: row.created_at,
+      }));
     },
   };
 }
@@ -371,7 +369,10 @@ export function createAiUsageRepository(db: Db, userId: string) {
   };
 }
 
-export function createWebhookEventRepository(db: Db, userId: string | null): WebhookEventRepository {
+export function createWebhookEventRepository(
+  db: Db,
+  userId: string | null,
+): WebhookEventRepository {
   return {
     async record(input) {
       const { error } = await db.from("webhook_events").insert({
@@ -392,18 +393,16 @@ export function createWebhookEventRepository(db: Db, userId: string | null): Web
         .order("received_at", { ascending: false })
         .limit(limit);
       if (error) fail("listWebhookEvents", error);
-      return (data ?? []).map(
-        (row: WebhookRow): WebhookEvent => ({
-          id: row.id,
-          entryId: row.entry_id,
-          platform: row.platform,
-          signatureValid: row.signature_valid,
-          httpStatus: row.http_status,
-          payloadDigest: row.payload_digest,
-          message: row.message,
-          receivedAt: row.received_at,
-        }),
-      );
+      return (data ?? []).map((row: WebhookRow): WebhookEvent => ({
+        id: row.id,
+        entryId: row.entry_id,
+        platform: row.platform,
+        signatureValid: row.signature_valid,
+        httpStatus: row.http_status,
+        payloadDigest: row.payload_digest,
+        message: row.message,
+        receivedAt: row.received_at,
+      }));
     },
   };
 }

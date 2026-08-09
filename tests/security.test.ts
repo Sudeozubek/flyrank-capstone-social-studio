@@ -46,7 +46,9 @@ describe("delivery webhook signatures", () => {
 
   it("rejects a valid signature over a different body (tampering)", () => {
     const header = signPayload(body);
-    expect(verifySignature(JSON.stringify({ entryId: "e1", status: "failed" }), header)).toBe(false);
+    expect(verifySignature(JSON.stringify({ entryId: "e1", status: "failed" }), header)).toBe(
+      false,
+    );
   });
 
   it("rejects replays outside the timestamp tolerance", () => {

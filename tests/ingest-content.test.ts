@@ -9,9 +9,9 @@ const LONG_BODY =
 describe("ingestPastedPost", () => {
   it("rejects bodies shorter than 40 characters", async () => {
     const { context } = createMockAppContext();
-    await expect(
-      ingestPastedPost(context, { body: "too short" }),
-    ).rejects.toThrow(/at least 40 characters/);
+    await expect(ingestPastedPost(context, { body: "too short" })).rejects.toThrow(
+      /at least 40 characters/,
+    );
   });
 
   it("creates a post with a derived title from the first line", async () => {
@@ -30,9 +30,7 @@ describe("ingestPastedPost", () => {
 describe("ingestUploadedPost", () => {
   it("delegates to the document parser", async () => {
     const { context } = createMockAppContext();
-    const data = new TextEncoder().encode(
-      `# Uploaded Doc\n\n${LONG_BODY}`,
-    );
+    const data = new TextEncoder().encode(`# Uploaded Doc\n\n${LONG_BODY}`);
     const post = await ingestUploadedPost(context, {
       kind: "markdown",
       filename: "article.md",

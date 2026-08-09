@@ -233,7 +233,8 @@ Supabase Dashboard → Authentication → Providers → Email for consistency.
 ```bash
 npm run dev        # http://localhost:8080 — background worker starts automatically
 npm run seed       # optional demo data (requires service role + auth user)
-npm run test       # vitest — 21 files, 117 tests, no network/DB required
+npm run typecheck  # tsc --noEmit — must stay at zero errors
+npm run test       # vitest — 22 files, 123 tests, no network/DB required
 npm run test:watch # vitest in watch mode
 npm run lint
 npm run build
@@ -267,16 +268,33 @@ Public HTTP routes (external callers, no session):
 | `POST` | `/api/public/webhooks/delivery` | signed delivery webhook — only writer of terminal status |
 | `POST` | `/api/public/mcp` | MCP JSON-RPC endpoint (`initialize`, `tools/list`, `tools/call`) |
 | `GET` | `/.well-known/oauth-protected-resource` | RFC 9728 discovery for MCP clients |
+| `GET` | `/.well-known/oauth-protected-resource/api/public/mcp` | same metadata, RFC 9728 §3.1 path-suffixed form |
 
 All inputs are validated with zod; invalid input returns `400` with the issue list, never a 500.
 
 ### MCP tools
 
-`create_campaign`, `list_campaigns`, `get_campaign`, `campaign_status`, `schedule_campaign`,
-`publish_campaign`, `retry_campaign` — each a thin delegate to a use case in `src/application/`.
-The MCP layer holds no business logic, writes no captions and calls no model. Authenticate with
-`Authorization: Bearer <access token>`; every query runs under the caller's RLS scope. Consent
-screen: `/oauth/consent`.
+`list_posts`, `create_post`, `create_campaign`, `list_campaigns`, `get_campaign`,
+`campaign_status`, `schedule_campaign`, `publish_campaign`, `retry_campaign` — each a thin
+delegate to a use case in `src/application/`. The MCP layer holds no business logic, writes no
+captions and calls no model. The set is self-sufficient: `list_posts` / `create_post` yield the
+`postId` that `create_campaign` requires, so a client never needs the web UI to get started.
+
+Responses are wire views (`src/mcp/views.ts`), not raw rows: server-internal fields
+(`userId`, `idempotencyKey`, `leaseUntil`) are dropped and post bodies truncated, because a tool
+result is read by a model with a finite context window. Listings take a `limit` (default 25).
+
+Transport hardening on `POST /api/public/mcp`: bearer token verified against the auth server on
+every request (revocation takes effect immediately), cross-origin browser callers refused,
+JSON-RPC batches capped at 50 messages and executed in order.
+
+Authenticate with `Authorization: Bearer <access token>`; every query runs under the caller's
+RLS scope. Consent screen: `/oauth/consent`.
+
+> **Connecting a client.** Protected-resource metadata (RFC 9728) is served at both the root and
+> path-suffixed well-known URLs, but Supabase Auth publishes no RFC 8414 authorization-server
+> metadata and no dynamic client registration, so a client that insists on fully automatic OAuth
+> discovery cannot complete the handshake yet. Pass an access token directly until that lands.
 
 ## Project structure
 
@@ -309,7 +327,7 @@ src/
     context.server.ts          composition root (dependency injection)
   interfaces
     routes/                    dashboard, auth, OAuth consent, public API routes
-    mcp/                       JSON-RPC server + 7 tool delegates
+    mcp/                       JSON-RPC server + 9 tool delegates + wire views
     components/campaign/   composer, variant gallery/carousel, AI spend panel, status chips
   config/                      platform specs, prompt fragments
 supabase/migrations/           schema, grants, RLS, indexes
@@ -338,7 +356,8 @@ in Node with `@/` path aliases (`vitest.config.ts`).
 | `tests/document-parser.test.ts` | `parseMarkdown`, `kindFromFilename` |
 | `tests/publishing-adapters.test.ts` | fake Instagram / X / LinkedIn adapters — accepted, duplicate, 429, 4xx mapping |
 | `tests/fake-platform-transport.test.ts` | `resolveFakePlatformBaseUrl`, HTTP transport to in-repo fake platform |
-| `tests/mcp-server.test.ts` | JSON-RPC `initialize`, `tools/list`, `tools/call` validation, unknown method/tool |
+| `tests/mcp-server.test.ts` | JSON-RPC `initialize`, protocol-version negotiation, `tools/list`, `tools/call` validation, unknown method/tool, post-discovery tool present |
+| `tests/mcp-views.test.ts` | MCP wire views — internal fields dropped, post body truncated |
 | `tests/mcp-context.test.ts` | `jsonResult`, `errorResult`, Supabase env resolution |
 | `tests/supabase-mappers.test.ts` | `toPost` / `toCampaign` / `toEntry` row mapping, `imagePath` |
 | `tests/imaging.test.ts` | real PNG bytes decoded from the IHDR chunk at exact platform dimensions |

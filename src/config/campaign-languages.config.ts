@@ -38,7 +38,11 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     signOff: "— the {brand} team",
     ctas: {
       x: ["Full write-up:", "Read it:", "Details:"],
-      instagram: ["Swipe then read the full post", "Tap through for the whole story", "Read the whole story"],
+      instagram: [
+        "Swipe then read the full post",
+        "Tap through for the whole story",
+        "Read the whole story",
+      ],
       linkedin: ["Read the full article", "Continue reading", "Explore the insights"],
     },
   },
@@ -82,7 +86,11 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     signOff: "— das {brand}-Team",
     ctas: {
       x: ["Ganzer Artikel:", "Lesen:", "Details:"],
-      instagram: ["Für den ganzen Beitrag wischen", "Tippen für die ganze Story", "Jetzt vollständig lesen"],
+      instagram: [
+        "Für den ganzen Beitrag wischen",
+        "Tippen für die ganze Story",
+        "Jetzt vollständig lesen",
+      ],
       linkedin: ["Ganzen Artikel lesen", "Weiterlesen", "Zur vollständigen Analyse"],
     },
   },
@@ -104,7 +112,11 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     signOff: "— {brand} tim",
     ctas: {
       x: ["Cijeli tekst:", "Pročitaj:", "Detalji:"],
-      instagram: ["Prevucite za cijeli tekst", "Dodirnite za cijelu priču", "Pročitajte cijeli članak"],
+      instagram: [
+        "Prevucite za cijeli tekst",
+        "Dodirnite za cijelu priču",
+        "Pročitajte cijeli članak",
+      ],
       linkedin: ["Pročitajte cijeli članak", "Nastavite čitanje", "Pogledajte analizu"],
     },
   },
@@ -126,7 +138,11 @@ export const CAMPAIGN_LANGUAGE_OPTIONS: readonly CampaignLanguageOption[] = [
     signOff: "— l'équipe {brand}",
     ctas: {
       x: ["Article complet :", "À lire :", "Détails :"],
-      instagram: ["Faites défiler pour lire l'article", "Touchez pour toute l'histoire", "Lire l'article complet"],
+      instagram: [
+        "Faites défiler pour lire l'article",
+        "Touchez pour toute l'histoire",
+        "Lire l'article complet",
+      ],
       linkedin: ["Lire l'article complet", "Continuer la lecture", "Voir l'analyse complète"],
     },
   },
@@ -165,7 +181,10 @@ const languageById = new Map(CAMPAIGN_LANGUAGE_OPTIONS.map((lang) => [lang.id, l
 
 export function resolveCampaignLanguage(language?: string | null): CampaignLanguageOption {
   if (!language?.trim()) return languageById.get(DEFAULT_CAMPAIGN_LANGUAGE)!;
-  return languageById.get(language.trim().toLowerCase() as CampaignLanguageId) ?? languageById.get(DEFAULT_CAMPAIGN_LANGUAGE)!;
+  return (
+    languageById.get(language.trim().toLowerCase() as CampaignLanguageId) ??
+    languageById.get(DEFAULT_CAMPAIGN_LANGUAGE)!
+  );
 }
 
 export function getCampaignLanguageLabel(language?: string | null): string {

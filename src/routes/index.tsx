@@ -40,17 +40,13 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-function LandingPage({
-  dark,
-  onThemeToggle,
-}: {
-  dark: boolean;
-  onThemeToggle: () => void;
-}) {
+function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: () => void }) {
   const { t } = useLandingI18n();
 
   return (
-    <div className={`landing-page min-h-screen overflow-hidden bg-background ${dark ? "landing-dark" : ""}`}>
+    <div
+      className={`landing-page min-h-screen overflow-hidden bg-background ${dark ? "landing-dark" : ""}`}
+    >
       <LandingHeader dark={dark} onThemeToggle={onThemeToggle} />
       <main>
         <section className="landing-sky relative">
@@ -151,12 +147,10 @@ function LandingPage({
             </ScrollReveal>
             <div className="grid gap-3">
               {t.benefits.items.map((benefit, index) => {
-                const Icon = BENEFIT_ICONS[index];
+                const Icon = BENEFIT_ICONS[index]!;
                 return (
                   <ScrollReveal key={benefit.title} delay={index * 120}>
-                    <article
-                      className="group flex gap-4 rounded-2xl border border-border bg-surface/60 p-5 transition-[border-color,transform] duration-300 hover:translate-x-1 hover:border-primary/25"
-                    >
+                    <article className="group flex gap-4 rounded-2xl border border-border bg-surface/60 p-5 transition-[border-color,transform] duration-300 hover:translate-x-1 hover:border-primary/25">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
                         <Icon className="size-5" />
                       </span>
@@ -187,7 +181,7 @@ function LandingPage({
             </ScrollReveal>
             <ol className="mt-14 grid gap-5 sm:grid-cols-3">
               {t.workflow.steps.map((item, index) => {
-                const Icon = STEP_ICONS[index];
+                const Icon = STEP_ICONS[index]!;
                 return (
                   <ScrollReveal
                     key={item.step}
@@ -199,10 +193,14 @@ function LandingPage({
                       <span className="flex size-11 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
                         <Icon className="size-5" />
                       </span>
-                      <span className="font-mono text-xs text-muted-foreground/70">{item.step}</span>
+                      <span className="font-mono text-xs text-muted-foreground/70">
+                        {item.step}
+                      </span>
                     </div>
                     <h3 className="mt-5 font-display text-xl text-foreground">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {item.body}
+                    </p>
                   </ScrollReveal>
                 );
               })}
@@ -228,16 +226,16 @@ function LandingPage({
               </ScrollReveal>
               <div className="grid gap-4 sm:grid-cols-2">
                 {t.features.items.map((feature, index) => {
-                  const Icon = FEATURE_ICONS[index];
+                  const Icon = FEATURE_ICONS[index]!;
                   return (
                     <ScrollReveal key={feature.title} delay={index * 100}>
-                      <article
-                        className="group rounded-2xl border border-border bg-background/50 p-6 transition-colors hover:border-primary/30"
-                      >
+                      <article className="group rounded-2xl border border-border bg-background/50 p-6 transition-colors hover:border-primary/30">
                         <div className="flex size-10 items-center justify-center rounded-xl border border-border bg-surface text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:text-primary">
                           <Icon className="size-5" />
                         </div>
-                        <h3 className="mt-4 font-display text-xl text-foreground">{feature.title}</h3>
+                        <h3 className="mt-4 font-display text-xl text-foreground">
+                          {feature.title}
+                        </h3>
                         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                           {feature.body}
                         </p>

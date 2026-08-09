@@ -1,11 +1,6 @@
 import type { AiSpendSnapshot } from "@/domain/ai-spend";
 import { aiSpendStatusLabel, formatAiUsd } from "@/domain/ai-spend";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 function statusTone(status: AiSpendSnapshot["status"]): string {

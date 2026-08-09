@@ -66,9 +66,8 @@ describe("caption writer budget guard", () => {
     process.env["OPENAI_API_KEY"] = "sk-test";
     const fetchSpy = vi.spyOn(globalThis, "fetch");
 
-    const { openAiCaptionWriter } = await import(
-      "@/infrastructure/ai/openai-caption-writer.server"
-    );
+    const { openAiCaptionWriter } =
+      await import("@/infrastructure/ai/openai-caption-writer.server");
     const caption = await openAiCaptionWriter.write(
       {
         id: "p1",

@@ -40,7 +40,11 @@ abstract class BaseFakeAdapter implements SocialPublisher {
       };
     }
     if (response.status === 200 && response.body?.duplicate) {
-      return { outcome: "duplicate", httpStatus: 200, remoteId: response.body?.id };
+      return {
+        outcome: "duplicate",
+        httpStatus: 200,
+        ...(response.body.id ? { remoteId: response.body.id } : {}),
+      };
     }
     if (response.status >= 200 && response.status < 300 && response.body?.id) {
       return { outcome: "accepted", httpStatus: response.status, remoteId: response.body.id };

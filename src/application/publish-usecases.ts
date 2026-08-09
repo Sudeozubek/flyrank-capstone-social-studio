@@ -165,7 +165,10 @@ export async function attemptEntry(
       entry.idempotencyKey,
     );
   } catch (error) {
-    result = { outcome: "failed", error: error instanceof Error ? error.message : "transport error" };
+    result = {
+      outcome: "failed",
+      error: error instanceof Error ? error.message : "transport error",
+    };
   }
 
   await context.attempts.record({

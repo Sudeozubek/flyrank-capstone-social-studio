@@ -37,7 +37,8 @@ export function formatAiFeatureLabel(feature: string): string {
           : "";
   if (kind === "caption") return platformLabel ? `Caption · ${platformLabel}` : "Caption";
   if (kind === "image") return platformLabel ? `Image · ${platformLabel}` : "Image";
-  if (kind === "art-director") return platformLabel ? `Art direction · ${platformLabel}` : "Art direction";
+  if (kind === "art-director")
+    return platformLabel ? `Art direction · ${platformLabel}` : "Art direction";
   return feature;
 }
 

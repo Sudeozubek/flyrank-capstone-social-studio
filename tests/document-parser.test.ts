@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  kindFromFilename,
-  parseMarkdown,
-} from "@/infrastructure/parsing/document-parser.server";
+import { kindFromFilename, parseMarkdown } from "@/infrastructure/parsing/document-parser.server";
 
 describe("kindFromFilename", () => {
   it("maps known extensions", () => {

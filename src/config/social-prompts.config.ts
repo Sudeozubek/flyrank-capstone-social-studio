@@ -75,11 +75,7 @@ export const PLATFORM_VOICE: Record<Platform, PlatformVoice> = {
     tone: "professional, insight-led, credible — written for practitioners and decision-makers",
     template:
       "{hook}\n\n{title}\n\n{summary}\n\n{value}\n\n{cta}\n{url}\n\n{signOff}\n\n{hashtags}",
-    ctas: [
-      "Read the full article",
-      "Continue reading on our blog",
-      "See the complete analysis",
-    ],
+    ctas: ["Read the full article", "Continue reading on our blog", "See the complete analysis"],
     hashtags: ["Leadership", "ContentMarketing", "B2B", "SaaS", "Product"],
     targetLength: 1100,
     summarySentences: 2,

@@ -45,7 +45,7 @@ export function supabasePublishableKey(): string {
       const parsed: unknown = JSON.parse(keyset);
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         const keys = parsed as Record<string, unknown>;
-        const key = [keys['default'], ...Object.values(keys)]
+        const key = [keys["default"], ...Object.values(keys)]
           .find((v): v is string => typeof v === "string" && v.trim().startsWith("sb_publishable_"))
           ?.trim();
         if (key) return key;
@@ -57,7 +57,9 @@ export function supabasePublishableKey(): string {
 
   const legacy = configuredEnv(["SUPABASE_ANON_KEY", "VITE_SUPABASE_ANON_KEY"]);
   if (legacy) return legacy;
-  throw new Error("SUPABASE_PUBLISHABLE_KEY, SUPABASE_PUBLISHABLE_KEYS, or SUPABASE_ANON_KEY is required");
+  throw new Error(
+    "SUPABASE_PUBLISHABLE_KEY, SUPABASE_PUBLISHABLE_KEYS, or SUPABASE_ANON_KEY is required",
+  );
 }
 
 /** Request-scoped client carrying the caller's token, so RLS applies as them. */
