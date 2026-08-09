@@ -195,7 +195,7 @@ sharp implementation rather than the prototype.
   palette so dashboard, landing and auth look like one product (`src/styles.css`). Dashboard
   `ThemeToggle` still uses `campaignhub-theme` + `html.light`; landing/auth use
   `campaignhub-landing-theme` on the page wrapper.
-- **Evidence** — `v2-17-landing-hero-generation-visual.png` through
+- **Evidence** — `v2-17-landing-hero-light.png`, `v2-17-landing-hero-dark.png` through
   `v2-20-locale-toggle-en-tr.png` in `docs/screenshots/`.
 
 ## Final notes
