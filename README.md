@@ -55,9 +55,6 @@ creation never fails because of the model.
 
 ## Product Screenshots
 
-<details>
-<summary><strong>Product screenshots</strong> (click to expand)</summary>
-
 **1. Landing hero (light)**
 
 ![Landing hero — light mode](docs/screenshots/v2-17-landing-hero-light.png)
@@ -85,8 +82,6 @@ creation never fails because of the model.
 **7. Profile (account)**
 
 ![Profile sheet — change email, password, reset link](docs/screenshots/v3-25-profile-account-sheet.png)
-
-</details>
 
 Also see [`docs/screenshots/`](docs/screenshots/README.md) for dark-mode hero, locale toggle, reviewer evidence, and additional captures.
 
