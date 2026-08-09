@@ -118,8 +118,8 @@ function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: ()
           </div>
         </section>
 
-        <section className="border-y border-border/70 bg-surface/60">
-          <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-y divide-border/70 px-6 sm:grid-cols-4 sm:divide-y-0">
+        <section className="landing-section landing-stats-band border-y border-border/70 bg-surface/60">
+          <div className="landing-stats-grid mx-auto grid max-w-6xl grid-cols-2 divide-x divide-y divide-border/70 px-6 sm:grid-cols-4 sm:divide-y-0">
             {t.stats.map((stat, index) => (
               <ScrollReveal
                 key={stat.value}
@@ -127,14 +127,16 @@ function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: ()
                 delay={index * 90}
                 className="px-4 py-7 text-center sm:px-6"
               >
-                <p className="font-display text-xl text-foreground sm:text-2xl">{stat.value}</p>
+                <p className="landing-stats-value font-display text-xl text-foreground sm:text-2xl">
+                  {stat.value}
+                </p>
                 <p className="mt-1 text-xs text-muted-foreground">{stat.label}</p>
               </ScrollReveal>
             ))}
           </div>
         </section>
 
-        <section className="border-b border-border/70">
+        <section className="landing-section landing-section-benefits border-b border-border/70">
           <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-16 lg:py-24">
             <ScrollReveal>
               <p className="eyebrow">{t.benefits.eyebrow}</p>
@@ -168,7 +170,7 @@ function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: ()
           </div>
         </section>
 
-        <section id="how-it-works" className="scroll-mt-20">
+        <section id="how-it-works" className="landing-section landing-section-workflow scroll-mt-20">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
             <ScrollReveal className="mx-auto max-w-2xl text-center">
               <p className="eyebrow">{t.workflow.eyebrow}</p>
@@ -208,7 +210,10 @@ function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: ()
           </div>
         </section>
 
-        <section id="features" className="scroll-mt-20 border-y border-border bg-surface/40">
+        <section
+          id="features"
+          className="landing-section landing-section-features scroll-mt-20 border-y border-border bg-surface/40"
+        >
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
             <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
               <ScrollReveal className="lg:sticky lg:top-28 lg:self-start">
@@ -251,7 +256,7 @@ function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: ()
           </div>
         </section>
 
-        <section>
+        <section className="landing-section landing-section-cta">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
             <ScrollReveal>
               <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-surface px-6 py-12 text-center shadow-2xl shadow-black/10 sm:px-12 sm:py-16">

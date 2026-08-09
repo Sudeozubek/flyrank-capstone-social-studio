@@ -5,7 +5,7 @@ export function LandingFooter() {
   const { t } = useLandingI18n();
 
   return (
-    <footer className="border-t border-border bg-surface/40">
+    <footer className="landing-footer border-t border-border bg-surface/40">
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
