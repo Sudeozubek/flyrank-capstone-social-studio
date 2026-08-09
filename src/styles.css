@@ -798,7 +798,11 @@
   --dashboard-sidebar-width: 4.25rem;
 }
 
-/* Fixed chrome — sidebar & top bar stay put while main scrolls */
+/* Fixed chrome — sidebar & mobile nav stay opaque; top bar blends with page */
+.dashboard-top-bar {
+  background-color: transparent;
+}
+
 .dashboard-chrome {
   background-color: var(--surface);
   backdrop-filter: blur(12px);

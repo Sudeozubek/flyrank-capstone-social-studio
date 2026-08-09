@@ -246,7 +246,7 @@ export function DashboardLayout({
       </aside>
 
       <div className="relative z-10 flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="dashboard-chrome shrink-0 border-b border-border/60">
+        <header className="dashboard-top-bar dashboard-grid-bg shrink-0">
           <div className="flex h-14 items-center justify-between gap-3 px-4 lg:px-6">
             <Link to="/" className="font-display text-base text-foreground lg:hidden">
               {t.layout.brandCampaign}
