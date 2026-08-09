@@ -28,6 +28,7 @@ export const dashboardTr: DashboardMessages = {
     signOut: "Çıkış yap",
     live: "Canlı",
     openProfile: "Profili aç",
+    preferences: "Tercihler",
     expandSidebar: "Kenar çubuğunu genişlet",
     collapseSidebar: "Kenar çubuğunu daralt",
     footerRights: "© CampaignHub",

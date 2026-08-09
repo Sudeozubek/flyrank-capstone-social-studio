@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { KeyRound, Link2, Mail, Unlink } from "lucide-react";
+import { KeyRound, Link2, LogOut, Mail, Unlink } from "lucide-react";
 import { toast } from "sonner";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import type { Platform } from "@/domain/entities";
@@ -25,7 +25,9 @@ import {
   type MockPlatformConnections,
 } from "@/components/dashboard/mock-platform-connections";
 import { interpolate } from "@/i18n/dashboard/catalog";
+import { DashboardLocaleToggle } from "@/i18n/dashboard/LocaleToggle";
 import { useDashboardI18n } from "@/i18n/dashboard/context";
+import { ThemeToggle } from "@/components/campaign/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 function initialsFromEmail(email: string): string {
@@ -39,14 +41,20 @@ export function DashboardProfileSheet({
   open,
   onOpenChange,
   user,
+  onSignOut,
+  showPreferences = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User | null;
+  onSignOut?: () => void;
+  /** Mobile: locale, theme, sign out in sheet footer */
+  showPreferences?: boolean;
 }) {
   const { t } = useDashboardI18n();
   const p = t.profile;
   const toastT = t.toasts;
+  const layout = t.layout;
   const email = user?.email ?? "";
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -321,6 +329,30 @@ export function DashboardProfileSheet({
             </TabsContent>
           </div>
         </Tabs>
+
+        {showPreferences && onSignOut ? (
+          <div className="dashboard-profile-preferences-footer shrink-0 border-t border-border/60 px-6 py-4">
+            <p className="mb-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {layout.preferences}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <DashboardLocaleToggle compact />
+              <ThemeToggle lightLabel={t.theme.switchToLight} darkLabel={t.theme.switchToDark} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto gap-1.5"
+                onClick={() => {
+                  onOpenChange(false);
+                  onSignOut();
+                }}
+              >
+                <LogOut className="size-3.5" />
+                {layout.signOut}
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </SheetContent>
     </Sheet>
   );

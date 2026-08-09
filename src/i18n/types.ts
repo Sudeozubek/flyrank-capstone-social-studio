@@ -190,6 +190,7 @@ export type DashboardMessages = {
     signOut: string;
     live: string;
     openProfile: string;
+    preferences: string;
     expandSidebar: string;
     collapseSidebar: string;
     footerRights: string;

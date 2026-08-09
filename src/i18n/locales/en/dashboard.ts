@@ -28,6 +28,7 @@ export const dashboardEn: DashboardMessages = {
     signOut: "Sign out",
     live: "Live",
     openProfile: "Open profile",
+    preferences: "Preferences",
     expandSidebar: "Expand sidebar",
     collapseSidebar: "Collapse sidebar",
     footerRights: "© CampaignHub",
