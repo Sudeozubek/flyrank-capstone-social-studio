@@ -32,7 +32,12 @@ export function CampaignsStartView({
             <p className="text-xs text-muted-foreground">{t.campaigns.libraryHintBody}</p>
           </div>
           {onOpenLibrary ? (
-            <Button size="sm" variant="outline" onClick={onOpenLibrary} className="shrink-0 gap-1.5">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onOpenLibrary}
+              className="shrink-0 gap-1.5"
+            >
               {t.campaigns.goToLibrary}
               <ArrowRight className="size-3.5" />
             </Button>

@@ -165,7 +165,9 @@ export function DashboardProfileSheet({
             </Avatar>
             <div className="min-w-0">
               <SheetTitle className="font-display text-lg">{p.title}</SheetTitle>
-              <SheetDescription className="truncate text-sm">{email || p.signedIn}</SheetDescription>
+              <SheetDescription className="truncate text-sm">
+                {email || p.signedIn}
+              </SheetDescription>
             </div>
           </div>
         </SheetHeader>
@@ -271,7 +273,8 @@ export function DashboardProfileSheet({
 
             <TabsContent value="platforms" className="mt-0 space-y-4">
               <div className="rounded-lg border border-dashed border-border/80 bg-muted/30 px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
-                <span className="font-medium text-foreground">{p.demoNotice}</span> {p.demoNoticeBody}
+                <span className="font-medium text-foreground">{p.demoNotice}</span>{" "}
+                {p.demoNoticeBody}
               </div>
 
               <ul className="space-y-2">

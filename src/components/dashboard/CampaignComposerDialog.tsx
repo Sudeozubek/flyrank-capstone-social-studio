@@ -64,7 +64,9 @@ export function CampaignComposerDialog({
         )}
       >
         <DialogHeader className="shrink-0 border-b border-border/60 bg-surface-raised/30 px-5 py-4 text-left light:bg-surface-raised/50">
-          <DialogTitle className="font-display text-xl text-foreground">{t.composer.title}</DialogTitle>
+          <DialogTitle className="font-display text-xl text-foreground">
+            {t.composer.title}
+          </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {t.composer.subtitle}
           </DialogDescription>

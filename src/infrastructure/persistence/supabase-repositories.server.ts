@@ -28,6 +28,19 @@ import type {
 
 export type Db = SupabaseClient<Database>;
 
+/** Claims due publish rows with a lease (service-role or authenticated client). */
+export async function claimDueEntries(
+  db: Db,
+  options: { limit: number; leaseSeconds: number },
+): Promise<SocialPostEntry[]> {
+  const { data, error } = await db.rpc("claim_due_entries", {
+    p_limit: options.limit,
+    p_lease_seconds: options.leaseSeconds,
+  });
+  if (error) fail("claimDueEntries", error);
+  return (data ?? []).map(toEntry);
+}
+
 type PostRow = Database["public"]["Tables"]["blog_posts"]["Row"];
 type CampaignRow = Database["public"]["Tables"]["campaigns"]["Row"];
 type EntryRow = Database["public"]["Tables"]["social_post_entries"]["Row"];

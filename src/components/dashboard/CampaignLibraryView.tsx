@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, LayoutGrid, Search, Sparkles } from "lucide-react";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { CampaignActionBar } from "@/components/dashboard/CampaignActionBar";
-import { LibraryVariantCard, LIBRARY_VARIANT_CARD_HEIGHT } from "@/components/dashboard/LibraryVariantCard";
+import {
+  LibraryVariantCard,
+  LIBRARY_VARIANT_CARD_HEIGHT,
+} from "@/components/dashboard/LibraryVariantCard";
 import { CampaignEditDialog, type CampaignEdit } from "@/components/campaign/CampaignEditDialog";
 import { StatusChip } from "@/components/campaign/StatusChip";
 import type { DashboardCampaignSnapshot } from "@/components/dashboard/types";
@@ -25,7 +28,11 @@ import { interpolate } from "@/i18n/dashboard/catalog";
 import { useDashboardI18n } from "@/i18n/dashboard/context";
 import { cn } from "@/lib/utils";
 
-function formatRelative(iso: string, locale: "en" | "tr", time: { justNow: string; minutesAgo: string; hoursAgo: string }): string {
+function formatRelative(
+  iso: string,
+  locale: "en" | "tr",
+  time: { justNow: string; minutesAgo: string; hoursAgo: string },
+): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
   const diffMs = Date.now() - date.getTime();
@@ -34,7 +41,10 @@ function formatRelative(iso: string, locale: "en" | "tr", time: { justNow: strin
   if (mins < 60) return interpolate(time.minutesAgo, { mins });
   const hours = Math.floor(mins / 60);
   if (hours < 24) return interpolate(time.hoursAgo, { hours });
-  return date.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", { day: "numeric", month: "short" });
+  return date.toLocaleDateString(locale === "tr" ? "tr-TR" : "en-US", {
+    day: "numeric",
+    month: "short",
+  });
 }
 
 export function CampaignLibraryView({
@@ -259,7 +269,7 @@ export function CampaignLibraryView({
                       <LibraryVariantCard
                         key={entry.id}
                         entry={entry}
-                        imageUrl={snapshot.images[entry.platform] ?? null}
+                        imageUrl={snapshot.thumbImages[entry.platform] ?? null}
                       />
                     ))
                   )}

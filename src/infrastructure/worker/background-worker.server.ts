@@ -6,10 +6,7 @@
  * because all state lives in the database.
  */
 
-import { runGlobalWorkerTick } from "@/application/worker";
-
 let timer: ReturnType<typeof setInterval> | undefined;
-let started = false;
 
 function pollIntervalMs(): number {
   const raw = Number(process.env["WORKER_POLL_INTERVAL_MS"] ?? 10_000);
@@ -18,14 +15,17 @@ function pollIntervalMs(): number {
 
 async function tickOnce(): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { runGlobalWorkerTick } = await import("@/infrastructure/worker/worker-tick.server");
   const baseUrl = process.env["PUBLIC_BASE_URL"]?.trim() || "http://localhost:8080";
   await runGlobalWorkerTick(supabaseAdmin as never, { requestUrl: baseUrl });
 }
 
 export function startBackgroundWorker(): void {
-  if (started || process.env["WORKER_ENABLED"] === "false") return;
+  if (process.env["WORKER_ENABLED"] === "false") return;
   if (typeof setInterval === "undefined") return;
-  started = true;
+
+  // HMR reloads this module — clear any previous interval so ticks always use fresh imports.
+  stopBackgroundWorker();
 
   const intervalMs = pollIntervalMs();
 
@@ -45,5 +45,4 @@ export function startBackgroundWorker(): void {
 export function stopBackgroundWorker(): void {
   if (timer) clearInterval(timer);
   timer = undefined;
-  started = false;
 }

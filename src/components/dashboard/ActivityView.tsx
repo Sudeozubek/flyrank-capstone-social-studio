@@ -242,7 +242,9 @@ export function DeliveryTimeline({
   const a = t.activity;
 
   return (
-    <section className={cn("dashboard-panel overflow-hidden rounded-2xl border border-border", className)}>
+    <section
+      className={cn("dashboard-panel overflow-hidden rounded-2xl border border-border", className)}
+    >
       <div className="border-b border-border/60 px-4 py-3.5 sm:px-5">
         <div className="flex items-center gap-2">
           <span className="flex size-8 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground">

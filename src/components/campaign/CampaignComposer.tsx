@@ -186,11 +186,7 @@ export function CampaignComposer({
   }
 
   return (
-    <section
-      className={
-        embedded ? "space-y-4" : "rounded-2xl border border-border bg-surface p-5"
-      }
-    >
+    <section className={embedded ? "space-y-4" : "rounded-2xl border border-border bg-surface p-5"}>
       {!embedded ? (
         <header className="mb-4">
           <h2 className="font-display text-lg text-foreground">New campaign</h2>

@@ -9,7 +9,7 @@ Reproduce every automated check with:
 
 ```bash
 npm install && npm run test
-# 21 files, 117 tests, all passing
+# 24 files, 131 tests, all passing
 ```
 
 Screenshots are captured and committed under `docs/screenshots/` (20 numbered images,
