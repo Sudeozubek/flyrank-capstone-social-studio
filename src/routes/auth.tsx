@@ -135,12 +135,16 @@ function AuthPageContent({
   return (
     <div className={cn("landing-page min-h-screen bg-background", dark && "landing-dark")}>
       <div className="grid min-h-screen lg:grid-cols-2">
-        <section className="relative hidden flex-col justify-between overflow-x-hidden overflow-y-visible border-r border-border bg-surface/50 p-10 xl:p-12 lg:flex">
-          <div className="pointer-events-none absolute inset-0" aria-hidden>
-            <div className="social-orb social-orb-coral absolute -left-20 top-12 size-72 rounded-full blur-3xl opacity-40" />
-            <div className="social-orb social-orb-violet absolute -right-12 top-1/3 size-64 rounded-full blur-3xl opacity-35" />
-            <div className="absolute bottom-0 left-1/4 size-56 rounded-full bg-primary/20 blur-3xl opacity-30" />
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-transparent" />
+        <section className="auth-panel landing-sky relative hidden flex-col justify-between overflow-x-hidden overflow-y-visible border-r border-border p-10 xl:p-12 lg:flex">
+          <div className="auth-panel-decor pointer-events-none absolute inset-0" aria-hidden>
+            <div
+              className="landing-grid absolute inset-0 opacity-30 [mask-image:linear-gradient(to_bottom,black,transparent_90%)]"
+              aria-hidden
+            />
+            <div className="auth-panel-orb social-orb social-orb-coral absolute -left-20 top-12 size-72 rounded-full blur-3xl opacity-40" />
+            <div className="auth-panel-orb social-orb social-orb-violet absolute -right-12 top-1/3 size-64 rounded-full blur-3xl opacity-35" />
+            <div className="auth-panel-orb absolute bottom-0 left-1/4 size-56 rounded-full bg-primary/20 blur-3xl opacity-30" />
+            <div className="auth-panel-glow absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-transparent" />
           </div>
 
           <div className="relative z-10 flex h-full min-h-0 flex-col items-center justify-center px-4 py-8 text-center">
@@ -167,7 +171,7 @@ function AuthPageContent({
           </div>
         </section>
 
-        <section className="flex min-h-screen flex-col">
+        <section className="auth-form-panel flex min-h-screen flex-col">
           <div className="flex items-center justify-between gap-4 px-6 py-5 lg:px-10">
             <Link to="/" className="inline-flex items-center lg:hidden">
               <span className="font-display text-xl font-bold tracking-[-0.04em]">
@@ -204,7 +208,7 @@ function AuthPageContent({
                 </p>
               </header>
 
-              <form className="space-y-4" onSubmit={submit}>
+              <form className="auth-form space-y-4" onSubmit={submit}>
                 <div className="space-y-2">
                   <Label htmlFor="email">{t.form.email}</Label>
                   <Input
@@ -214,6 +218,7 @@ function AuthPageContent({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
+                    className="auth-input"
                   />
                 </div>
                 <div className="space-y-2">
@@ -226,6 +231,7 @@ function AuthPageContent({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete={isSignIn ? "current-password" : "new-password"}
+                    className="auth-input"
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={busy}>

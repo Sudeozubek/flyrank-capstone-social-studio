@@ -444,7 +444,8 @@
 }
 
 .landing-dark .gen-card [class*="text-slate-7"],
-.landing-dark .gen-card [class*="text-slate-6"] {
+.landing-dark .gen-card [class*="text-slate-6"],
+.landing-dark .gen-card [class*="text-slate-8"] {
   color: oklch(0.92 0.015 280) !important;
 }
 
@@ -488,6 +489,31 @@
 }
 
 /* Auth panel — stacked fan of post preview cards */
+
+.landing-page:not(.landing-dark) .auth-panel {
+  border-right-color: oklch(from var(--primary) l c h / 0.12);
+}
+
+.landing-page:not(.landing-dark) .auth-form label {
+  color: oklch(0.24 0.02 50);
+  font-weight: 500;
+}
+
+.landing-page:not(.landing-dark) .auth-input {
+  border-color: oklch(0.82 0.01 95);
+  background-color: oklch(0.998 0.002 95);
+  color: oklch(0.22 0.022 50);
+  box-shadow: 0 1px 2px oklch(0.35 0.01 55 / 0.04);
+}
+
+.landing-page:not(.landing-dark) .auth-input::placeholder {
+  color: oklch(0.52 0.014 55);
+}
+
+.landing-page:not(.landing-dark) .auth-input:focus-visible {
+  border-color: oklch(from var(--primary) l c h / 0.45);
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.12);
+}
 
 .auth-fan-stack {
   position: relative;
