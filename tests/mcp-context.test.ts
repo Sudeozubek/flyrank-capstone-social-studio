@@ -1,10 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  jsonResult,
-  errorResult,
-  supabaseProjectUrl,
-  supabasePublishableKey,
-} from "@/mcp/context";
+import { jsonResult, errorResult, supabaseProjectUrl, supabasePublishableKey } from "@/mcp/context";
 
 describe("MCP context helpers", () => {
   const envBackup = { ...process.env };

@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { applyAuthDocumentLocale, authMessages } from "@/i18n/auth/catalog";
 import { persistLocale, readStoredLocale } from "@/i18n/locale";
 import type { AuthMessages, LandingLocale } from "@/i18n/types";

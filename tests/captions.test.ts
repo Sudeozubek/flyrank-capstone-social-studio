@@ -1,13 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORMS } from "@/domain/entities";
-import {
-  clamp,
-  composeCaption,
-  splitSentences,
-  stableHash,
-  summarize,
-} from "@/domain/captions";
+import { clamp, composeCaption, splitSentences, stableHash, summarize } from "@/domain/captions";
 
 const post = {
   id: "post-42",
@@ -82,7 +76,9 @@ describe("composeCaption brand substitution", () => {
 
   it("respects platform length limits after brand substitution", () => {
     for (const platform of PLATFORMS) {
-      const caption = composeCaption(post, platform, { name: "Very Long Brand Name International" });
+      const caption = composeCaption(post, platform, {
+        name: "Very Long Brand Name International",
+      });
       expect(caption.length).toBeLessThanOrEqual(PLATFORM_SPECS[platform].maxCaptionLength);
     }
   });

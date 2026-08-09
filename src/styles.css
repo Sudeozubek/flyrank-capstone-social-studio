@@ -3,6 +3,7 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light *));
 
 /*
  * Design system definition.
@@ -119,41 +120,41 @@
 
 .light,
 .landing-page:not(.landing-dark) {
-  --background: oklch(0.985 0.012 80);
-  --foreground: oklch(0.25 0.025 50);
-  --surface: oklch(0.998 0.004 80);
-  --surface-raised: oklch(0.965 0.018 75);
-  --card: oklch(0.998 0.004 80);
-  --card-foreground: oklch(0.25 0.025 50);
-  --popover: oklch(0.998 0.004 80);
-  --popover-foreground: oklch(0.25 0.025 50);
-  --primary: oklch(0.65 0.18 35);
-  --primary-foreground: oklch(0.99 0.005 80);
-  --accent-strong: oklch(0.65 0.18 35);
-  --accent-strong-foreground: oklch(0.99 0.005 80);
-  --secondary: oklch(0.94 0.025 75);
-  --secondary-foreground: oklch(0.3 0.03 50);
-  --muted: oklch(0.95 0.018 75);
-  --muted-foreground: oklch(0.5 0.025 55);
-  --accent: oklch(0.93 0.035 75);
-  --accent-foreground: oklch(0.28 0.03 50);
-  --destructive: oklch(0.55 0.2 25);
-  --destructive-foreground: oklch(0.99 0.008 85);
-  --border: oklch(0.88 0.025 70);
-  --input: oklch(0.89 0.025 70);
-  --ring: oklch(0.65 0.18 35);
-  --status-queued: oklch(0.52 0.13 240);
-  --status-publishing: oklch(0.58 0.13 80);
-  --status-published: oklch(0.54 0.15 155);
-  --status-failed: oklch(0.55 0.2 25);
-  --sidebar: oklch(0.97 0.012 80);
-  --sidebar-foreground: oklch(0.25 0.025 50);
-  --sidebar-primary: oklch(0.65 0.18 35);
-  --sidebar-primary-foreground: oklch(0.99 0.005 80);
-  --sidebar-accent: oklch(0.94 0.025 75);
-  --sidebar-accent-foreground: oklch(0.3 0.03 50);
-  --sidebar-border: oklch(0.88 0.025 70);
-  --sidebar-ring: oklch(0.65 0.18 35);
+  --background: oklch(0.985 0.004 95);
+  --foreground: oklch(0.28 0.018 50);
+  --surface: oklch(0.995 0.003 95);
+  --surface-raised: oklch(0.972 0.006 92);
+  --card: oklch(0.995 0.003 95);
+  --card-foreground: oklch(0.28 0.018 50);
+  --popover: oklch(0.998 0.002 95);
+  --popover-foreground: oklch(0.28 0.018 50);
+  --primary: oklch(0.56 0.13 38);
+  --primary-foreground: oklch(0.99 0.003 95);
+  --accent-strong: oklch(0.56 0.13 38);
+  --accent-strong-foreground: oklch(0.99 0.003 95);
+  --secondary: oklch(0.965 0.005 95);
+  --secondary-foreground: oklch(0.32 0.02 50);
+  --muted: oklch(0.96 0.005 95);
+  --muted-foreground: oklch(0.5 0.014 55);
+  --accent: oklch(0.955 0.006 92);
+  --accent-foreground: oklch(0.28 0.018 50);
+  --destructive: oklch(0.5 0.16 25);
+  --destructive-foreground: oklch(0.99 0.003 95);
+  --border: oklch(0.9 0.006 95);
+  --input: oklch(0.92 0.005 95);
+  --ring: oklch(0.56 0.13 38);
+  --status-queued: oklch(0.46 0.1 240);
+  --status-publishing: oklch(0.5 0.1 80);
+  --status-published: oklch(0.46 0.11 155);
+  --status-failed: oklch(0.5 0.16 25);
+  --sidebar: oklch(0.98 0.004 95);
+  --sidebar-foreground: oklch(0.28 0.018 50);
+  --sidebar-primary: oklch(0.56 0.13 38);
+  --sidebar-primary-foreground: oklch(0.99 0.003 95);
+  --sidebar-accent: oklch(0.965 0.005 95);
+  --sidebar-accent-foreground: oklch(0.32 0.02 50);
+  --sidebar-border: oklch(0.9 0.006 95);
+  --sidebar-ring: oklch(0.56 0.13 38);
   color-scheme: light;
 }
 
@@ -209,6 +210,10 @@
     scroll-behavior: smooth;
   }
 
+  html.light {
+    color-scheme: light;
+  }
+
   body {
     font-family:
       ui-sans-serif,
@@ -221,6 +226,12 @@
       radial-gradient(1100px 520px at 12% -10%, oklch(0.79 0.166 68 / 0.1), transparent 60%),
       radial-gradient(900px 480px at 92% 0%, oklch(0.78 0.16 155 / 0.07), transparent 55%);
     background-attachment: fixed;
+  }
+
+  html.light body {
+    background-image:
+      radial-gradient(1000px 500px at 10% -8%, oklch(0.72 0.06 230 / 0.03), transparent 58%),
+      radial-gradient(900px 460px at 94% 0%, oklch(0.68 0.05 200 / 0.025), transparent 55%);
   }
 
   h1,
@@ -250,6 +261,55 @@
     radial-gradient(circle at 88% 8%, oklch(0.48 0.14 305 / 0.22), transparent 30rem),
     radial-gradient(circle at 52% 64%, oklch(0.45 0.12 235 / 0.16), transparent 28rem),
     linear-gradient(180deg, oklch(0.17 0.03 285), var(--background));
+}
+
+/* Stats band — light mode: primary-tinted strip; dark keeps elevated surface */
+.landing-page:not(.landing-dark) .landing-stats-band {
+  background: linear-gradient(
+    180deg,
+    oklch(from var(--primary) l c h / 0.1),
+    oklch(from var(--primary) l c h / 0.05)
+  );
+  border-top: none;
+  border-bottom: none;
+  border-color: oklch(from var(--primary) l c h / 0.22);
+}
+
+.landing-page:not(.landing-dark) .landing-stats-grid {
+  border-color: oklch(from var(--primary) l c h / 0.14);
+}
+
+.landing-page:not(.landing-dark) .landing-stats-grid > :not([hidden]) ~ :not([hidden]) {
+  border-color: oklch(from var(--primary) l c h / 0.14);
+}
+
+.landing-page:not(.landing-dark) .landing-stats-value {
+  color: var(--primary);
+}
+
+/* Light landing — alternate section bands instead of divider lines */
+.landing-page:not(.landing-dark) .landing-section-benefits {
+  border-bottom: none;
+  background: var(--background);
+}
+
+.landing-page:not(.landing-dark) .landing-section-workflow {
+  background: var(--muted);
+}
+
+.landing-page:not(.landing-dark) .landing-section-features {
+  border-top: none;
+  border-bottom: none;
+  background: var(--surface);
+}
+
+.landing-page:not(.landing-dark) .landing-section-cta {
+  background: var(--background);
+}
+
+.landing-page:not(.landing-dark) .landing-footer {
+  border-top: none;
+  background: var(--muted);
 }
 
 .sky-cloud {
@@ -331,8 +391,41 @@
 }
 
 .landing-dark .sky-cloud {
-  background: oklch(0.72 0.055 270 / 0.1);
-  box-shadow: none;
+  background: oklch(0.94 0.012 245 / 0.2);
+  box-shadow:
+    0 24px 56px oklch(0.38 0.07 265 / 0.2),
+    0 10px 36px oklch(0.52 0.05 250 / 0.12);
+  filter: blur(10px);
+  mix-blend-mode: soft-light;
+}
+
+.landing-dark .sky-cloud::before,
+.landing-dark .sky-cloud::after {
+  background: inherit;
+}
+
+.landing-dark .sky-cloud-1 {
+  opacity: 0.7;
+}
+
+.landing-dark .sky-cloud-2 {
+  opacity: 0.58;
+}
+
+.landing-dark .sky-cloud-3 {
+  opacity: 0.48;
+}
+
+.landing-dark .sky-cloud-4 {
+  opacity: 0.36;
+}
+
+.landing-dark .sky-cloud-5 {
+  opacity: 0.4;
+}
+
+.landing-dark .sky-cloud-6 {
+  opacity: 0.32;
 }
 
 /* --- Hero generation visual --- */
@@ -351,7 +444,8 @@
 }
 
 .landing-dark .gen-card [class*="text-slate-7"],
-.landing-dark .gen-card [class*="text-slate-6"] {
+.landing-dark .gen-card [class*="text-slate-6"],
+.landing-dark .gen-card [class*="text-slate-8"] {
   color: oklch(0.92 0.015 280) !important;
 }
 
@@ -395,6 +489,31 @@
 }
 
 /* Auth panel — stacked fan of post preview cards */
+
+.landing-page:not(.landing-dark) .auth-panel {
+  border-right-color: oklch(from var(--primary) l c h / 0.12);
+}
+
+.landing-page:not(.landing-dark) .auth-form label {
+  color: oklch(0.24 0.02 50);
+  font-weight: 500;
+}
+
+.landing-page:not(.landing-dark) .auth-input {
+  border-color: oklch(0.82 0.01 95);
+  background-color: oklch(0.998 0.002 95);
+  color: oklch(0.22 0.022 50);
+  box-shadow: 0 1px 2px oklch(0.35 0.01 55 / 0.04);
+}
+
+.landing-page:not(.landing-dark) .auth-input::placeholder {
+  color: oklch(0.52 0.014 55);
+}
+
+.landing-page:not(.landing-dark) .auth-input:focus-visible {
+  border-color: oklch(from var(--primary) l c h / 0.45);
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.12);
+}
 
 .auth-fan-stack {
   position: relative;
@@ -464,8 +583,8 @@
 
 .landing-page .landing-grid {
   background-image:
-    linear-gradient(to right, oklch(0.3 0.02 60 / 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.3 0.02 60 / 0.06) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.35 0.01 55 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.35 0.01 55 / 0.05) 1px, transparent 1px);
 }
 
 .landing-dark .landing-grid {
@@ -504,8 +623,8 @@
 
 @utility landing-grid {
   background-image:
-    linear-gradient(to right, oklch(0.96 0.008 85 / 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.96 0.008 85 / 0.045) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.35 0.01 55 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.35 0.01 55 / 0.04) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
@@ -626,6 +745,335 @@
 
 @utility landing-pulse {
   animation: landing-pulse 2.4s ease-in-out infinite;
+}
+
+/* --- Dashboard app shell --- */
+
+.dashboard-shell {
+  --dashboard-sidebar-width: 15rem;
+  --dashboard-mobile-nav-height: 3.75rem;
+  --dashboard-main-footer-height: 2.75rem;
+  background-color: var(--background);
+}
+
+.dashboard-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 900px 480px at 8% -5%, oklch(0.76 0.15 40 / 0.06), transparent 55%),
+    radial-gradient(ellipse 700px 420px at 95% 2%, oklch(0.72 0.13 310 / 0.05), transparent 50%);
+}
+
+.light .dashboard-shell::before {
+  background:
+    radial-gradient(ellipse 900px 480px at 8% -5%, oklch(0.68 0.06 55 / 0.03), transparent 55%),
+    radial-gradient(ellipse 700px 420px at 95% 2%, oklch(0.62 0.05 230 / 0.03), transparent 50%);
+}
+
+.dashboard-grid-bg {
+  background-image:
+    linear-gradient(to right, oklch(0.96 0.008 85 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.96 0.008 85 / 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.light .dashboard-grid-bg {
+  background-image:
+    linear-gradient(to right, oklch(0.35 0.01 55 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.35 0.01 55 / 0.04) 1px, transparent 1px);
+}
+
+/* Soft elevated panels in light dashboard */
+.dashboard-panel {
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
+.dark .dashboard-panel {
+  background-color: oklch(0.205 0.028 285 / 0.96);
+  border-color: oklch(0.34 0.035 285 / 0.85);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.2),
+    0 8px 28px oklch(0 0 0 / 0.18);
+}
+
+.light .dashboard-panel {
+  background-color: var(--surface);
+  border-color: oklch(from var(--border) l c h / 0.9);
+  box-shadow:
+    0 1px 2px oklch(0.3 0.01 55 / 0.05),
+    0 8px 24px oklch(0.3 0.01 55 / 0.06);
+}
+
+.light .dashboard-panel-muted {
+  background-color: oklch(from var(--surface-raised) l c h / 0.85);
+  border-color: oklch(from var(--border) l c h / 0.75);
+}
+
+.dashboard-panel-muted {
+  background-color: var(--surface-raised);
+  border-color: var(--border);
+}
+
+.dark .dashboard-panel-muted {
+  background-color: oklch(0.25 0.032 285 / 0.94);
+  border-color: oklch(0.34 0.035 285 / 0.75);
+}
+
+/* Activity page — opaque content surfaces over dashboard gradient */
+.dashboard-activity-inset {
+  background-color: var(--surface-raised);
+  border: 1px solid oklch(from var(--border) l c h / 0.65);
+}
+
+.light .dashboard-activity-inset {
+  background-color: var(--surface-raised);
+  border-color: oklch(from var(--border) l c h / 0.8);
+}
+
+.dark .dashboard-activity-inset {
+  background-color: oklch(0.19 0.026 285);
+  border-color: oklch(0.34 0.035 285 / 0.7);
+}
+
+.dashboard-activity-row {
+  background-color: var(--background);
+  border: 1px solid oklch(from var(--border) l c h / 0.55);
+}
+
+.light .dashboard-activity-row {
+  background-color: oklch(0.988 0.004 95);
+  border-color: oklch(from var(--border) l c h / 0.85);
+}
+
+.dark .dashboard-activity-row {
+  background-color: oklch(0.17 0.024 285);
+  border-color: oklch(0.32 0.032 285 / 0.75);
+}
+
+.dashboard-activity-stat {
+  background-color: var(--surface-raised);
+  border: 1px solid oklch(from var(--border) l c h / 0.6);
+}
+
+.light .dashboard-activity-stat {
+  background-color: var(--surface-raised);
+}
+
+.dark .dashboard-activity-stat {
+  background-color: oklch(0.22 0.03 285);
+}
+
+.light .dashboard-hint {
+  background: linear-gradient(
+    135deg,
+    oklch(0.975 0.006 92 / 0.95),
+    oklch(0.965 0.005 95 / 0.9)
+  );
+  border-color: oklch(from var(--border) l c h / 0.95);
+}
+
+.light .dashboard-empty-glow {
+  box-shadow:
+    0 1px 2px oklch(0.3 0.01 55 / 0.05),
+    0 12px 36px oklch(0.35 0.02 50 / 0.08);
+}
+
+.light .composer-modal-shell {
+  background-color: var(--surface);
+  border-color: oklch(from var(--border) l c h / 0.9);
+}
+
+.composer-modal-body {
+  scrollbar-gutter: stable;
+}
+
+.composer-scroll-fade {
+  background: linear-gradient(to top, var(--surface) 0%, transparent 100%);
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.composer-scroll-fade[data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dashboard-shell[data-sidebar-collapsed="true"] {
+  --dashboard-sidebar-width: 4.25rem;
+}
+
+/* Fixed chrome — sidebar & mobile nav stay opaque; top bar blends with page */
+.dashboard-top-bar {
+  background-color: transparent;
+}
+
+.dashboard-chrome {
+  background-color: var(--surface);
+  backdrop-filter: blur(12px);
+}
+
+.light .dashboard-chrome {
+  background-color: oklch(from var(--surface) l c h / 0.97);
+  border-color: oklch(from var(--border) l c h / 0.9);
+}
+
+.dark .dashboard-chrome {
+  background-color: oklch(0.205 0.028 285 / 0.97);
+  border-color: oklch(0.34 0.035 285 / 0.85);
+}
+
+.dashboard-sidebar-edge-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 40;
+  width: 0.625rem;
+  height: 100%;
+  transform: translateX(50%);
+  cursor: col-resize;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.dashboard-sidebar-edge-right:hover,
+.dashboard-chrome:hover .dashboard-sidebar-edge-right {
+  opacity: 1;
+  background-color: oklch(from var(--primary) l c h / 0.14);
+}
+
+/* Mobile dashboard — bottom tab bar, no duplicate sidebar nav in header */
+.dashboard-main-scroll {
+  padding-bottom: calc(var(--dashboard-mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+}
+
+.dashboard-main-footer {
+  display: flex;
+  min-height: var(--dashboard-main-footer-height);
+  flex-shrink: 0;
+  align-items: center;
+  border-top: 1px solid oklch(from var(--border) l c h / 0.5);
+  padding-inline: 1rem;
+}
+
+.dashboard-main-body {
+  flex: 0 1 auto;
+}
+
+@media (min-width: 640px) {
+  .dashboard-main-footer {
+    padding-inline: 1.5rem;
+  }
+}
+
+.dashboard-main-footer-inner {
+  display: flex;
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  min-height: var(--dashboard-main-footer-height);
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  line-height: 1;
+  color: var(--muted-foreground);
+}
+
+@media (min-width: 1024px) {
+  .dashboard-main-scroll {
+    padding-bottom: 0;
+  }
+
+  .dashboard-main-frame {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+  }
+
+  .dashboard-main-body {
+    flex: 1 1 auto;
+  }
+
+  .dashboard-main-footer,
+  .dashboard-main-footer-inner {
+    height: var(--dashboard-main-footer-height);
+    min-height: var(--dashboard-main-footer-height);
+  }
+
+  .dashboard-mobile-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .dashboard-mobile-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: grid;
+    height: calc(var(--dashboard-mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: var(--dashboard-mobile-nav-height);
+    align-content: start;
+    gap: 0;
+    border-top: 1px solid oklch(from var(--border) l c h / 0.75);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+.dashboard-mobile-nav-item {
+  display: flex;
+  height: var(--dashboard-mobile-nav-height);
+  min-height: 0;
+  max-height: var(--dashboard-mobile-nav-height);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0.25rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.dashboard-mobile-nav-label {
+  display: block;
+  width: 100%;
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.dashboard-mobile-nav-item:hover {
+  color: var(--foreground);
+  background-color: oklch(from var(--accent) l c h / 0.35);
+}
+
+.dashboard-mobile-nav-item-active {
+  color: var(--primary);
+  background-color: oklch(from var(--primary) l c h / 0.08);
+}
+
+.dashboard-profile-preferences-footer {
+  display: flex;
+  min-height: 5.5rem;
+  flex-direction: column;
+  justify-content: center;
 }
 
 @utility landing-delay-1 {

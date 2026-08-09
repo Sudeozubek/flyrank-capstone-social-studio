@@ -18,11 +18,7 @@ import {
   getCampaignSnapshot,
 } from "@/application/campaign-usecases";
 import { ingestPastedPost, ingestUploadedPost } from "@/application/ingest-content";
-import {
-  publishCampaign,
-  retryCampaign,
-  scheduleCampaign,
-} from "@/application/publish-usecases";
+import { publishCampaign, retryCampaign, scheduleCampaign } from "@/application/publish-usecases";
 import { runWorkerTick } from "@/application/worker";
 import { PLATFORMS } from "@/domain/entities";
 import { createAppContext } from "@/infrastructure/context.server";
@@ -54,7 +50,11 @@ export const createPostFromText = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const app = createAppContext(context.supabase as never, context.userId);
-    return ingestPastedPost(app, { body: data.body, ...(data.title ? { title: data.title } : {}), url: data.url ?? null });
+    return ingestPastedPost(app, {
+      body: data.body,
+      ...(data.title ? { title: data.title } : {}),
+      url: data.url ?? null,
+    });
   });
 
 export const createPostFromUpload = createServerFn({ method: "POST" })
@@ -93,10 +93,20 @@ export const deletePost = createServerFn({ method: "POST" })
 export const createCampaignWithAssets = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ postId: uuid, name: z.string().max(200).optional(), brandName: z.string().max(120).nullish(), brandTone, brandLanguage }).parse(input),
+    z
+      .object({
+        postId: uuid,
+        name: z.string().max(200).optional(),
+        brandName: z.string().max(120).nullish(),
+        brandTone,
+        brandLanguage,
+      })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
+    const app = createAppContext(context.supabase as never, context.userId, {
+      requestUrl: getRequest().url,
+    });
     const snapshot = await createCampaign(app, {
       postId: data.postId,
       ...(data.name ? { name: data.name } : {}),
@@ -147,7 +157,6 @@ export const deleteCampaignFn = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
 export const regenerateCaptions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ campaignId: uuid }).parse(input))
@@ -181,7 +190,9 @@ export const publishCampaignFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ campaignId: uuid }).parse(input))
   .handler(async ({ data, context }) => {
-    const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
+    const app = createAppContext(context.supabase as never, context.userId, {
+      requestUrl: getRequest().url,
+    });
     await publishCampaign(app, data.campaignId);
     return getCampaignSnapshot(app, data.campaignId);
   });
@@ -190,7 +201,9 @@ export const retryCampaignFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ campaignId: uuid }).parse(input))
   .handler(async ({ data, context }) => {
-    const app = createAppContext(context.supabase as never, context.userId, { requestUrl: getRequest().url });
+    const app = createAppContext(context.supabase as never, context.userId, {
+      requestUrl: getRequest().url,
+    });
     await retryCampaign(app, data.campaignId);
     return getCampaignSnapshot(app, data.campaignId);
   });
@@ -242,13 +255,17 @@ export const loadDashboard = createServerFn({ method: "GET" })
 export const tickWorker = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    return runWorkerTick(context.supabase as never, context.userId, { requestUrl: getRequest().url });
+    return runWorkerTick(context.supabase as never, context.userId, {
+      requestUrl: getRequest().url,
+    });
   });
 
 export const setPlatformRateLimit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ platform: z.enum(PLATFORMS), failures: z.number().int().min(0).max(10) }).parse(input),
+    z
+      .object({ platform: z.enum(PLATFORMS), failures: z.number().int().min(0).max(10) })
+      .parse(input),
   )
   .handler(async ({ data }) => {
     const { setRateLimit } = await import("@/routes/api/public/fake-platform/$platform/posts");
@@ -285,6 +302,39 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
     const { fetchArticle } = await import("@/infrastructure/feeds/blog-library.server");
     const { importLibraryPost } = await import("@/application/import-library-post");
     const article = await fetchArticle(data.url);
+    const post = await importLibraryPost(app, { ...article, url: data.url });
+    const snapshot = await createCampaign(app, {
+      postId: post.id,
+      ...(data.name ? { name: data.name } : {}),
+      brandName: data.brandName ?? null,
+      brandTone: data.brandTone ?? null,
+      brandLanguage: data.brandLanguage,
+    });
+    await generateImages(app, snapshot.campaign.id);
+    return getCampaignSnapshot(app, snapshot.campaign.id);
+  });
+
+/** Import a published post from a user-supplied URL and campaign on it. */
+export const createCampaignFromUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        url: z.string().url().max(500),
+        name: z.string().max(200).optional(),
+        brandName: z.string().max(120).nullish(),
+        brandTone,
+        brandLanguage,
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const app = createAppContext(context.supabase as never, context.userId, {
+      requestUrl: getRequest().url,
+    });
+    const { fetchPublicArticle } = await import("@/infrastructure/feeds/blog-library.server");
+    const { importLibraryPost } = await import("@/application/import-library-post");
+    const article = await fetchPublicArticle(data.url);
     const post = await importLibraryPost(app, { ...article, url: data.url });
     const snapshot = await createCampaign(app, {
       postId: post.id,

@@ -3,6 +3,7 @@ import { getCampaignSnapshot } from "@/application/campaign-usecases";
 import { retryCampaign } from "@/application/publish-usecases";
 import { withApp } from "../context";
 import { defineTool } from "../types";
+import { snapshotView } from "../views";
 
 export default defineTool({
   name: "retry_campaign",
@@ -14,6 +15,6 @@ export default defineTool({
   handler: async ({ campaignId }, ctx) =>
     withApp(ctx, async (app) => {
       await retryCampaign(app, campaignId);
-      return getCampaignSnapshot(app, campaignId);
+      return snapshotView(await getCampaignSnapshot(app, campaignId));
     }),
 });

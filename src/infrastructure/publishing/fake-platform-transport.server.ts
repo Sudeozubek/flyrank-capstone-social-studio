@@ -4,14 +4,25 @@
  * /api/public/fake-platform surface.
  */
 
+/** The fields adapters read off a fake-platform reply; extras are ignored. */
+export interface FakePlatformBody {
+  id?: string;
+  duplicate?: boolean;
+  error?: string;
+}
+
 export interface FakePlatformResponse {
   status: number;
   retryAfterSec?: number;
-  body: any;
+  body: FakePlatformBody | null;
 }
 
 export interface FakePlatformTransport {
-  post(platform: string, payload: unknown, headers: Record<string, string>): Promise<FakePlatformResponse>;
+  post(
+    platform: string,
+    payload: unknown,
+    headers: Record<string, string>,
+  ): Promise<FakePlatformResponse>;
 }
 
 export function resolveFakePlatformBaseUrl(requestUrl?: string): string {
@@ -30,7 +41,7 @@ export function createFakePlatformTransport(baseUrl: string): FakePlatformTransp
         body: JSON.stringify(payload),
       });
       const retryAfter = response.headers.get("retry-after");
-      let body: unknown = null;
+      let body: FakePlatformBody | null = null;
       try {
         body = await response.json();
       } catch {

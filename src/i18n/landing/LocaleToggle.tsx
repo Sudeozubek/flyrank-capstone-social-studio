@@ -10,7 +10,7 @@ export function LandingLocaleToggle({ className }: { className?: string }) {
       locale={locale}
       setLocale={setLocale}
       chooseLanguageLabel={t.nav.chooseLanguage}
-      className={className}
+      {...(className ? { className } : {})}
     />
   );
 }

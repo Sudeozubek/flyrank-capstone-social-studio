@@ -15,7 +15,14 @@ import { resolveCampaignLanguage } from "@/config/campaign-languages.config";
 import { resolveBrandTone } from "@/config/brand-tones.config";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
 import { PLATFORM_VOICE, SHARED_VOICE } from "@/config/social-prompts.config";
-import { clamp, composeCaption, captionLimit, fitCaptionToLimit, summarize, type CaptionSource } from "@/domain/captions";
+import {
+  clamp,
+  composeCaption,
+  captionLimit,
+  fitCaptionToLimit,
+  summarize,
+  type CaptionSource,
+} from "@/domain/captions";
 import type { BrandContext, Platform } from "@/domain/entities";
 import type { AiCostMeter, CaptionWriter } from "@/domain/ports";
 import {
@@ -36,12 +43,9 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
   const language = resolveCampaignLanguage(brand?.language);
   const legacyTone = !tone ? brand?.tone?.trim() : null;
 
-  const hooks =
-    tone?.hooks ??
-    (language.id === "en" ? SHARED_VOICE.hooks : language.hooks);
+  const hooks = tone?.hooks ?? (language.id === "en" ? SHARED_VOICE.hooks : language.hooks);
   const valueProps =
-    tone?.valueProps ??
-    (language.id === "en" ? SHARED_VOICE.valueProps : language.valueProps);
+    tone?.valueProps ?? (language.id === "en" ? SHARED_VOICE.valueProps : language.valueProps);
   const signOff = tone?.signOff ?? (language.id === "en" ? SHARED_VOICE.signOff : language.signOff);
   const ctas = tone?.ctas[platform] ?? language.ctas[platform] ?? voice.ctas;
 
@@ -95,7 +99,9 @@ export function buildSystemPrompt(platform: Platform, brand?: BrandContext): str
           "The tone must shape word choice, rhythm, and energy throughout — opener, body, and CTA.",
           `Tone-appropriate CTAs: ${tone.ctas[platform].join(" | ")}`,
           ...(tone.hooks.length
-            ? [`Tone-appropriate angles: ${tone.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`]
+            ? [
+                `Tone-appropriate angles: ${tone.hooks.map((h) => h.replaceAll("{brand}", brandName)).join(" | ")}`,
+              ]
             : []),
         ]
       : legacyTone
@@ -173,78 +179,77 @@ export function createOpenAiCaptionWriter(meter: AiCostMeter): CaptionWriter {
         return fallbackCaption(post, platform, "AI budget exhausted", brand);
       }
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-    try {
-      const response = await fetch(ENDPOINT, {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          temperature: 0.72,
-          max_tokens: 600,
-          messages: [
-            { role: "system", content: buildSystemPrompt(platform, brand) },
-            { role: "user", content: buildUserPrompt(post, platform) },
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-        const detail = await response.text().catch(() => "");
-        const label =
-          response.status === 429
-            ? "rate limited"
-            : response.status === 401 || response.status === 403
-              ? "auth rejected"
-              : `HTTP ${response.status}`;
-        return fallbackCaption(post, platform, `${label}: ${detail.slice(0, 200)}`, brand);
-      }
-
-      const json = (await response.json()) as {
-        choices?: Array<{ message?: { content?: string } }>;
-        usage?: { prompt_tokens?: number; completion_tokens?: number };
-      };
-      const usage = json.usage;
-      if (usage) {
-        await meter.record({
-          feature: `caption:${platform}`,
-          model: MODEL,
-          inputTokens: usage.prompt_tokens ?? 0,
-          outputTokens: usage.completion_tokens ?? 0,
-          estimatedUsd: estimateChatCost(
-            MODEL,
-            usage.prompt_tokens ?? 0,
-            usage.completion_tokens ?? 0,
-          ),
+      try {
+        const response = await fetch(ENDPOINT, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            temperature: 0.72,
+            max_tokens: 600,
+            messages: [
+              { role: "system", content: buildSystemPrompt(platform, brand) },
+              { role: "user", content: buildUserPrompt(post, platform) },
+            ],
+          }),
         });
-      }
-      const content = json.choices?.[0]?.message?.content?.trim();
-      if (!content) return fallbackCaption(post, platform, "empty completion", brand);
 
-      const caption = sanitize(content, platform).trim();
-      if (!caption) return fallbackCaption(post, platform, "caption empty after sanitize", brand);
-      return caption;
-    } catch (error) {
-      const reason =
-        error instanceof Error && error.name === "AbortError"
-          ? `timeout after ${TIMEOUT_MS}ms`
-          : error instanceof Error
-            ? error.message
-            : "unknown error";
-      return fallbackCaption(post, platform, reason, brand);
-    } finally {
-      clearTimeout(timer);
-    }
+        if (!response.ok) {
+          const detail = await response.text().catch(() => "");
+          const label =
+            response.status === 429
+              ? "rate limited"
+              : response.status === 401 || response.status === 403
+                ? "auth rejected"
+                : `HTTP ${response.status}`;
+          return fallbackCaption(post, platform, `${label}: ${detail.slice(0, 200)}`, brand);
+        }
+
+        const json = (await response.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+          usage?: { prompt_tokens?: number; completion_tokens?: number };
+        };
+        const usage = json.usage;
+        if (usage) {
+          await meter.record({
+            feature: `caption:${platform}`,
+            model: MODEL,
+            inputTokens: usage.prompt_tokens ?? 0,
+            outputTokens: usage.completion_tokens ?? 0,
+            estimatedUsd: estimateChatCost(
+              MODEL,
+              usage.prompt_tokens ?? 0,
+              usage.completion_tokens ?? 0,
+            ),
+          });
+        }
+        const content = json.choices?.[0]?.message?.content?.trim();
+        if (!content) return fallbackCaption(post, platform, "empty completion", brand);
+
+        const caption = sanitize(content, platform).trim();
+        if (!caption) return fallbackCaption(post, platform, "caption empty after sanitize", brand);
+        return caption;
+      } catch (error) {
+        const reason =
+          error instanceof Error && error.name === "AbortError"
+            ? `timeout after ${TIMEOUT_MS}ms`
+            : error instanceof Error
+              ? error.message
+              : "unknown error";
+        return fallbackCaption(post, platform, reason, brand);
+      } finally {
+        clearTimeout(timer);
+      }
     },
   };
 }
 
 /** Default export for tests — uses the in-memory meter. */
 export const openAiCaptionWriter = createOpenAiCaptionWriter(getTestAiCostMeter());
-

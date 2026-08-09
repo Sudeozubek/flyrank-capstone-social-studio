@@ -23,7 +23,10 @@ export interface IngestUploadInput {
 
 function firstLineTitle(body: string): string {
   const line = body.split("\n").find((l) => l.trim().length > 0) ?? "Untitled post";
-  return line.replace(/^#+\s*/, "").trim().slice(0, 200);
+  return line
+    .replace(/^#+\s*/, "")
+    .trim()
+    .slice(0, 200);
 }
 
 export async function ingestPastedPost(

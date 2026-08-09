@@ -68,7 +68,11 @@ export function createAppContext(db: Db, userId: string, options: ContextOptions
     publisherFor(platform) {
       const ciphertext = cipherCache.get(platform) ?? devCiphertext(userId, platform);
       cipherCache.set(platform, ciphertext);
-      return createPublisher(platform, { transport, cipher: tokenCipher, accessTokenCiphertext: ciphertext });
+      return createPublisher(platform, {
+        transport,
+        cipher: tokenCipher,
+        accessTokenCiphertext: ciphertext,
+      });
     },
   };
 }

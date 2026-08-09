@@ -11,6 +11,7 @@
 
 import { composeVariant } from "@/domain/image-composition";
 import type { ImageRenderer, RenderedImage } from "@/domain/ports";
+import { loadSharp } from "./sharp-loader.server";
 
 type RenderSpec = Parameters<ImageRenderer["render"]>[0];
 
@@ -31,23 +32,7 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
               ? [x, 0, c]
               : [c, 0, x];
   const m = l - c / 2;
-  return [
-    Math.round((r1 + m) * 255),
-    Math.round((g1 + m) * 255),
-    Math.round((b1 + m) * 255),
-  ];
-}
-
-/** Defeat static bundler analysis: the Worker build must not try to resolve sharp. */
-async function loadSharp(): Promise<any | null> {
-  if (process.env["FLYRANK_DISABLE_SHARP"] === "1") return null;
-  try {
-    const specifier = ["sh", "arp"].join("");
-    const mod = await import(/* @vite-ignore */ specifier);
-    return mod.default ?? mod;
-  } catch {
-    return null;
-  }
+  return [Math.round((r1 + m) * 255), Math.round((g1 + m) * 255), Math.round((b1 + m) * 255)];
 }
 
 export const sharpRenderer: ImageRenderer = {
@@ -156,8 +141,7 @@ export const imageRenderer = svgImageRenderer;
 /** Decoded PNG header dimensions — used by tests and by the upload path. */
 export function readPngSize(bytes: Uint8Array): { width: number; height: number } {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const isPng =
-    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  const isPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
   if (!isPng) throw new Error("Not a PNG");
   return { width: view.getUint32(16), height: view.getUint32(20) };
 }

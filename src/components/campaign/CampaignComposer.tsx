@@ -33,7 +33,7 @@ export interface LibraryGroup {
 }
 
 export interface ComposerSubmit {
-  mode: "paste" | "upload" | "library";
+  mode: "paste" | "upload" | "library" | "url";
   campaignName?: string | undefined;
   brandName?: string | undefined;
   brandTone?: string | undefined;
@@ -77,34 +77,35 @@ export function CampaignComposer({
   library,
   libraryLoading,
   aiSpend,
+  embedded = false,
 }: {
   onSubmit: (input: ComposerSubmit) => Promise<void> | void;
   busy: boolean;
   library: LibraryGroup[];
   libraryLoading: boolean;
   aiSpend?: AiSpendSnapshot | null;
+  embedded?: boolean;
 }) {
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<string>(ALL_SOURCES);
   const [campaignName, setCampaignName] = useState("");
   const [brandName, setBrandName] = useState("");
   const [brandTone, setBrandTone] = useState("");
-  const [brandLanguage, setBrandLanguage] = useState(DEFAULT_CAMPAIGN_LANGUAGE);
+  const [brandLanguage, setBrandLanguage] = useState<string>(DEFAULT_CAMPAIGN_LANGUAGE);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [url, setUrl] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [canonicalUrl, setCanonicalUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const visibleGroups = useMemo(
-    () => (sourceFilter === ALL_SOURCES ? library : library.filter((g) => g.source.id === sourceFilter)),
+    () =>
+      sourceFilter === ALL_SOURCES ? library : library.filter((g) => g.source.id === sourceFilter),
     [library, sourceFilter],
   );
   const posts = useMemo(() => visibleGroups.flatMap((group) => group.items), [visibleGroups]);
-  const feedErrors = useMemo(
-    () => visibleGroups.filter((group) => group.error),
-    [visibleGroups],
-  );
+  const feedErrors = useMemo(() => visibleGroups.filter((group) => group.error), [visibleGroups]);
 
   const brand = () => ({
     brandName: brandName.trim() || undefined,
@@ -121,7 +122,7 @@ export function CampaignComposer({
       mode: "paste",
       title: title.trim() || undefined,
       body,
-      url: url.trim() || null,
+      url: canonicalUrl.trim() || null,
       ...brand(),
     });
     setBody("");
@@ -140,7 +141,7 @@ export function CampaignComposer({
     }
     await onSubmit({
       mode: "upload",
-      url: url.trim() || null,
+      url: canonicalUrl.trim() || null,
       file: { kind, filename: file.name, base64: await toBase64(file) },
       ...brand(),
     });
@@ -162,15 +163,43 @@ export function CampaignComposer({
     setCampaignName("");
   }
 
+  async function submitUrl() {
+    const trimmed = sourceUrl.trim();
+    if (!trimmed) {
+      toast.error("Enter the URL of a published blog post.");
+      return;
+    }
+    try {
+      new URL(trimmed);
+    } catch {
+      toast.error("Enter a valid http or https URL.");
+      return;
+    }
+    await onSubmit({
+      mode: "url",
+      url: trimmed,
+      campaignName: campaignName.trim() || undefined,
+      ...brand(),
+    });
+    setSourceUrl("");
+    setCampaignName("");
+  }
+
   return (
-    <section className="rounded-2xl border border-border bg-surface p-5">
-      <header className="mb-4">
-        <h2 className="font-display text-lg text-foreground">New campaign</h2>
-        <p className="text-sm text-muted-foreground">
-          Start from a published blog post — pick one from the live blog library, paste it, or
-          upload the document.
-        </p>
-      </header>
+    <section
+      className={
+        embedded ? "space-y-4" : "rounded-2xl border border-border bg-surface p-5"
+      }
+    >
+      {!embedded ? (
+        <header className="mb-4">
+          <h2 className="font-display text-lg text-foreground">New campaign</h2>
+          <p className="text-sm text-muted-foreground">
+            Start from a published blog post — pick one from the live blog library, paste it, or
+            upload the document.
+          </p>
+        </header>
+      ) : null}
 
       <BrandContextFields
         className="mb-5"
@@ -212,10 +241,19 @@ export function CampaignComposer({
       ) : null}
 
       <Tabs defaultValue="library">
-        <TabsList className="mb-4">
-          <TabsTrigger value="library">Blog library</TabsTrigger>
-          <TabsTrigger value="paste">Write / paste</TabsTrigger>
-          <TabsTrigger value="upload">Upload document</TabsTrigger>
+        <TabsList className="mb-4 flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/50 p-1">
+          <TabsTrigger value="library" className="text-xs sm:text-sm">
+            Blog library
+          </TabsTrigger>
+          <TabsTrigger value="url" className="text-xs sm:text-sm">
+            From URL
+          </TabsTrigger>
+          <TabsTrigger value="paste" className="text-xs sm:text-sm">
+            Write / paste
+          </TabsTrigger>
+          <TabsTrigger value="upload" className="text-xs sm:text-sm">
+            Upload document
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="library" className="space-y-4">
@@ -297,6 +335,36 @@ export function CampaignComposer({
           </Button>
         </TabsContent>
 
+        <TabsContent value="url" className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2 min-w-0 sm:col-span-2">
+              <Label htmlFor="url-source">Blog post URL</Label>
+              <Input
+                id="url-source"
+                type="url"
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                placeholder="https://blog.example.com/your-post"
+              />
+              <p className="text-xs text-muted-foreground">
+                We fetch the page, extract the article text, and generate platform variants from it.
+              </p>
+            </div>
+            <div className="space-y-2 min-w-0 sm:col-span-2">
+              <Label htmlFor="url-campaign-name">Campaign name (optional)</Label>
+              <Input
+                id="url-campaign-name"
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value)}
+                placeholder="Falls back to the article title"
+              />
+            </div>
+          </div>
+          <Button onClick={submitUrl} disabled={busy} className="w-full sm:w-auto">
+            {busy ? "Fetching & generating…" : "Generate campaign"}
+          </Button>
+        </TabsContent>
+
         <TabsContent value="paste" className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="composer-title">Title (optional)</Label>
@@ -318,7 +386,7 @@ export function CampaignComposer({
               className="font-mono text-xs leading-relaxed"
             />
           </div>
-          <UrlField url={url} setUrl={setUrl} />
+          <UrlField url={canonicalUrl} setUrl={setCanonicalUrl} />
           <Button onClick={submitPaste} disabled={busy} className="w-full sm:w-auto">
             {busy ? "Generating…" : "Generate campaign"}
           </Button>
@@ -338,7 +406,7 @@ export function CampaignComposer({
               Text is extracted on the server; the title falls back to the first heading.
             </p>
           </div>
-          <UrlField url={url} setUrl={setUrl} />
+          <UrlField url={canonicalUrl} setUrl={setCanonicalUrl} />
           <Button onClick={submitUpload} disabled={busy} className="w-full sm:w-auto">
             {busy ? "Parsing…" : "Generate campaign"}
           </Button>

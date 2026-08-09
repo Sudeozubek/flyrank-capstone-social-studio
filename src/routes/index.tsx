@@ -40,17 +40,13 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-function LandingPage({
-  dark,
-  onThemeToggle,
-}: {
-  dark: boolean;
-  onThemeToggle: () => void;
-}) {
+function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: () => void }) {
   const { t } = useLandingI18n();
 
   return (
-    <div className={`landing-page min-h-screen overflow-hidden bg-background ${dark ? "landing-dark" : ""}`}>
+    <div
+      className={`landing-page min-h-screen overflow-hidden bg-background ${dark ? "landing-dark" : ""}`}
+    >
       <LandingHeader dark={dark} onThemeToggle={onThemeToggle} />
       <main>
         <section className="landing-sky relative">
@@ -122,8 +118,8 @@ function LandingPage({
           </div>
         </section>
 
-        <section className="border-y border-border/70 bg-surface/60">
-          <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-y divide-border/70 px-6 sm:grid-cols-4 sm:divide-y-0">
+        <section className="landing-section landing-stats-band border-y border-border/70 bg-surface/60">
+          <div className="landing-stats-grid mx-auto grid max-w-6xl grid-cols-2 divide-x divide-y divide-border/70 px-6 sm:grid-cols-4 sm:divide-y-0">
             {t.stats.map((stat, index) => (
               <ScrollReveal
                 key={stat.value}
@@ -131,14 +127,16 @@ function LandingPage({
                 delay={index * 90}
                 className="px-4 py-7 text-center sm:px-6"
               >
-                <p className="font-display text-xl text-foreground sm:text-2xl">{stat.value}</p>
+                <p className="landing-stats-value font-display text-xl text-foreground sm:text-2xl">
+                  {stat.value}
+                </p>
                 <p className="mt-1 text-xs text-muted-foreground">{stat.label}</p>
               </ScrollReveal>
             ))}
           </div>
         </section>
 
-        <section className="border-b border-border/70">
+        <section className="landing-section landing-section-benefits border-b border-border/70">
           <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-16 lg:py-24">
             <ScrollReveal>
               <p className="eyebrow">{t.benefits.eyebrow}</p>
@@ -151,12 +149,10 @@ function LandingPage({
             </ScrollReveal>
             <div className="grid gap-3">
               {t.benefits.items.map((benefit, index) => {
-                const Icon = BENEFIT_ICONS[index];
+                const Icon = BENEFIT_ICONS[index]!;
                 return (
                   <ScrollReveal key={benefit.title} delay={index * 120}>
-                    <article
-                      className="group flex gap-4 rounded-2xl border border-border bg-surface/60 p-5 transition-[border-color,transform] duration-300 hover:translate-x-1 hover:border-primary/25"
-                    >
+                    <article className="group flex gap-4 rounded-2xl border border-border bg-surface/60 p-5 transition-[border-color,transform] duration-300 hover:translate-x-1 hover:border-primary/25">
                       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
                         <Icon className="size-5" />
                       </span>
@@ -174,7 +170,7 @@ function LandingPage({
           </div>
         </section>
 
-        <section id="how-it-works" className="scroll-mt-20">
+        <section id="how-it-works" className="landing-section landing-section-workflow scroll-mt-20">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
             <ScrollReveal className="mx-auto max-w-2xl text-center">
               <p className="eyebrow">{t.workflow.eyebrow}</p>
@@ -187,7 +183,7 @@ function LandingPage({
             </ScrollReveal>
             <ol className="mt-14 grid gap-5 sm:grid-cols-3">
               {t.workflow.steps.map((item, index) => {
-                const Icon = STEP_ICONS[index];
+                const Icon = STEP_ICONS[index]!;
                 return (
                   <ScrollReveal
                     key={item.step}
@@ -199,10 +195,14 @@ function LandingPage({
                       <span className="flex size-11 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
                         <Icon className="size-5" />
                       </span>
-                      <span className="font-mono text-xs text-muted-foreground/70">{item.step}</span>
+                      <span className="font-mono text-xs text-muted-foreground/70">
+                        {item.step}
+                      </span>
                     </div>
                     <h3 className="mt-5 font-display text-xl text-foreground">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {item.body}
+                    </p>
                   </ScrollReveal>
                 );
               })}
@@ -210,7 +210,10 @@ function LandingPage({
           </div>
         </section>
 
-        <section id="features" className="scroll-mt-20 border-y border-border bg-surface/40">
+        <section
+          id="features"
+          className="landing-section landing-section-features scroll-mt-20 border-y border-border bg-surface/40"
+        >
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
             <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
               <ScrollReveal className="lg:sticky lg:top-28 lg:self-start">
@@ -228,16 +231,16 @@ function LandingPage({
               </ScrollReveal>
               <div className="grid gap-4 sm:grid-cols-2">
                 {t.features.items.map((feature, index) => {
-                  const Icon = FEATURE_ICONS[index];
+                  const Icon = FEATURE_ICONS[index]!;
                   return (
                     <ScrollReveal key={feature.title} delay={index * 100}>
-                      <article
-                        className="group rounded-2xl border border-border bg-background/50 p-6 transition-colors hover:border-primary/30"
-                      >
+                      <article className="group rounded-2xl border border-border bg-background/50 p-6 transition-colors hover:border-primary/30">
                         <div className="flex size-10 items-center justify-center rounded-xl border border-border bg-surface text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:text-primary">
                           <Icon className="size-5" />
                         </div>
-                        <h3 className="mt-4 font-display text-xl text-foreground">{feature.title}</h3>
+                        <h3 className="mt-4 font-display text-xl text-foreground">
+                          {feature.title}
+                        </h3>
                         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                           {feature.body}
                         </p>
@@ -253,7 +256,7 @@ function LandingPage({
           </div>
         </section>
 
-        <section>
+        <section className="landing-section landing-section-cta">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
             <ScrollReveal>
               <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-surface px-6 py-12 text-center shadow-2xl shadow-black/10 sm:px-12 sm:py-16">

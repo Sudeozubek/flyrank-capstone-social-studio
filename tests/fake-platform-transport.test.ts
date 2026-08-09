@@ -36,9 +36,8 @@ describe("createFakePlatformTransport", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { createFakePlatformTransport } = await import(
-      "@/infrastructure/publishing/fake-platform-transport.server"
-    );
+    const { createFakePlatformTransport } =
+      await import("@/infrastructure/publishing/fake-platform-transport.server");
     const transport = createFakePlatformTransport("http://localhost:8080");
     const response = await transport.post("x", { text: "hello" }, { authorization: "Bearer t" });
 

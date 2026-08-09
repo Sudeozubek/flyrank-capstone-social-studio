@@ -10,14 +10,23 @@
 import { zodToJsonSchema } from "zod-to-json-schema";
 import campaignStatusTool from "./tools/campaign-status";
 import createCampaignTool from "./tools/create-campaign";
+import createPostTool from "./tools/create-post";
 import getCampaignTool from "./tools/get-campaign";
 import listCampaignsTool from "./tools/list-campaigns";
+import listPostsTool from "./tools/list-posts";
 import publishCampaignTool from "./tools/publish-campaign";
 import retryCampaignTool from "./tools/retry-campaign";
 import scheduleCampaignTool from "./tools/schedule-campaign";
 import type { McpCallerContext, McpTool } from "./types";
 
 export const MCP_PROTOCOL_VERSION = "2025-06-18";
+
+/** Newest first. A client asking for one of these gets it back verbatim. */
+export const SUPPORTED_PROTOCOL_VERSIONS = [
+  MCP_PROTOCOL_VERSION,
+  "2025-03-26",
+  "2024-11-05",
+] as const;
 
 export const serverInfo = {
   name: "campaignhub-studio",
@@ -26,9 +35,11 @@ export const serverInfo = {
 } as const;
 
 export const instructions =
-  "Remote control for CampaignHub Studio. Campaigns turn a blog post into platform-native captions and image variants, then publish through a durable, idempotent pipeline. Use `list_campaigns` to browse, `get_campaign` for full detail, `create_campaign` with an existing postId to build a new one, `schedule_campaign` / `publish_campaign` to deliver, `retry_campaign` after a failure, and `campaign_status` to poll delivery. All tools act as the signed-in user and only see that user's data.";
+  "Remote control for CampaignHub Studio. Campaigns turn a blog post into platform-native captions and image variants, then publish through a durable, idempotent pipeline. Start with `list_posts` (or `create_post` to add one) to get a postId, then `create_campaign`. Use `list_campaigns` to browse, `get_campaign` for full detail, `schedule_campaign` / `publish_campaign` to deliver, `retry_campaign` after a failure, and `campaign_status` to poll delivery. All tools act as the signed-in user and only see that user's data.";
 
 export const tools: McpTool[] = [
+  listPostsTool,
+  createPostTool,
   createCampaignTool,
   listCampaignsTool,
   getCampaignTool,
@@ -86,13 +97,17 @@ export async function handleRpc(
   if (method.startsWith("notifications/")) return null;
 
   switch (method) {
-    case "initialize":
+    case "initialize": {
+      // Answer in the client's dialect when we speak it, ours otherwise.
+      const requested = message.params?.["protocolVersion"];
+      const negotiated = SUPPORTED_PROTOCOL_VERSIONS.find((v) => v === requested);
       return ok(id, {
-        protocolVersion: MCP_PROTOCOL_VERSION,
+        protocolVersion: negotiated ?? MCP_PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
         serverInfo,
         instructions,
       });
+    }
 
     case "ping":
       return ok(id, {});
@@ -101,11 +116,11 @@ export async function handleRpc(
       return ok(id, { tools: toolDescriptors() });
 
     case "tools/call": {
-      const name = String(message.params?.['name'] ?? "");
+      const name = String(message.params?.["name"] ?? "");
       const tool = toolsByName.get(name);
       if (!tool) return fail(id, -32602, `Unknown tool: ${name}`);
 
-      const parsed = tool.schema.safeParse(message.params?.['arguments'] ?? {});
+      const parsed = tool.schema.safeParse(message.params?.["arguments"] ?? {});
       if (!parsed.success) {
         return ok(id, {
           content: [{ type: "text", text: `Invalid arguments: ${parsed.error.message}` }],
@@ -117,9 +132,7 @@ export async function handleRpc(
         return ok(id, await tool.handler(parsed.data, caller));
       } catch (error) {
         return ok(id, {
-          content: [
-            { type: "text", text: error instanceof Error ? error.message : String(error) },
-          ],
+          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
           isError: true,
         });
       }

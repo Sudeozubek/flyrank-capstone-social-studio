@@ -26,3 +26,8 @@ here with the exact filename.
 | `v2-18-landing-ai-studio-preview-and-stats.png` | `HeroVisual` AI Studio preview + stats row (3 platforms, tones, languages, workflow) |
 | `v2-19-auth-split-panel-fanned-cards.png` | Auth 50/50: centered left panel with fanned Instagram / X / LinkedIn cards; email/password form on the right |
 | `v2-20-locale-toggle-en-tr.png` | EN/TR locale toggle + theme icon (navbar or auth header) |
+| `v3-21-dashboard-campaigns-start.png` | Dashboard **Campaigns** tab: onboarding hero, 3-step workflow, library hint banner, sidebar with profile + EN/TR toggle |
+| `v3-22-dashboard-campaign-library.png` | Dashboard **Library** tab: campaign search/filter, draft campaign with inline publish/schedule controls, Instagram/X/LinkedIn variant cards |
+| `v3-23-dashboard-activity.png` | Dashboard **Activity** tab: AI budget stats, AI spend panel with recent OpenAI calls, delivery log |
+| `v3-24-new-campaign-composer-modal.png` | **New campaign** modal: brand context, blog library source picker, company filter |
+| `v3-25-profile-account-sheet.png` | **Profile** sheet (Account tab): change email, change password, forgot password |

@@ -1,8 +1,15 @@
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 /** Persisted light/dark toggle. Dark is the product's default surface. */
-export function ThemeToggle() {
+export function ThemeToggle({
+  lightLabel = "Switch to light mode",
+  darkLabel = "Switch to dark mode",
+}: {
+  lightLabel?: string;
+  darkLabel?: string;
+} = {}) {
   const [light, setLight] = useState(false);
 
   useEffect(() => {
@@ -22,8 +29,14 @@ export function ThemeToggle() {
   }
 
   return (
-    <Button variant="ghost" size="sm" onClick={toggle} aria-label="Toggle color theme">
-      {light ? "Dark" : "Light"}
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-8 rounded-lg text-muted-foreground"
+      onClick={toggle}
+      aria-label={light ? darkLabel : lightLabel}
+    >
+      {light ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}
     </Button>
   );
 }

@@ -15,7 +15,8 @@ import {
 } from "@/infrastructure/persistence/supabase-repositories.server";
 
 function persistenceUnavailable(error: unknown): boolean {
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  const message =
+    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   return (
     message.includes("ai_usage_records") ||
     message.includes("could not find the table") ||
@@ -109,7 +110,9 @@ export function createDbAiCostMeter(db: Db, userId: string): AiCostMeter {
         };
       } catch (error) {
         if (!persistenceUnavailable(error)) throw error;
-        console.warn("[ai-cost] returning empty spend snapshot because persistence is unavailable.");
+        console.warn(
+          "[ai-cost] returning empty spend snapshot because persistence is unavailable.",
+        );
         return emptyAiSpendSnapshot();
       }
     },

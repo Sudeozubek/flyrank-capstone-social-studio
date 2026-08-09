@@ -22,8 +22,7 @@ export const landingEn: LandingMessages = {
     badge: "AI-powered social campaign studio",
     title: "Your best content,",
     titleAccent: "ready for every platform.",
-    body:
-      "Transform one article into polished, platform-native campaigns. CampaignHub writes, designs, schedules and reliably delivers every post from one focused workspace.",
+    body: "Transform one article into polished, platform-native campaigns. CampaignHub writes, designs, schedules and reliably delivers every post from one focused workspace.",
     ctaPrimary: "Create your first campaign",
     ctaSecondary: "See how it works",
     trustItems: ["No duplicate posts", "Budget-aware AI", "Signed delivery"],
@@ -37,18 +36,15 @@ export const landingEn: LandingMessages = {
   benefits: {
     eyebrow: "Create once, adapt intelligently",
     title: "Stop rebuilding the same campaign three times.",
-    body:
-      "CampaignHub removes repetitive rewriting and resizing while keeping the parts that make your company sound like itself.",
+    body: "CampaignHub removes repetitive rewriting and resizing while keeping the parts that make your company sound like itself.",
     items: [
       {
         title: "Move from article to campaign faster",
-        body:
-          "Generate platform-ready copy and visuals together instead of briefing, rewriting and resizing each post manually.",
+        body: "Generate platform-ready copy and visuals together instead of briefing, rewriting and resizing each post manually.",
       },
       {
         title: "Keep every post true to your brand",
-        body:
-          "Apply your company name and choose from 10 distinct tones, from professional and authoritative to friendly or playful.",
+        body: "Apply your company name and choose from 10 distinct tones, from professional and authoritative to friendly or playful.",
       },
       {
         title: "Speak to audiences in their language",
@@ -81,32 +77,27 @@ export const landingEn: LandingMessages = {
   features: {
     eyebrow: "Built for real delivery",
     title: "Creative tools up front. Production discipline underneath.",
-    body:
-      "CampaignHub makes complex publishing infrastructure feel calm and understandable, without hiding what is happening to your campaign.",
+    body: "CampaignHub makes complex publishing infrastructure feel calm and understandable, without hiding what is happening to your campaign.",
     deliveryNote: "Every terminal status is confirmed by a signed callback.",
     items: [
       {
         title: "Platform-native assets",
-        body:
-          "One post becomes Instagram, X and LinkedIn variants — each with its own voice, length and visual format.",
+        body: "One post becomes Instagram, X and LinkedIn variants — each with its own voice, length and visual format.",
         detail: "1080×1080 · 1600×900 · 1200×627",
       },
       {
         title: "Idempotent publishing",
-        body:
-          "Every attempt carries a deterministic key, so retries and crashes never create a duplicate remote post.",
+        body: "Every attempt carries a deterministic key, so retries and crashes never create a duplicate remote post.",
         detail: "Safe retries · no duplicates",
       },
       {
         title: "Durable scheduling",
-        body:
-          "Scheduled work survives interrupted workers and resumes safely without losing its place in the queue.",
+        body: "Scheduled work survives interrupted workers and resumes safely without losing its place in the queue.",
         detail: "Lease-based recovery",
       },
       {
         title: "Verified delivery",
-        body:
-          "Signed callbacks confirm what was delivered, while every attempt remains visible in a complete audit trail.",
+        body: "Signed callbacks confirm what was delivered, while every attempt remains visible in a complete audit trail.",
         detail: "HMAC-verified callbacks",
       },
     ],
@@ -114,8 +105,7 @@ export const landingEn: LandingMessages = {
   cta: {
     eyebrow: "Your next campaign",
     title: "Give your best content the reach it deserves.",
-    body:
-      "Import an article and create a complete, platform-ready campaign from one focused workspace.",
+    body: "Import an article and create a complete, platform-ready campaign from one focused workspace.",
     primary: "Create your workspace",
     secondary: "Sign in",
   },

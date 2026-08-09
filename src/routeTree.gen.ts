@@ -17,6 +17,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as OauthConsentRouteImport } from './routes/oauth.consent'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicWebhooksDeliveryRouteImport } from './routes/api/public/webhooks/delivery'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRouteImport } from './routes/[.well-known]/oauth-protected-resource.api.public.mcp'
 import { Route as ApiPublicFakePlatformPlatformPostsRouteImport } from './routes/api/public/fake-platform/$platform/posts'
 
 const IndexRoute = IndexRouteImport.update({
@@ -60,6 +61,12 @@ const ApiPublicWebhooksDeliveryRoute =
     path: '/api/public/webhooks/delivery',
     getParentRoute: () => rootRouteImport,
   } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRouteImport.update({
+    id: '/api/public/mcp',
+    path: '/api/public/mcp',
+    getParentRoute: () => Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  } as any)
 const ApiPublicFakePlatformPlatformPostsRoute =
   ApiPublicFakePlatformPlatformPostsRouteImport.update({
     id: '/api/public/fake-platform/$platform/posts',
@@ -70,21 +77,23 @@ const ApiPublicFakePlatformPlatformPostsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
+  '/.well-known/oauth-protected-resource/api/public/mcp': typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
+  '/.well-known/oauth-protected-resource/api/public/mcp': typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesById {
@@ -92,11 +101,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
+  '/.well-known/oauth-protected-resource/api/public/mcp': typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRouteTypes {
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/oauth/consent'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
+    | '/.well-known/oauth-protected-resource/api/public/mcp'
     | '/api/public/fake-platform/$platform/posts'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/oauth/consent'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
+    | '/.well-known/oauth-protected-resource/api/public/mcp'
     | '/api/public/fake-platform/$platform/posts'
   id:
     | '__root__'
@@ -130,6 +142,7 @@ export interface FileRouteTypes {
     | '/oauth/consent'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
+    | '/.well-known/oauth-protected-resource/api/public/mcp'
     | '/api/public/fake-platform/$platform/posts'
   fileRoutesById: FileRoutesById
 }
@@ -137,7 +150,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   OauthConsentRoute: typeof OauthConsentRoute
   ApiPublicMcpRoute: typeof ApiPublicMcpRoute
   ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
@@ -202,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksDeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource/api/public/mcp': {
+      id: '/.well-known/oauth-protected-resource/api/public/mcp'
+      path: '/api/public/mcp'
+      fullPath: '/.well-known/oauth-protected-resource/api/public/mcp'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRouteImport
+      parentRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+    }
     '/api/public/fake-platform/$platform/posts': {
       id: '/api/public/fake-platform/$platform/posts'
       path: '/api/public/fake-platform/$platform/posts'
@@ -223,12 +243,27 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface Char91DotwellKnownChar93OauthProtectedResourceRouteChildren {
+  Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute
+}
+
+const Char91DotwellKnownChar93OauthProtectedResourceRouteChildren: Char91DotwellKnownChar93OauthProtectedResourceRouteChildren =
+  {
+    Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute:
+      Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute,
+  }
+
+const Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren =
+  Char91DotwellKnownChar93OauthProtectedResourceRoute._addFileChildren(
+    Char91DotwellKnownChar93OauthProtectedResourceRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
-    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+    Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren,
   OauthConsentRoute: OauthConsentRoute,
   ApiPublicMcpRoute: ApiPublicMcpRoute,
   ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,

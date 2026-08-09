@@ -35,8 +35,16 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Check it out:", "Give it a read:", "See for yourself:"],
-      instagram: ["Tap through when you have a minute", "Worth a scroll — full post linked", "Read the whole story"],
-      linkedin: ["Read when you have a moment", "Full article linked below", "Worth your time — see the post"],
+      instagram: [
+        "Tap through when you have a minute",
+        "Worth a scroll — full post linked",
+        "Read the whole story",
+      ],
+      linkedin: [
+        "Read when you have a moment",
+        "Full article linked below",
+        "Worth your time — see the post",
+      ],
     },
     signOff: "— your friends at {brand}",
   },
@@ -57,7 +65,11 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Read the full article:", "Full analysis:", "Details:"],
-      instagram: ["Read the complete article", "Full write-up available now", "Explore the full post"],
+      instagram: [
+        "Read the complete article",
+        "Full write-up available now",
+        "Explore the full post",
+      ],
       linkedin: ["Read the full article", "Continue reading", "Explore the analysis"],
     },
     signOff: "— the {brand} team",
@@ -79,7 +91,11 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Link:", "Peek:", "Here:"],
-      instagram: ["Link in bio if you want the long version", "Full post is one tap away", "Go read it when you're free"],
+      instagram: [
+        "Link in bio if you want the long version",
+        "Full post is one tap away",
+        "Go read it when you're free",
+      ],
       linkedin: ["Link below if you're curious", "Full post here", "Take a look when you can"],
     },
     signOff: "— {brand}",
@@ -101,8 +117,16 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Don't miss it:", "Jump in:", "Read now:"],
-      instagram: ["You're going to love this one — tap through!", "Don't skip this read!", "Full post waiting for you"],
-      linkedin: ["Don't miss this one — read on", "Full post linked below", "Dive into the details"],
+      instagram: [
+        "You're going to love this one — tap through!",
+        "Don't skip this read!",
+        "Full post waiting for you",
+      ],
+      linkedin: [
+        "Don't miss this one — read on",
+        "Full post linked below",
+        "Dive into the details",
+      ],
     },
     signOff: "— the excited {brand} crew",
   },
@@ -123,7 +147,11 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Read the guide:", "Full breakdown:", "Evidence:"],
-      instagram: ["Read the definitive breakdown", "Full guide — essential reading", "Study the complete analysis"],
+      instagram: [
+        "Read the definitive breakdown",
+        "Full guide — essential reading",
+        "Study the complete analysis",
+      ],
       linkedin: ["Read the full guide", "See the complete breakdown", "Review the evidence"],
     },
     signOff: "— {brand} experts",
@@ -145,7 +173,11 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Treat yourself:", "Go on:", "Worth the click:"],
-      instagram: ["Treat your brain — tap through", "Your scroll just got better", "Read it, thank us later"],
+      instagram: [
+        "Treat your brain — tap through",
+        "Your scroll just got better",
+        "Read it, thank us later",
+      ],
       linkedin: ["Worth a click — promise", "Full story below", "Go on, read it"],
     },
     signOff: "— {brand} (yes, we write too)",
@@ -167,8 +199,16 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Hope this helps:", "For you:", "Read if it resonates:"],
-      instagram: ["If this hits home, read on", "Written with you in mind", "Full post — we hope it helps"],
-      linkedin: ["Hope this helps — read on", "Full post if it resonates", "Written with you in mind"],
+      instagram: [
+        "If this hits home, read on",
+        "Written with you in mind",
+        "Full post — we hope it helps",
+      ],
+      linkedin: [
+        "Hope this helps — read on",
+        "Full post if it resonates",
+        "Written with you in mind",
+      ],
     },
     signOff: "— with care, {brand}",
   },
@@ -189,7 +229,11 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Start here:", "Level up:", "Take the first step:"],
-      instagram: ["Let this inspire your next move", "Read it — then build something", "Fuel for your next project"],
+      instagram: [
+        "Let this inspire your next move",
+        "Read it — then build something",
+        "Fuel for your next project",
+      ],
       linkedin: ["Read it — then take action", "Full article below", "Fuel for your next move"],
     },
     signOff: "— onward, {brand}",
@@ -198,17 +242,8 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     id: "minimal",
     label: "Minimal",
     description: "Direct and concise — every word earns its place.",
-    hooks: [
-      "New post.",
-      "Published.",
-      "Blog update.",
-      "Read this.",
-    ],
-    valueProps: [
-      "Short. Useful. Done.",
-      "Only what matters.",
-      "No padding.",
-    ],
+    hooks: ["New post.", "Published.", "Blog update.", "Read this."],
+    valueProps: ["Short. Useful. Done.", "Only what matters.", "No padding."],
     ctas: {
       x: ["→", "Link:", "Read:"],
       instagram: ["Link in bio", "Full post linked", "Read more"],
@@ -233,7 +268,11 @@ export const BRAND_TONE_OPTIONS: readonly BrandToneOption[] = [
     ],
     ctas: {
       x: ["Read the story:", "How it ends:", "Full tale:"],
-      instagram: ["See how the story unfolds", "Read the full narrative", "The ending is worth it — tap through"],
+      instagram: [
+        "See how the story unfolds",
+        "Read the full narrative",
+        "The ending is worth it — tap through",
+      ],
       linkedin: ["Read how it unfolds", "Full narrative below", "See the ending"],
     },
     signOff: "— {brand}, still writing chapters",

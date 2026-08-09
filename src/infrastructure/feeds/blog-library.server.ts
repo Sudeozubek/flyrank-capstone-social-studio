@@ -122,9 +122,7 @@ function parseRss(xml: string, source: BlogSource): LibraryItem[] {
   return blocks
     .map((block) => {
       const link =
-        tag(block, "link") ||
-        /<link[^>]*href="([^"]+)"/i.exec(block)?.[1] ||
-        tag(block, "guid");
+        tag(block, "link") || /<link[^>]*href="([^"]+)"/i.exec(block)?.[1] || tag(block, "guid");
       const summaryHtml = tag(block, "description") || tag(block, "summary") || "";
       const published = tag(block, "pubDate") || tag(block, "updated") || tag(block, "published");
       return {
@@ -180,7 +178,9 @@ async function fetchMeta(url: string): Promise<Partial<LibraryItem>> {
     const html = await get(url);
     const image = meta(html, "og:image") ?? meta(html, "twitter:image");
     const description =
-      meta(html, "og:description") ?? meta(html, "description") ?? meta(html, "twitter:description");
+      meta(html, "og:description") ??
+      meta(html, "description") ??
+      meta(html, "twitter:description");
     const title = meta(html, "og:title");
     const published =
       meta(html, "article:published_time") ?? meta(html, "publishdate") ?? meta(html, "date");
@@ -246,20 +246,18 @@ export async function listSourcePosts(sourceId: string, limit = 12): Promise<Lib
   if (cached && cached.expires > Date.now()) return cached.value.slice(0, limit);
 
   const raw = await get(source.feed);
-  const parsed = (source.kind === "rss" ? parseRss(raw, source) : parseAnthropicListing(raw, source)).slice(
-    0,
-    24,
-  );
+  const parsed = (
+    source.kind === "rss" ? parseRss(raw, source) : parseAnthropicListing(raw, source)
+  ).slice(0, 24);
   const items = await enrich(parsed.slice(0, 12));
   listCache.set(sourceId, { value: items, expires: Date.now() + LIST_TTL_MS });
   return items.slice(0, limit);
 }
 
-
 /** Every catalogued source, fetched in parallel; a failing source is skipped. */
-export async function listLibrary(perSource = 8): Promise<
-  { source: Omit<BlogSource, "feed" | "kind">; items: LibraryItem[]; error?: string }[]
-> {
+export async function listLibrary(
+  perSource = 8,
+): Promise<{ source: Omit<BlogSource, "feed" | "kind">; items: LibraryItem[]; error?: string }[]> {
   return Promise.all(
     BLOG_SOURCES.map(async ({ feed: _feed, kind: _kind, ...source }) => {
       try {
@@ -275,15 +273,35 @@ export async function listLibrary(perSource = 8): Promise<
   );
 }
 
-/** Fetches the full published article text for a catalogued URL. */
-export async function fetchArticle(url: string): Promise<{ title: string; body: string }> {
-  const allowed = BLOG_SOURCES.some((source) => url.startsWith(new URL(source.homepage).origin));
-  if (!allowed) throw new Error("URL is not part of the blog library catalogue");
+/** Validates that a URL is safe to fetch server-side (http/https, no private hosts). */
+export function assertPublicHttpUrl(raw: string): URL {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw.trim());
+  } catch {
+    throw new Error("Enter a valid http or https URL");
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error("Only http and https URLs are supported");
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    host.startsWith("10.") ||
+    host.startsWith("192.168.") ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+    host.endsWith(".local")
+  ) {
+    throw new Error("That URL cannot be fetched from the server");
+  }
+  return parsed;
+}
 
-  const cached = articleCache.get(url);
-  if (cached && cached.expires > Date.now()) return cached.value;
-
-  const html = await get(url);
+/** Extracts a title and plain-text body from an HTML document. */
+export function parseArticleFromHtml(html: string): { title: string; body: string } {
   const main =
     /<article[\s\S]*?<\/article>/i.exec(html)?.[0] ??
     /<main[\s\S]*?<\/main>/i.exec(html)?.[0] ??
@@ -293,9 +311,44 @@ export async function fetchArticle(url: string): Promise<{ title: string; body: 
     stripHtml(/<h1[^>]*>([\s\S]*?)<\/h1>/i.exec(html)?.[1] ?? "") ||
     decode(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? "Untitled post");
   const body = stripHtml(main);
+  return {
+    title: title.split("\n")[0]!.trim().slice(0, 200),
+    body: body.slice(0, 40_000),
+  };
+}
+
+/** Fetches article text from any public http(s) URL the user supplies. */
+export async function fetchPublicArticle(url: string): Promise<{ title: string; body: string }> {
+  const parsed = assertPublicHttpUrl(url);
+  const canonical = parsed.toString();
+
+  const cached = articleCache.get(canonical);
+  if (cached && cached.expires > Date.now()) return cached.value;
+
+  const html = await get(canonical);
+  const { title, body } = parseArticleFromHtml(html);
+  if (body.length < 200) {
+    throw new Error("Could not extract enough article text from this page");
+  }
+
+  const article = { title, body };
+  articleCache.set(canonical, { value: article, expires: Date.now() + ARTICLE_TTL_MS });
+  return article;
+}
+
+/** Fetches the full published article text for a catalogued URL. */
+export async function fetchArticle(url: string): Promise<{ title: string; body: string }> {
+  const allowed = BLOG_SOURCES.some((source) => url.startsWith(new URL(source.homepage).origin));
+  if (!allowed) throw new Error("URL is not part of the blog library catalogue");
+
+  const cached = articleCache.get(url);
+  if (cached && cached.expires > Date.now()) return cached.value;
+
+  const html = await get(url);
+  const { title, body } = parseArticleFromHtml(html);
   if (body.length < 200) throw new Error("Could not extract the article body from this post");
 
-  const article = { title: title.split("\\")[0]!.trim().slice(0, 200), body: body.slice(0, 40_000) };
+  const article = { title, body };
   articleCache.set(url, { value: article, expires: Date.now() + ARTICLE_TTL_MS });
   return article;
 }

@@ -46,7 +46,8 @@ export const authTr: AuthMessages = {
     signInTitle: "Tekrar hoş geldiniz",
     signUpTitle: "İlk kampanyanızı başlatın",
     signInSubtitle: "Kampanyalarınıza devam etmek için giriş yapın.",
-    signUpSubtitle: "Çalışma alanı oluşturun; bir sonraki makalenizi dakikalar içinde kampanyaya dönüştürün.",
+    signUpSubtitle:
+      "Çalışma alanı oluşturun; bir sonraki makalenizi dakikalar içinde kampanyaya dönüştürün.",
     email: "E-posta",
     password: "Şifre",
     signInSubmit: "Giriş yap",
