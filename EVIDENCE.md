@@ -264,7 +264,8 @@ token set in `src/styles.css`.
   `<REPO>src/components/landing/*`, `<REPO>src/components/auth/AuthPanelFan.tsx`,
   `<REPO>src/i18n/**`
 - Screenshots:
-  `docs/screenshots/v2-17-landing-hero-generation-visual.png`,
+  `docs/screenshots/v2-17-landing-hero-light.png`,
+  `docs/screenshots/v2-17-landing-hero-dark.png`,
   `docs/screenshots/v2-18-landing-ai-studio-preview-and-stats.png`,
   `docs/screenshots/v2-19-auth-split-panel-fanned-cards.png`,
   `docs/screenshots/v2-20-locale-toggle-en-tr.png`

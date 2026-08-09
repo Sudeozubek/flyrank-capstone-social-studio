@@ -16,19 +16,20 @@ signature-verified delivery webhooks and a crash-safe worker.
 ## Table of contents
 
 1. [Overview](#overview)
-2. [Architecture](#architecture)
-3. [Features](#features)
-4. [Technology stack](#technology-stack)
-5. [Installation](#installation)
-6. [Environment setup](#environment-setup)
-7. [Running locally](#running-locally)
-8. [API overview](#api-overview)
-9. [Project structure](#project-structure)
-10. [Testing](#testing)
-11. [Demo walkthrough](#demo-walkthrough)
-12. [Design decisions](#design-decisions)
-13. [Limitations](#limitations)
-14. [Future work](#future-work)
+2. [Screenshots](#screenshots)
+3. [Architecture](#architecture)
+4. [Features](#features)
+5. [Technology stack](#technology-stack)
+6. [Installation](#installation)
+7. [Environment setup](#environment-setup)
+8. [Running locally](#running-locally)
+9. [API overview](#api-overview)
+10. [Project structure](#project-structure)
+11. [Testing](#testing)
+12. [Demo walkthrough](#demo-walkthrough)
+13. [Design decisions](#design-decisions)
+14. [Limitations](#limitations)
+15. [Future work](#future-work)
 
 ---
 
@@ -51,6 +52,43 @@ brand-voice + platform-fragment prompts, calls an LLM (OpenAI `gpt-4o-mini`) as 
 step, then validates and normalises the result against each platform's constraints. If the
 model is unavailable it falls back silently to the deterministic composer, so campaign
 creation never fails because of the model.
+
+## Product Screenshots
+
+<details>
+<summary><strong>Product screenshots</strong> (click to expand)</summary>
+
+**1. Landing hero (light)**
+
+![Landing hero — light mode](docs/screenshots/v2-17-landing-hero-light.png)
+
+**2. Sign in**
+
+![Sign in — welcome back, email/password, EN/TR + theme toggle](docs/screenshots/v3-26-auth-sign-in.png)
+
+**3. Dashboard — Campaigns (start)**
+
+![Dashboard campaigns tab — onboarding and create flow](docs/screenshots/v3-21-dashboard-campaigns-start.png)
+
+**4. New campaign composer**
+
+![New campaign modal — brand context and blog library picker](docs/screenshots/v3-24-new-campaign-composer-modal.png)
+
+**5. Campaign library**
+
+![Campaign library — draft variants for Instagram, X, LinkedIn](docs/screenshots/v3-22-dashboard-campaign-library.png)
+
+**6. Activity**
+
+![Activity tab — AI spend, budget, delivery log](docs/screenshots/v3-23-dashboard-activity.png)
+
+**7. Profile (account)**
+
+![Profile sheet — change email, password, reset link](docs/screenshots/v3-25-profile-account-sheet.png)
+
+</details>
+
+Also see [`docs/screenshots/`](docs/screenshots/README.md) for dark-mode hero, locale toggle, reviewer evidence, and additional captures.
 
 ## Architecture
 
