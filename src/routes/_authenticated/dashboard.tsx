@@ -1,25 +1,26 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouteContext } from "@tanstack/react-router";
 import { DEFAULT_CAMPAIGN_LANGUAGE } from "@/config/campaign-languages.config";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CampaignComposer, type ComposerSubmit } from "@/components/campaign/CampaignComposer";
-import { CampaignEditDialog, type CampaignEdit } from "@/components/campaign/CampaignEditDialog";
-import { AiSpendBadge } from "@/components/campaign/AiSpendBadge";
-import { AiSpendPanel } from "@/components/campaign/AiSpendPanel";
-import { StatusChip } from "@/components/campaign/StatusChip";
-import { ThemeToggle } from "@/components/campaign/ThemeToggle";
-import { VariantGallery } from "@/components/campaign/VariantGallery";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
-import { PLATFORMS } from "@/domain/entities";
+import type { ComposerSubmit } from "@/components/campaign/CampaignComposer";
+import type { CampaignEdit } from "@/components/campaign/CampaignEditDialog";
+import { ActivityView } from "@/components/dashboard/ActivityView";
+import { CampaignComposerDialog } from "@/components/dashboard/CampaignComposerDialog";
+import { CampaignLibraryView } from "@/components/dashboard/CampaignLibraryView";
+import { CampaignReadyDialog } from "@/components/dashboard/CampaignReadyDialog";
+import { CampaignsStartView } from "@/components/dashboard/CampaignsStartView";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import type { DashboardView } from "@/components/dashboard/types";
+import { interpolate } from "@/i18n/dashboard/catalog";
+import { DashboardI18nProvider, useDashboardI18n } from "@/i18n/dashboard/context";
 import { PLATFORM_SPECS } from "@/config/platform-specs";
+import { supabase } from "@/integrations/supabase/client";
 import {
   createCampaignWithAssets,
   createCampaignFromLibrary,
+  createCampaignFromUrl,
   listBlogLibrary,
   createPostFromText,
   createPostFromUpload,
@@ -56,15 +57,29 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
+function Dashboard() {
+  return (
+    <DashboardI18nProvider>
+      <DashboardPage />
+    </DashboardI18nProvider>
+  );
+}
+
 function localIsoInMinutes(minutes: number): string {
   const d = new Date(Date.now() + minutes * 60_000 - new Date().getTimezoneOffset() * 60_000);
   return d.toISOString().slice(0, 16);
 }
 
-function Dashboard() {
+function DashboardPage() {
   const navigate = useNavigate();
+  const { user } = useRouteContext({ from: "/_authenticated" });
+  const { t } = useDashboardI18n();
   const queryClient = useQueryClient();
   const load = useServerFn(loadDashboard);
+  const [view, setView] = useState<DashboardView>("campaigns");
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [expandedCampaignId, setExpandedCampaignId] = useState<string | null>(null);
+  const [readyCampaign, setReadyCampaign] = useState<{ id: string; name: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [scheduleAt, setScheduleAt] = useState(localIsoInMinutes(2));
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -81,6 +96,7 @@ function Dashboard() {
   const fns = {
     createText: useServerFn(createPostFromText),
     fromLibrary: useServerFn(createCampaignFromLibrary),
+    fromUrl: useServerFn(createCampaignFromUrl),
     createUpload: useServerFn(createPostFromUpload),
     createCampaign: useServerFn(createCampaignWithAssets),
     captions: useServerFn(regenerateCaptions),
@@ -111,7 +127,7 @@ function Dashboard() {
       toast.success(label);
       return result;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : label + " failed");
+      toast.error(error instanceof Error ? error.message : interpolate(t.toasts.actionFailed, { action: label }));
       return undefined;
     } finally {
       setBusy(false);
@@ -122,6 +138,17 @@ function Dashboard() {
     mutationFn: async (input: ComposerSubmit) => {
       if (input.mode === "library") {
         return fns.fromLibrary({
+          data: {
+            url: input.url!,
+            ...(input.campaignName ? { name: input.campaignName } : {}),
+            brandName: input.brandName?.trim() || null,
+            brandTone: input.brandTone?.trim() || null,
+            brandLanguage: input.brandLanguage || DEFAULT_CAMPAIGN_LANGUAGE,
+          },
+        });
+      }
+      if (input.mode === "url") {
+        return fns.fromUrl({
           data: {
             url: input.url!,
             ...(input.campaignName ? { name: input.campaignName } : {}),
@@ -159,26 +186,25 @@ function Dashboard() {
     },
     onSuccess: async () => {
       await refresh();
-      toast.success("Campaign generated with captions and image variants");
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : "Could not create the campaign"),
+      toast.error(error instanceof Error ? error.message : t.toasts.createFailed),
   });
 
-  /** Soft-delete with a 10s undo window: hide locally, commit when the toast expires. */
   function requestDelete(campaignId: string, name: string) {
     const timer = setTimeout(() => {
       setPendingDelete(({ [campaignId]: _removed, ...rest }) => rest);
-      void run("Campaign deleted", () => fns.remove({ data: { campaignId } }));
+      void run(t.toasts.campaignDeleted, () => fns.remove({ data: { campaignId } }));
+      if (expandedCampaignId === campaignId) setExpandedCampaignId(null);
     }, 10_000);
 
     setPendingDelete((current) => ({ ...current, [campaignId]: timer }));
 
-    toast(`"${name}" deleted`, {
-      description: "Removing in 10 seconds.",
+    toast(interpolate(t.toasts.deleteTitle, { name }), {
+      description: t.toasts.deleteDescription,
       duration: 10_000,
       action: {
-        label: "Undo",
+        label: t.toasts.undo,
         onClick: () => {
           clearTimeout(timer);
           setPendingDelete(({ [campaignId]: _removed, ...rest }) => rest);
@@ -188,7 +214,7 @@ function Dashboard() {
   }
 
   async function saveEdit(edit: CampaignEdit) {
-    const done = await run("Campaign updated", () =>
+    const done = await run(t.toasts.campaignUpdated, () =>
       fns.update({
         data: {
           campaignId: edit.campaignId,
@@ -214,264 +240,110 @@ function Dashboard() {
   const campaigns = allCampaigns.filter((c) => !pendingDelete[c.campaign.id]);
   const webhooks = dashboard.data?.webhooks ?? [];
   const aiSpend = dashboard.data?.aiSpend;
-  const totals = campaigns.reduce(
-    (acc, c) => {
-      for (const entry of c.entries) acc[entry.status] = (acc[entry.status] ?? 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex max-w-[88rem] items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-baseline gap-3">
-            <span className="font-display text-lg text-foreground">CampaignHub</span>
-            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              studio
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden font-mono text-[11px] text-muted-foreground lg:inline">
-              queued {totals["queued"] ?? 0} · publishing {totals["publishing"] ?? 0} · published{" "}
-              {totals["published"] ?? 0} · failed {totals["failed"] ?? 0}
-            </span>
-            {aiSpend ? <AiSpendBadge spend={aiSpend} /> : null}
-            <ThemeToggle />
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-[88rem] space-y-8 px-4 py-8 sm:px-6">
-        {/* Full width so the blog-library previews get a real three-up grid. */}
-        <CampaignComposer
-          library={library.data ?? []}
-          libraryLoading={library.isLoading}
-          busy={compose.isPending}
-          aiSpend={aiSpend ?? null}
-          onSubmit={async (input) => {
-            await compose.mutateAsync(input);
-          }}
+    <DashboardLayout
+      view={view}
+      onViewChange={setView}
+      aiSpend={aiSpend}
+      live={dashboard.isSuccess}
+      user={user}
+      onNewCampaign={() => setComposerOpen(true)}
+      onSignOut={signOut}
+    >
+      {view === "campaigns" ? (
+        <CampaignsStartView
+          campaignCount={campaigns.length}
+          onCreate={() => setComposerOpen(true)}
+          onOpenLibrary={() => setView("library")}
         />
+      ) : view === "library" ? (
+        <CampaignLibraryView
+          campaigns={campaigns}
+          expandedCampaignId={expandedCampaignId}
+          onExpandCampaign={setExpandedCampaignId}
+          scheduleAt={scheduleAt}
+          onScheduleAtChange={setScheduleAt}
+          busy={busy}
+          editingId={editingId}
+          onEditOpen={setEditingId}
+          onEditClose={() => setEditingId(null)}
+          onSaveEdit={saveEdit}
+          onPublish={(campaignId) =>
+            run(t.toasts.publishAttempted, () => fns.publish({ data: { campaignId } }))
+          }
+          onSchedule={(campaignId) =>
+            run(t.toasts.campaignScheduled, () =>
+              fns.schedule({
+                data: {
+                  campaignId,
+                  scheduledFor: new Date(scheduleAt).toISOString(),
+                },
+              }),
+            )
+          }
+          onRegenerateCaptions={(campaignId) =>
+            run(t.toasts.captionsRegenerated, () => fns.captions({ data: { campaignId } }))
+          }
+          onRegenerateImages={(campaignId) =>
+            run(t.toasts.imagesRegenerated, () => fns.images({ data: { campaignId } }))
+          }
+          onRetry={(campaignId) =>
+            run(t.toasts.retryQueued, () => fns.retry({ data: { campaignId } }))
+          }
+          onDelete={requestDelete}
+          onCreate={() => setComposerOpen(true)}
+          loading={dashboard.isLoading}
+        />
+      ) : (
+        <ActivityView
+          aiSpend={aiSpend}
+          webhooks={webhooks}
+          busy={busy}
+          scheduleAt={scheduleAt}
+          onScheduleAtChange={setScheduleAt}
+          onTick={() => run(t.toasts.workerTick, () => fns.tick({}))}
+          onRateLimit={(platform) =>
+            run(
+              interpolate(t.toasts.rateLimit, { platform: PLATFORM_SPECS[platform].label }),
+              () => fns.rateLimit({ data: { platform, failures: 2 } }),
+            )
+          }
+        />
+      )}
 
-        <div className="flex flex-col gap-8 xl:flex-row xl:items-start">
-          <aside className="w-full shrink-0 space-y-6 xl:w-[300px] xl:sticky xl:top-[4.25rem]">
-            {aiSpend ? <AiSpendPanel spend={aiSpend} /> : null}
+      <CampaignComposerDialog
+        open={composerOpen}
+        onOpenChange={setComposerOpen}
+        library={library.data ?? []}
+        libraryLoading={library.isLoading}
+        busy={compose.isPending}
+        aiSpend={aiSpend ?? null}
+        onSubmit={async (input) => {
+          const snapshot = await compose.mutateAsync(input);
+          setComposerOpen(false);
+          if (snapshot?.campaign?.id) {
+            setReadyCampaign({
+              id: snapshot.campaign.id,
+              name: snapshot.campaign.name,
+            });
+          }
+        }}
+      />
 
-            <section className="rounded-2xl border border-border bg-surface p-5">
-              <h2 className="font-display text-lg text-foreground">Operations</h2>
-              <p className="mb-4 text-sm text-muted-foreground">
-                Drive the durable worker and simulate platform rate limits.
-              </p>
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="schedule-at">Schedule time</Label>
-                  <Input
-                    id="schedule-at"
-                    type="datetime-local"
-                    value={scheduleAt}
-                    onChange={(e) => setScheduleAt(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => run("Worker tick complete", () => fns.tick({}))}
-                  >
-                    Run worker tick
-                  </Button>
-                  {PLATFORMS.map((platform) => (
-                    <Button
-                      key={platform}
-                      size="sm"
-                      variant="outline"
-                      disabled={busy}
-                      onClick={() =>
-                        run(
-                          `${PLATFORM_SPECS[platform].label} will rate-limit the next 2 attempts`,
-                          () => fns.rateLimit({ data: { platform, failures: 2 } }),
-                        )
-                      }
-                    >
-                      Force 429 on {PLATFORM_SPECS[platform].label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-border bg-surface p-5">
-              <h2 className="font-display text-lg text-foreground">Delivery webhooks</h2>
-              <p className="mb-3 text-sm text-muted-foreground">
-                Signature-verified callbacks — the only writer of terminal status.
-              </p>
-              <ul className="space-y-2">
-                {webhooks.length === 0 ? (
-                  <li className="text-xs text-muted-foreground">No webhook traffic yet.</li>
-                ) : null}
-                {webhooks.map((event) => (
-                  <li
-                    key={event.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 font-mono text-[11px]"
-                  >
-                    <span
-                      className={
-                        event.signatureValid ? "text-status-published" : "text-status-failed"
-                      }
-                    >
-                      {event.signatureValid ? "signed" : "rejected"} · {event.httpStatus}
-                    </span>
-                    <span className="truncate text-muted-foreground">{event.message ?? "—"}</span>
-                    <span className="text-muted-foreground">
-                      {new Date(event.receivedAt).toLocaleTimeString()}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </aside>
-
-          <section className="min-w-0 flex-1 space-y-6">
-            {campaigns.length === 0 ? (
-              <section className="rounded-2xl border border-dashed border-border p-12 text-center">
-                <h2 className="font-display text-xl text-foreground">No campaigns yet</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Paste a blog post or upload a document to generate your first set of
-                  platform-native variants.
-                </p>
-              </section>
-            ) : null}
-
-            {campaigns.map((snapshot) => (
-              <section
-                key={snapshot.campaign.id}
-                className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
-              >
-                <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
-                  <div className="min-w-0">
-                    <h2 className="truncate font-display text-base text-foreground">
-                      {snapshot.campaign.name}
-                    </h2>
-                    <p className="truncate font-mono text-[10px] text-muted-foreground">
-                      {snapshot.post.url ?? `source: ${snapshot.post.source}`} ·{" "}
-                      {new Date(snapshot.campaign.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                  <StatusChip status={snapshot.campaign.status} kind="campaign" />
-                </header>
-
-                <div className="flex flex-wrap gap-1 border-b border-border px-3 py-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() =>
-                      run("Captions regenerated", () =>
-                        fns.captions({ data: { campaignId: snapshot.campaign.id } }),
-                      )
-                    }
-                  >
-                    Regenerate captions
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() =>
-                      run("Image variants regenerated", () =>
-                        fns.images({ data: { campaignId: snapshot.campaign.id } }),
-                      )
-                    }
-                  >
-                    Regenerate images
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() =>
-                      run("Campaign scheduled", () =>
-                        fns.schedule({
-                          data: {
-                            campaignId: snapshot.campaign.id,
-                            scheduledFor: new Date(scheduleAt).toISOString(),
-                          },
-                        }),
-                      )
-                    }
-                  >
-                    Schedule
-                  </Button>
-                  <Button
-                    size="sm"
-                    disabled={busy}
-                    onClick={() =>
-                      run("Publish attempted", () =>
-                        fns.publish({ data: { campaignId: snapshot.campaign.id } }),
-                      )
-                    }
-                  >
-                    Publish now
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={busy}
-                    onClick={() =>
-                      run("Retry queued", () =>
-                        fns.retry({ data: { campaignId: snapshot.campaign.id } }),
-                      )
-                    }
-                  >
-                    Retry failed
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={busy}
-                    onClick={() => setEditingId(snapshot.campaign.id)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={busy}
-                    className="text-status-failed hover:text-status-failed"
-                    onClick={() => requestDelete(snapshot.campaign.id, snapshot.campaign.name)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-
-                <CampaignEditDialog
-                  snapshot={snapshot}
-                  open={editingId === snapshot.campaign.id}
-                  busy={busy}
-                  onOpenChange={(open) => setEditingId(open ? snapshot.campaign.id : null)}
-                  onSave={saveEdit}
-                />
-
-                <div className="border-t border-border bg-surface-raised/20 px-3 py-3">
-                  <VariantGallery entries={snapshot.entries} images={snapshot.images} />
-                </div>
-              </section>
-            ))}
-          </section>
-        </div>
-      </main>
-
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-[88rem] px-4 sm:px-6 py-6 font-mono text-[11px] text-muted-foreground">
-          © CampaignHub
-        </div>
-      </footer>
-    </div>
+      <CampaignReadyDialog
+        open={readyCampaign !== null}
+        campaignName={readyCampaign?.name ?? t.ready.fallbackName}
+        onOpenChange={(open) => {
+          if (!open) setReadyCampaign(null);
+        }}
+        onOpenCampaign={() => {
+          if (!readyCampaign) return;
+          setView("library");
+          setExpandedCampaignId(readyCampaign.id);
+          setReadyCampaign(null);
+        }}
+      />
+    </DashboardLayout>
   );
 }

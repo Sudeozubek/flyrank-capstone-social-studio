@@ -163,6 +163,215 @@ export type AuthMessages = {
   };
 };
 
+export type DashboardMessages = {
+  meta: {
+    title: string;
+    description: string;
+    ogTitle: string;
+    ogDescription: string;
+  };
+  chooseLanguage: string;
+  theme: {
+    switchToLight: string;
+    switchToDark: string;
+  };
+  layout: {
+    brandCampaign: string;
+    brandHub: string;
+    brandTitle: string;
+    brandShort: string;
+    campaigns: string;
+    library: string;
+    activity: string;
+    newCampaign: string;
+    new: string;
+    profile: string;
+    account: string;
+    signOut: string;
+    live: string;
+    openProfile: string;
+    expandSidebar: string;
+    collapseSidebar: string;
+    footerRights: string;
+    footerVersion: string;
+  };
+  campaigns: {
+    libraryHintOne: string;
+    libraryHintMany: string;
+    libraryHintBody: string;
+    goToLibrary: string;
+    badge: string;
+    title: string;
+    titleAccent: string;
+    body: string;
+    create: string;
+    step: string;
+    steps: Array<{ title: string; body: string }>;
+  };
+  library: {
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    searchAria: string;
+    filterAria: string;
+    allPlatforms: string;
+    new: string;
+    countOne: string;
+    countMany: string;
+    platformVariants: string;
+    emptyTitle: string;
+    emptyBody: string;
+    emptyCta: string;
+    noMatch: string;
+    clearFilters: string;
+    sourcePrefix: string;
+    manageCampaign: string;
+    hideControls: string;
+    noVariants: string;
+  };
+  actions: {
+    publishNow: string;
+    schedule: string;
+    more: string;
+    regenerateCaptions: string;
+    regenerateImages: string;
+    retryFailed: string;
+    editCampaign: string;
+    delete: string;
+    scheduleTime: string;
+  };
+  ready: {
+    title: string;
+    body: string;
+    open: string;
+    stay: string;
+    fallbackName: string;
+  };
+  composer: {
+    title: string;
+    subtitle: string;
+    scrollHint: string;
+  };
+  activity: {
+    title: string;
+    subtitle: string;
+    aiBudget: string;
+    noData: string;
+    budgetHint: string;
+    noSession: string;
+    signed: string;
+    signedHint: string;
+    signedEmpty: string;
+    rejected: string;
+    rejectedHint: string;
+    rejectedEmpty: string;
+    devTools: string;
+    devToolsBody: string;
+    defaultSchedule: string;
+    runTick: string;
+    simulateRateLimits: string;
+    rateLimitButton: string;
+    deliveryLog: string;
+    deliveryLogBody: string;
+    noEventsTitle: string;
+    noEventsBody: string;
+    signedEvent: string;
+    rejectedEvent: string;
+    noMessage: string;
+  };
+  profile: {
+    title: string;
+    signedIn: string;
+    accountTab: string;
+    platformsTab: string;
+    changeEmail: string;
+    changeEmailBody: string;
+    newEmail: string;
+    emailPlaceholder: string;
+    updateEmail: string;
+    changePassword: string;
+    newPassword: string;
+    confirmPassword: string;
+    updatePassword: string;
+    forgotPassword: string;
+    forgotPasswordBody: string;
+    sendReset: string;
+    demoNotice: string;
+    demoNoticeBody: string;
+    connected: string;
+    notConnected: string;
+    connectedHint: string;
+    notConnectedHint: string;
+    connect: string;
+    disconnect: string;
+  };
+  variant: {
+    noImage: string;
+    previewAlt: string;
+  };
+  aiSpend: {
+    title: string;
+    subtitle: string;
+    ofBudget: string;
+    recentCalls: string;
+    totalCalls: string;
+    emptyRecent: string;
+    flatRate: string;
+    tokens: string;
+    status: {
+      disabled: string;
+      ok: string;
+      warning: string;
+      critical: string;
+      exhausted: string;
+    };
+    notes: {
+      noKeyTitle: string;
+      noKeyBody: string;
+      exhaustedTitle: string;
+      exhaustedBody: string;
+      exhaustedEnv: string;
+      criticalTitle: string;
+      criticalBody: string;
+    };
+  };
+  time: {
+    justNow: string;
+    minutesAgo: string;
+    hoursAgo: string;
+  };
+  toasts: {
+    campaignDeleted: string;
+    campaignUpdated: string;
+    publishAttempted: string;
+    campaignScheduled: string;
+    captionsRegenerated: string;
+    imagesRegenerated: string;
+    retryQueued: string;
+    workerTick: string;
+    rateLimit: string;
+    createFailed: string;
+    actionFailed: string;
+    deleteTitle: string;
+    deleteDescription: string;
+    undo: string;
+    emailConfirmTitle: string;
+    emailConfirmBody: string;
+    emailUpdateFailed: string;
+    passwordMinLength: string;
+    passwordMismatch: string;
+    passwordUpdated: string;
+    passwordUpdateFailed: string;
+    noEmail: string;
+    resetSentTitle: string;
+    resetSentBody: string;
+    resetFailed: string;
+    platformConnected: string;
+    disconnected: string;
+    demoOAuth: string;
+  };
+};
+
 export const LANDING_LOCALE_OPTIONS: Record<
   LandingLocale,
   { code: LandingLocale; short: string; label: string }

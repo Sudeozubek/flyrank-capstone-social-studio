@@ -8,16 +8,20 @@ export function LocaleToggle({
   setLocale,
   chooseLanguageLabel,
   className,
+  compact = false,
 }: {
   locale: LandingLocale;
   setLocale: (locale: LandingLocale) => void;
   chooseLanguageLabel: string;
   className?: string;
+  /** Narrow sidebar — stack EN/TR vertically */
+  compact?: boolean;
 }) {
   return (
     <div
       className={cn(
         "flex rounded-lg border border-border/80 bg-surface/60 p-0.5 shadow-sm",
+        compact ? "w-full max-w-full flex-col gap-0.5" : "",
         className,
       )}
       role="group"
@@ -35,7 +39,10 @@ export function LocaleToggle({
             aria-pressed={active}
             aria-label={option.label}
             className={cn(
-              "min-w-[2.25rem] rounded-md px-2 py-1 text-[11px] font-semibold tracking-wide transition-colors",
+              "rounded-md font-semibold tracking-wide transition-colors",
+              compact
+                ? "w-full min-w-0 px-0 py-1 text-[10px] leading-none"
+                : "min-w-[2.25rem] px-2 py-1 text-[11px]",
               active
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",

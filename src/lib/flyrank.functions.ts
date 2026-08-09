@@ -313,3 +313,36 @@ export const createCampaignFromLibrary = createServerFn({ method: "POST" })
     await generateImages(app, snapshot.campaign.id);
     return getCampaignSnapshot(app, snapshot.campaign.id);
   });
+
+/** Import a published post from a user-supplied URL and campaign on it. */
+export const createCampaignFromUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        url: z.string().url().max(500),
+        name: z.string().max(200).optional(),
+        brandName: z.string().max(120).nullish(),
+        brandTone,
+        brandLanguage,
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const app = createAppContext(context.supabase as never, context.userId, {
+      requestUrl: getRequest().url,
+    });
+    const { fetchPublicArticle } = await import("@/infrastructure/feeds/blog-library.server");
+    const { importLibraryPost } = await import("@/application/import-library-post");
+    const article = await fetchPublicArticle(data.url);
+    const post = await importLibraryPost(app, { ...article, url: data.url });
+    const snapshot = await createCampaign(app, {
+      postId: post.id,
+      ...(data.name ? { name: data.name } : {}),
+      brandName: data.brandName ?? null,
+      brandTone: data.brandTone ?? null,
+      brandLanguage: data.brandLanguage,
+    });
+    await generateImages(app, snapshot.campaign.id);
+    return getCampaignSnapshot(app, snapshot.campaign.id);
+  });
