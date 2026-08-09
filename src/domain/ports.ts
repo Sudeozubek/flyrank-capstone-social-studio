@@ -171,9 +171,18 @@ export interface ImageRenderer {
   }): Promise<RenderedImage>;
 }
 
+export interface ImageSignedUrlOptions {
+  expiresInSec?: number;
+  transform?: {
+    width?: number;
+    height?: number;
+    resize?: "cover" | "contain" | "fill";
+  };
+}
+
 export interface ImageStore {
   put(path: string, image: RenderedImage): Promise<string>;
-  signedUrl(path: string, expiresInSec?: number): Promise<string | null>;
+  signedUrl(path: string, options?: ImageSignedUrlOptions): Promise<string | null>;
 }
 
 /** Writes the final platform-specific caption from a post (LLM-backed adapter). */

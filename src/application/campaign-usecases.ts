@@ -19,8 +19,8 @@ import {
   defaultSourceImage,
   fitSubjectToSafeZone,
 } from "@/domain/image-composition";
+import { campaignImagePath } from "@/domain/storage-paths";
 import type { AppContext } from "@/domain/ports";
-import { imagePath } from "@/infrastructure/storage/image-store.server";
 
 export async function createCampaign(
   context: AppContext,
@@ -125,38 +125,35 @@ export async function generateImages(
   if (!post) throw new Error("Blog post not found");
 
   const entries = await context.entries.listByCampaign(campaign.id);
-  const updated: SocialPostEntry[] = [];
 
-  for (const entry of entries) {
-    const spec = PLATFORM_SPECS[entry.platform as Platform]!;
-    const geometry = computeVariantGeometry(defaultSourceImage(), entry.platform);
-    const subject = fitSubjectToSafeZone(geometry);
+  return Promise.all(
+    entries.map(async (entry) => {
+      const spec = PLATFORM_SPECS[entry.platform as Platform]!;
+      const geometry = computeVariantGeometry(defaultSourceImage(), entry.platform);
+      const subject = fitSubjectToSafeZone(geometry);
 
-    const image = await context.renderer.render({
-      platform: entry.platform,
-      width: spec.width,
-      height: spec.height,
-      title: post.title,
-      body: post.body,
-      seed: `${post.id}:${entry.platform}`,
-      brand: campaign.brandName?.trim() || "CampaignHub",
-      brandTone: campaign.brandTone,
-      brandLanguage: campaign.brandLanguage,
-      subject,
-    });
+      const image = await context.renderer.render({
+        platform: entry.platform,
+        width: spec.width,
+        height: spec.height,
+        title: post.title,
+        body: post.body,
+        seed: `${post.id}:${entry.platform}`,
+        brand: campaign.brandName?.trim() || "CampaignHub",
+        brandTone: campaign.brandTone,
+        brandLanguage: campaign.brandLanguage,
+        subject,
+      });
 
-    const path = imagePath(context.userId, campaign.id, entry.platform);
-    await context.images.put(path, image);
-    updated.push(
-      await context.entries.update(entry.id, {
+      const path = campaignImagePath(context.userId, campaign.id, entry.platform);
+      await context.images.put(path, image);
+      return context.entries.update(entry.id, {
         imagePath: path,
         imageWidth: image.width,
         imageHeight: image.height,
-      }),
-    );
-  }
-
-  return updated;
+      });
+    }),
+  );
 }
 
 export async function getCampaignSnapshot(

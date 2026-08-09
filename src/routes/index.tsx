@@ -170,7 +170,10 @@ function LandingPage({ dark, onThemeToggle }: { dark: boolean; onThemeToggle: ()
           </div>
         </section>
 
-        <section id="how-it-works" className="landing-section landing-section-workflow scroll-mt-20">
+        <section
+          id="how-it-works"
+          className="landing-section landing-section-workflow scroll-mt-20"
+        >
           <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
             <ScrollReveal className="mx-auto max-w-2xl text-center">
               <p className="eyebrow">{t.workflow.eyebrow}</p>

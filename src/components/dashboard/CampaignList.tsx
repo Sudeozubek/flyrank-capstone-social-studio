@@ -225,7 +225,9 @@ function CampaignRow({
         <ChevronRight
           className={cn(
             "size-4 transition-transform",
-            selected ? "text-primary" : "text-muted-foreground group-hover:translate-x-0.5 group-hover:text-foreground",
+            selected
+              ? "text-primary"
+              : "text-muted-foreground group-hover:translate-x-0.5 group-hover:text-foreground",
           )}
         />
       </div>

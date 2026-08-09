@@ -1,14 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
-import {
-  Activity,
-  ChevronRight,
-  LayoutGrid,
-  Library,
-  LogOut,
-  Plus,
-  UserRound,
-} from "lucide-react";
+import { Activity, ChevronRight, LayoutGrid, Library, LogOut, Plus, UserRound } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { DashboardView } from "@/components/dashboard/types";
 import { DashboardProfileSheet } from "@/components/dashboard/DashboardProfileSheet";
@@ -128,7 +120,9 @@ export function DashboardLayout({
       {!collapsed ? (
         <>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-foreground">{t.layout.profile}</span>
+            <span className="block truncate text-sm font-medium text-foreground">
+              {t.layout.profile}
+            </span>
             <span className="block truncate text-[11px] text-muted-foreground">
               {email || t.layout.account}
             </span>
@@ -193,7 +187,9 @@ export function DashboardLayout({
               <span className="font-display text-base tracking-tight text-foreground transition-colors group-hover:text-primary">
                 {t.layout.brandCampaign}
               </span>
-              <span className="font-display text-base tracking-tight text-primary">{t.layout.brandHub}</span>
+              <span className="font-display text-base tracking-tight text-primary">
+                {t.layout.brandHub}
+              </span>
             </Link>
           ) : (
             <Link
@@ -319,7 +315,10 @@ export function DashboardLayout({
           <button
             type="button"
             onClick={() => setProfileOpen(true)}
-            className={cn("dashboard-mobile-nav-item", profileOpen && "dashboard-mobile-nav-item-active")}
+            className={cn(
+              "dashboard-mobile-nav-item",
+              profileOpen && "dashboard-mobile-nav-item-active",
+            )}
             aria-label={t.layout.openProfile}
           >
             <UserRound className="size-5 shrink-0" />

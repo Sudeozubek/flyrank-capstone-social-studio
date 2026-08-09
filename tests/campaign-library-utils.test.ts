@@ -58,6 +58,7 @@ function snapshot(
       updatedAt: new Date().toISOString(),
     })),
     images: Object.fromEntries(platforms.map((p) => [p, null])),
+    thumbImages: Object.fromEntries(platforms.map((p) => [p, null])),
   };
 }
 

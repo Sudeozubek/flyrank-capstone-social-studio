@@ -23,11 +23,11 @@ project:
     crash-safe. No real social platform API is ever called.
   repository: "https://github.com/Sudeozubek/flyrank-capstone-social-studio"
   license: MIT
-  demo_url: ""
+  demo_url: "http://localhost:8080"
 
 author:
   name: "Sude Özübek"
-  email: "<YOUR EMAIL>"
+  email: "Sudeozubek@users.noreply.github.com"
   github: "Sudeozubek"
 
 stack:
@@ -147,6 +147,9 @@ api:
       path: /api/public/mcp
       purpose: MCP JSON-RPC endpoint
     - method: GET
+      path: /api/public/health
+      purpose: Postgres + Redis health probe for Docker reviewers
+    - method: GET
       path: /.well-known/oauth-protected-resource
       purpose: RFC 9728 discovery for MCP clients
 
@@ -186,13 +189,14 @@ testing:
     - path: tests/campaign-languages.test.ts
       covers: [multi-language caption fragments]
   totals:
-    files: 21
-    tests: 117
+    files: 24
+    tests: 131
 
 setup:
   install: npm install
   env: cp .env.example .env
-  database: apply supabase/flyrank-full-schema.sql in Supabase SQL editor
+  docker: cp .env.docker.example .env.docker && docker compose --env-file .env.docker up --build
+  database: apply supabase/flyrank-full-schema.sql in Supabase SQL editor (or use Docker Postgres init)
   dev: npm run dev   # http://localhost:8080 — background worker starts automatically
   seed: npm run seed
   test: npm run test

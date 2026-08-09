@@ -101,7 +101,8 @@ export const dashboardEn: DashboardMessages = {
   },
   composer: {
     title: "New campaign",
-    subtitle: "Choose a source below — brand context stays visible while you work. Scroll to reach generate.",
+    subtitle:
+      "Choose a source below — brand context stays visible while you work. Scroll to reach generate.",
     scrollHint: "Scroll for more",
   },
   activity: {
@@ -183,12 +184,10 @@ export const dashboardEn: DashboardMessages = {
       noKeyBody:
         "Captions use the deterministic composer; images use the SVG renderer — zero API cost.",
       exhaustedTitle: "Budget exhausted.",
-      exhaustedBody:
-        "New campaigns will use free fallbacks until the server restarts or you raise",
+      exhaustedBody: "New campaigns will use free fallbacks until the server restarts or you raise",
       exhaustedEnv: "AI_BUDGET_USD",
       criticalTitle: "Budget nearly full.",
-      criticalBody:
-        "The next generation may switch to deterministic captions and SVG images.",
+      criticalBody: "The next generation may switch to deterministic captions and SVG images.",
     },
   },
   time: {

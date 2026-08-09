@@ -189,8 +189,7 @@ export const dashboardTr: DashboardMessages = {
         "Sunucu yeniden başlayana veya şunu artırana kadar yeni kampanyalar ücretsiz yedekleri kullanır",
       exhaustedEnv: "AI_BUDGET_USD",
       criticalTitle: "Bütçe neredeyse dolu.",
-      criticalBody:
-        "Sonraki oluşturma deterministik altyazılara ve SVG görsellere geçebilir.",
+      criticalBody: "Sonraki oluşturma deterministik altyazılara ve SVG görsellere geçebilir.",
     },
   },
   time: {

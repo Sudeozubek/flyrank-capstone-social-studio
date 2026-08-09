@@ -15,9 +15,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as OauthConsentRouteImport } from './routes/oauth.consent'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicWebhooksDeliveryRouteImport } from './routes/api/public/webhooks/delivery'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRouteImport } from './routes/[.well-known]/oauth-protected-resource.api.public.mcp'
+import { Route as ApiPublicCampaignImagesCampaignIdPlatformRouteImport } from './routes/api/public/campaign-images/$campaignId/$platform'
 import { Route as ApiPublicFakePlatformPlatformPostsRouteImport } from './routes/api/public/fake-platform/$platform/posts'
 
 const IndexRoute = IndexRouteImport.update({
@@ -50,6 +52,11 @@ const OauthConsentRoute = OauthConsentRouteImport.update({
   path: '/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
   id: '/api/public/mcp',
   path: '/api/public/mcp',
@@ -67,6 +74,12 @@ const Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute =
     path: '/api/public/mcp',
     getParentRoute: () => Char91DotwellKnownChar93OauthProtectedResourceRoute,
   } as any)
+const ApiPublicCampaignImagesCampaignIdPlatformRoute =
+  ApiPublicCampaignImagesCampaignIdPlatformRouteImport.update({
+    id: '/api/public/campaign-images/$campaignId/$platform',
+    path: '/api/public/campaign-images/$campaignId/$platform',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFakePlatformPlatformPostsRoute =
   ApiPublicFakePlatformPlatformPostsRouteImport.update({
     id: '/api/public/fake-platform/$platform/posts',
@@ -80,9 +93,11 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/oauth/consent': typeof OauthConsentRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/.well-known/oauth-protected-resource/api/public/mcp': typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute
+  '/api/public/campaign-images/$campaignId/$platform': typeof ApiPublicCampaignImagesCampaignIdPlatformRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesByTo {
@@ -91,9 +106,11 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/oauth/consent': typeof OauthConsentRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/.well-known/oauth-protected-resource/api/public/mcp': typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute
+  '/api/public/campaign-images/$campaignId/$platform': typeof ApiPublicCampaignImagesCampaignIdPlatformRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRoutesById {
@@ -104,9 +121,11 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/oauth/consent': typeof OauthConsentRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/webhooks/delivery': typeof ApiPublicWebhooksDeliveryRoute
   '/.well-known/oauth-protected-resource/api/public/mcp': typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRoute
+  '/api/public/campaign-images/$campaignId/$platform': typeof ApiPublicCampaignImagesCampaignIdPlatformRoute
   '/api/public/fake-platform/$platform/posts': typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 export interface FileRouteTypes {
@@ -117,9 +136,11 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/dashboard'
     | '/oauth/consent'
+    | '/api/public/health'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/.well-known/oauth-protected-resource/api/public/mcp'
+    | '/api/public/campaign-images/$campaignId/$platform'
     | '/api/public/fake-platform/$platform/posts'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,9 +149,11 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/dashboard'
     | '/oauth/consent'
+    | '/api/public/health'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/.well-known/oauth-protected-resource/api/public/mcp'
+    | '/api/public/campaign-images/$campaignId/$platform'
     | '/api/public/fake-platform/$platform/posts'
   id:
     | '__root__'
@@ -140,9 +163,11 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/dashboard'
     | '/oauth/consent'
+    | '/api/public/health'
     | '/api/public/mcp'
     | '/api/public/webhooks/delivery'
     | '/.well-known/oauth-protected-resource/api/public/mcp'
+    | '/api/public/campaign-images/$campaignId/$platform'
     | '/api/public/fake-platform/$platform/posts'
   fileRoutesById: FileRoutesById
 }
@@ -152,8 +177,10 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren
   OauthConsentRoute: typeof OauthConsentRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicMcpRoute: typeof ApiPublicMcpRoute
   ApiPublicWebhooksDeliveryRoute: typeof ApiPublicWebhooksDeliveryRoute
+  ApiPublicCampaignImagesCampaignIdPlatformRoute: typeof ApiPublicCampaignImagesCampaignIdPlatformRoute
   ApiPublicFakePlatformPlatformPostsRoute: typeof ApiPublicFakePlatformPlatformPostsRoute
 }
 
@@ -201,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/mcp': {
       id: '/api/public/mcp'
       path: '/api/public/mcp'
@@ -221,6 +255,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/.well-known/oauth-protected-resource/api/public/mcp'
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceApiPublicMcpRouteImport
       parentRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+    }
+    '/api/public/campaign-images/$campaignId/$platform': {
+      id: '/api/public/campaign-images/$campaignId/$platform'
+      path: '/api/public/campaign-images/$campaignId/$platform'
+      fullPath: '/api/public/campaign-images/$campaignId/$platform'
+      preLoaderRoute: typeof ApiPublicCampaignImagesCampaignIdPlatformRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/fake-platform/$platform/posts': {
       id: '/api/public/fake-platform/$platform/posts'
@@ -265,8 +306,11 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRouteWithChildren,
   OauthConsentRoute: OauthConsentRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicMcpRoute: ApiPublicMcpRoute,
   ApiPublicWebhooksDeliveryRoute: ApiPublicWebhooksDeliveryRoute,
+  ApiPublicCampaignImagesCampaignIdPlatformRoute:
+    ApiPublicCampaignImagesCampaignIdPlatformRoute,
   ApiPublicFakePlatformPlatformPostsRoute:
     ApiPublicFakePlatformPlatformPostsRoute,
 }

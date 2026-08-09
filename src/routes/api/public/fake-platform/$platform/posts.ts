@@ -11,6 +11,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { isPlatform } from "@/domain/entities";
 import { signPayload, SIGNATURE_HEADER } from "@/infrastructure/crypto/webhook-signature.server";
+import {
+  decrementRateLimitBudget,
+  readRateLimitBudget,
+  writeRateLimitBudget,
+} from "@/infrastructure/redis/redis.server";
 
 interface StoredPost {
   id: string;
@@ -26,6 +31,21 @@ const rateLimitBudget = new Map<string, number>();
 
 export function setRateLimit(platform: string, failures: number) {
   rateLimitBudget.set(platform, failures);
+  void writeRateLimitBudget(platform, failures);
+}
+
+async function rateLimitRemaining(platform: string): Promise<number> {
+  const fromRedis = await readRateLimitBudget(platform);
+  if (fromRedis !== undefined) return fromRedis;
+  return rateLimitBudget.get(platform) ?? 0;
+}
+
+async function consumeRateLimit(platform: string, remaining: number): Promise<void> {
+  const next = remaining - 1;
+  rateLimitBudget.set(platform, next);
+  if (process.env["REDIS_URL"]) {
+    await decrementRateLimitBudget(platform);
+  }
 }
 
 export function fakePlatformState() {
@@ -81,9 +101,9 @@ export const Route = createFileRoute("/api/public/fake-platform/$platform/posts"
           return Response.json({ error: "idempotency-key required" }, { status: 400 });
         }
 
-        const remaining = rateLimitBudget.get(platform) ?? 0;
+        const remaining = await rateLimitRemaining(platform);
         if (remaining > 0) {
-          rateLimitBudget.set(platform, remaining - 1);
+          await consumeRateLimit(platform, remaining);
           return Response.json(
             { error: "rate_limited" },
             { status: 429, headers: { "retry-after": "2" } },

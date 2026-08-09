@@ -194,8 +194,7 @@ export function AiSpendPanel({
                     : "border-border text-muted-foreground",
                 )}
               >
-                {labels?.emptyRecent ??
-                  "Generate a campaign to see attributed OpenAI usage here."}
+                {labels?.emptyRecent ?? "Generate a campaign to see attributed OpenAI usage here."}
               </li>
             ) : (
               spend.recent.map((row, index) => {
@@ -205,9 +204,7 @@ export function AiSpendPanel({
                     key={`${row.at}-${row.feature}-${index}`}
                     className={cn(
                       "flex items-center gap-2 rounded-lg border px-3 py-2",
-                      embedded
-                        ? "dashboard-activity-row"
-                        : "border-border/80 bg-background/40",
+                      embedded ? "dashboard-activity-row" : "border-border/80 bg-background/40",
                     )}
                   >
                     <div className="min-w-0 flex-1">

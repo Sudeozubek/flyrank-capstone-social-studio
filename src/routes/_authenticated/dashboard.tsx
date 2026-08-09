@@ -90,7 +90,7 @@ function DashboardPage() {
   const dashboard = useQuery({
     queryKey: ["dashboard"],
     queryFn: () => load(),
-    refetchInterval: 4000,
+    refetchInterval: view === "activity" ? 4000 : view === "library" ? false : 20000,
   });
 
   const fns = {
@@ -127,7 +127,11 @@ function DashboardPage() {
       toast.success(label);
       return result;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : interpolate(t.toasts.actionFailed, { action: label }));
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : interpolate(t.toasts.actionFailed, { action: label }),
+      );
       return undefined;
     } finally {
       setBusy(false);
@@ -187,8 +191,7 @@ function DashboardPage() {
     onSuccess: async () => {
       await refresh();
     },
-    onError: (error) =>
-      toast.error(error instanceof Error ? error.message : t.toasts.createFailed),
+    onError: (error) => toast.error(error instanceof Error ? error.message : t.toasts.createFailed),
   });
 
   function requestDelete(campaignId: string, name: string) {
@@ -304,9 +307,8 @@ function DashboardPage() {
           onScheduleAtChange={setScheduleAt}
           onTick={() => run(t.toasts.workerTick, () => fns.tick({}))}
           onRateLimit={(platform) =>
-            run(
-              interpolate(t.toasts.rateLimit, { platform: PLATFORM_SPECS[platform].label }),
-              () => fns.rateLimit({ data: { platform, failures: 2 } }),
+            run(interpolate(t.toasts.rateLimit, { platform: PLATFORM_SPECS[platform].label }), () =>
+              fns.rateLimit({ data: { platform, failures: 2 } }),
             )
           }
         />

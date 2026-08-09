@@ -41,6 +41,9 @@ export function LibraryVariantCard({
             src={imageUrl}
             alt={interpolate(t.variant.previewAlt, { platform: spec.label })}
             loading="lazy"
+            decoding="async"
+            width={640}
+            height={360}
             className="size-full object-cover"
           />
         ) : (

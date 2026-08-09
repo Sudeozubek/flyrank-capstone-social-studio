@@ -3,7 +3,8 @@
  * owner-scoped RLS; the UI reads through short-lived signed URLs).
  */
 
-import type { ImageStore, RenderedImage } from "@/domain/ports";
+import type { ImageSignedUrlOptions, ImageStore, RenderedImage } from "@/domain/ports";
+import { campaignImagePath } from "@/domain/storage-paths";
 import type { Db } from "../persistence/supabase-repositories.server";
 
 export const IMAGE_BUCKET = "campaign-images";
@@ -18,16 +19,24 @@ export function createImageStore(db: Db): ImageStore {
       if (error) throw new Error(`uploadImage: ${error.message}`);
       return path;
     },
-    async signedUrl(path, expiresInSec = 3600) {
-      const { data, error } = await db.storage
-        .from(IMAGE_BUCKET)
-        .createSignedUrl(path, expiresInSec);
+    async signedUrl(path, options: ImageSignedUrlOptions = {}) {
+      const expiresInSec = options.expiresInSec ?? 3600;
+      const transform = options.transform;
+
+      if (transform) {
+        const transformed = await db.storage
+          .from(IMAGE_BUCKET)
+          .createSignedUrl(path, expiresInSec, { transform });
+        if (!transformed.error && transformed.data?.signedUrl) {
+          return transformed.data.signedUrl;
+        }
+      }
+
+      const { data, error } = await db.storage.from(IMAGE_BUCKET).createSignedUrl(path, expiresInSec);
       if (error) return null;
       return data?.signedUrl ?? null;
     },
   };
 }
 
-export function imagePath(userId: string, campaignId: string, platform: string): string {
-  return `${userId}/${campaignId}/${platform}.png`;
-}
+export const imagePath = campaignImagePath;

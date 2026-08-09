@@ -19,9 +19,10 @@ import {
 } from "@/application/campaign-usecases";
 import { ingestPastedPost, ingestUploadedPost } from "@/application/ingest-content";
 import { publishCampaign, retryCampaign, scheduleCampaign } from "@/application/publish-usecases";
-import { runWorkerTick } from "@/application/worker";
+import { runWorkerTick } from "@/infrastructure/worker/worker-tick.server";
 import { PLATFORMS } from "@/domain/entities";
 import { createAppContext } from "@/infrastructure/context.server";
+import { buildCampaignImageUrl } from "@/infrastructure/crypto/image-access-token.server";
 import type { CampaignSnapshot } from "@/domain/entities";
 import type { AiSpendSnapshot } from "@/domain/ai-spend";
 import { emptyAiSpendSnapshot } from "@/infrastructure/ai/ai-cost-meter.server";
@@ -209,10 +210,48 @@ export const retryCampaignFn = createServerFn({ method: "POST" })
   });
 
 export interface DashboardData {
-  campaigns: Array<CampaignSnapshot & { images: Record<string, string | null> }>;
+  campaigns: Array<
+    CampaignSnapshot & {
+      images: Record<string, string | null>;
+      thumbImages: Record<string, string | null>;
+    }
+  >;
   posts: Awaited<ReturnType<typeof listPosts>>;
   webhooks: Awaited<ReturnType<ReturnType<typeof createAppContext>["webhooks"]["listRecent"]>>;
   aiSpend: AiSpendSnapshot;
+}
+
+/** Grid thumbnails — stable app URLs (browser cacheable; no rotating Supabase signed URLs). */
+async function campaignSnapshotWithImages(
+  app: ReturnType<typeof createAppContext>,
+  campaign: CampaignSnapshot["campaign"],
+): Promise<
+  (CampaignSnapshot & {
+    images: Record<string, string | null>;
+    thumbImages: Record<string, string | null>;
+  }) | null
+> {
+  const [post, entries] = await Promise.all([
+    app.posts.findById(campaign.postId),
+    app.entries.listByCampaign(campaign.id),
+  ]);
+  if (!post) return null;
+
+  const images: Record<string, string | null> = {};
+  const thumbImages: Record<string, string | null> = {};
+  for (const entry of entries) {
+    if (!entry.imagePath) {
+      images[entry.platform] = null;
+      thumbImages[entry.platform] = null;
+      continue;
+    }
+    images[entry.platform] = buildCampaignImageUrl(campaign.id, entry.platform, { size: "full" });
+    thumbImages[entry.platform] = buildCampaignImageUrl(campaign.id, entry.platform, {
+      size: "thumb",
+    });
+  }
+
+  return { campaign, post, entries, images, thumbImages };
 }
 
 export const loadDashboard = createServerFn({ method: "GET" })
@@ -226,19 +265,7 @@ export const loadDashboard = createServerFn({ method: "GET" })
     ]);
 
     const snapshots = await Promise.all(
-      campaigns.map(async (campaign) => {
-        const [post, entries] = await Promise.all([
-          app.posts.findById(campaign.postId),
-          app.entries.listByCampaign(campaign.id),
-        ]);
-        const images: Record<string, string | null> = {};
-        for (const entry of entries) {
-          images[entry.platform] = entry.imagePath
-            ? await app.images.signedUrl(entry.imagePath, 3600)
-            : null;
-        }
-        return { campaign, post: post!, entries, images };
-      }),
+      campaigns.map((campaign) => campaignSnapshotWithImages(app, campaign)),
     );
 
     let aiSpend: AiSpendSnapshot;
@@ -249,7 +276,7 @@ export const loadDashboard = createServerFn({ method: "GET" })
       aiSpend = emptyAiSpendSnapshot();
     }
 
-    return { posts, campaigns: snapshots.filter((s) => s.post), webhooks, aiSpend };
+    return { posts, campaigns: snapshots.filter((s) => s !== null), webhooks, aiSpend };
   });
 
 export const tickWorker = createServerFn({ method: "POST" })

@@ -167,6 +167,26 @@ npm install         # or: bun install
 Requires **Node.js 22+** (recommended). Node 20 works for local dev — the `ws` package
 backfills WebSocket for Supabase on the server. Install with `npm install` (or `bun install`).
 
+### Docker (PostgreSQL + Redis + app)
+
+Self-contained local stack with Supabase-compatible Postgres, Redis, GoTrue, PostgREST and the app:
+
+```bash
+cp .env.docker.example .env.docker
+docker compose --env-file .env.docker up --build
+```
+
+- App: http://localhost:8080
+- Supabase API (local): http://localhost:54321
+- Redis: localhost:6379
+- Health: http://localhost:8080/api/public/health
+
+After the stack is up, seed demo data:
+
+```bash
+npm run seed   # uses .env — point SUPABASE_* at http://localhost:54321 for Docker
+```
+
 ## Environment setup
 
 ```bash
@@ -232,9 +252,9 @@ Supabase Dashboard → Authentication → Providers → Email for consistency.
 
 ```bash
 npm run dev        # http://localhost:8080 — background worker starts automatically
-npm run seed       # optional demo data (requires service role + auth user)
+npm run seed       # automated demo user + campaign (requires service role in .env)
 npm run typecheck  # tsc --noEmit — must stay at zero errors
-npm run test       # vitest — 22 files, 123 tests, no network/DB required
+npm run test       # vitest — 24 files, 131 tests, no network/DB required
 npm run test:watch # vitest in watch mode
 npm run lint
 npm run build

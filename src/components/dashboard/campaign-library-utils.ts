@@ -6,7 +6,7 @@ export type PlatformFilter = "all" | Platform;
 
 export function pickThumbnail(snapshot: DashboardCampaignSnapshot): string | null {
   for (const platform of PLATFORMS) {
-    const url = snapshot.images[platform];
+    const url = snapshot.thumbImages[platform];
     if (url) return url;
   }
   return null;
